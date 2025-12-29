@@ -396,3 +396,9 @@ header {
 .game-header:active {
     cursor: grabbing;
 }
+
+.tool-item {
+    touch-action: none; /* Запрещает браузеру обрабатывать жесты на этих элементах */
+    user-select: none;
+    -webkit-user-select: none;
+}
