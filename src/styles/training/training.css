@@ -1,0 +1,179 @@
+/* =========================================
+   TUTORIAL OVERLAY & BASE STYLES
+   ========================================= */
+
+.tutorial-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.7); /* Затемненный фон */
+    z-index: 9998; /* Ниже тултипа и хайлайта */
+    display: none;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.tutorial-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+/* =========================================
+   TUTORIAL TOOLTIP (Окно с текстом и кнопками)
+   ========================================= */
+
+.tutorial-tooltip {
+    position: absolute;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    max-width: 90vw; /* Не выходит за экран */
+    max-height: 80vh; /* Не выходит за экран */
+    overflow: auto; /* Скролл если контент большой */
+    box-shadow: var(--shadow-soft);
+    z-index: 10000; /* Выше всего */
+    color: var(--text);
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px) scale(0.95); /* Slide + scale анимация */
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    will-change: opacity, transform;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    word-wrap: break-word; /* Перенос текста */
+    line-height: 1.5; /* Читабельность */
+}
+
+.tutorial-tooltip.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.tutorial-tooltip h2 {
+    font-size: 20px;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.tutorial-tooltip p {
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    color: var(--text-soft);
+}
+
+.tutorial-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+}
+
+.tutorial-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.tutorial-btn:hover {
+    transform: scale(1.05);
+}
+
+.tutorial-btn-prev {
+    background: var(--bg-elevated-soft);
+    color: var(--text);
+}
+
+.tutorial-btn-next {
+    background: var(--accent);
+    color: var(--text);
+}
+
+.tutorial-btn-skip {
+    background: transparent;
+    color: var(--text-soft);
+    text-decoration: underline;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+/* =========================================
+   TUTORIAL HIGHLIGHT (Подсветка элемента)
+   ========================================= */
+
+.tutorial-highlight {
+    position: absolute;
+    border: 2px solid var(--accent);
+    border-radius: 12px;
+    box-shadow: 0 0 20px var(--accent-soft);
+    z-index: 9999; /* Выше оверлея, ниже тултипа */
+    pointer-events: none;
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    will-change: opacity, transform;
+}
+
+.tutorial-highlight.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* =========================================
+   ANIMATIONS & TRANSITIONS
+   ========================================= */
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px) scale(0.95); }
+    to { transform: translateY(0) scale(1); }
+}
+
+/* =========================================
+   MOBILE ADAPTATIONS
+   ========================================= */
+
+@media (max-width: 768px) {
+    .tutorial-tooltip {
+        max-width: 90vw;
+        max-height: 70vh; /* Уменьшено для мобильных */
+        padding: 16px;
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px) scale(0.95); /* Для slide + scale */
+    }
+
+    .tutorial-tooltip.visible {
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+
+    .tutorial-buttons {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .tutorial-btn-skip {
+        position: static;
+        text-align: center;
+        margin-top: 12px;
+    }
+}

@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title data-translate="title">Ecrous Engine</title>
+    <link rel="icon" type="image/png" href="public/vite.jpg" />
+
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css" rel="stylesheet" />
+
+    <link rel="stylesheet" href="src/styles/loading.css">
+    <link rel="stylesheet" href="src/styles/fonts.css">
+    <link rel="stylesheet" href="src/styles/main.css">
+    <link rel="stylesheet" href="src/styles/mobile.css">
+    <link rel="stylesheet" href="src/styles/scroll.css">
+    <link rel="stylesheet" href="src/styles/themes.css">
+
+    <!-- Menu -->
+    <link rel="stylesheet" href="src/styles/menu/MyProjects.css">
+    <link rel="stylesheet" href="src/styles/menu/CenterProjects.css">
+    <link rel="stylesheet" href="src/styles/menu/thanks.css">
+    <link rel="stylesheet" href="src/styles/menu/News.css">
+    <link rel="stylesheet" href="src/styles/menu/Settings.css">
+    <link rel="stylesheet" href="src/styles/menu/UploadMusic.css">
+    <link rel="stylesheet" href="src/styles/menu/Tutorial.css">
+
+    <!-- Training -->
+    <link rel="stylesheet" href="src/styles/training/training.css">
+
+</head>
+
+<body>
+
+    <div class="title no-select" data-translate="title">Ecrous Engine</div>
+    <div class="side-panel">
+        <button class="menu-button" onclick="openMyProjects()" data-translate="myProjects">Мои Проекты</button>
+        <button class="menu-button-disable no-select" data-translate="AssetStore">Магазин Ассетов</button>
+        <button class="menu-button-disable no-select" data-translate="blackStore">BlackStore</button>
+        <button id="myBtn" class="menu-button" data-translate="thanks" onclick="openThanks()">Благодарности</button>
+        <div class="build-info">
+            <span class="build-text">ECX 2025.31.12</span>
+        </div>
+    </div>
+
+    <!-- Соцсети в левом нижнем углу -->
+    <div class="social-links ui-no-select">
+        <a href="https://www.youtube.com/@EcrousEngine" target="_blank">
+            <img src="https://img.icons8.com/ios-filled/50/FFFFFF/youtube-play.png" alt="YouTube" class="ui-image"
+                draggable="false">
+        </a>
+
+        <a href="tg://resolve?domain=ecrousengine" target="_blank">
+            <img src="https://img.icons8.com/ios-filled/50/FFFFFF/telegram-app.png" alt="Telegram" class="ui-image"
+                draggable="false">
+        </a>
+
+        <a href="https://boosty.to/ecrousengine" target="_blank">
+            <img src="https://logo-teka.com/wp-content/uploads/2025/06/boosty-sign-logo.svg" alt="Boosty" class="ui-image"
+                draggable="false">
+        </a>
+    </div>
+
+    <div class="ButtonsMenuSmall ui-no-select">
+        <a href="#" onclick="openTutorials()">
+            <img src="https://img.icons8.com/ios-filled/48/FFFFFF/book.png" alt="Tutorials" class="ui-image"
+                draggable="false">
+        </a>
+
+        <a href="#" class="TabbyAI">
+            <img src="https://img.icons8.com/ios-filled/48/FFFFFF/tab.png" alt="Tabby" class="ui-image"
+                draggable="false">
+        </a>
+
+        <!-- <a href="#" onclick="openAchivements()">
+            <img src="https://img.icons8.com/ios-filled/48/FFFFFF/trophy.png" alt="Achievements" class="ui-image"
+                draggable="false">
+        </a> -->
+
+        <a href="#" onclick="openNews()">
+            <img src="https://img.icons8.com/ios-filled/48/FFFFFF/news.png" alt="News" class="ui-image"
+                draggable="false">
+        </a>
+
+        <a href="#" onclick="openSettings()">
+            <img src="https://img.icons8.com/ios-filled/48/FFFFFF/settings.png" alt="Settings" class="ui-image"
+                draggable="false">
+        </a>
+    </div>
+
+    <div class="center-container">
+        <img src="https://img.icons8.com/?size=100&id=Rtc4TvgYD4oM&format=png&color=FFFFFF" alt="No Projects"
+            class="center-image">
+        <div class="center-text no-select" data-translate="centerText">
+            Похоже, у вас еще нет проектов. Создайте новый или импортируйте!
+        </div>
+    </div>
+
+    <!-- Мои проекты -->
+    <div id="MyProjectsPanel" class="MyProjects-panel" style="display: none;">
+
+        <!-- Кнопка закрыть -->
+        <button class="close-MyProjects" onclick="closeMyProjects()">
+            <img src="https://img.icons8.com/ios-glyphs/50/FFFFFF/macos-close.png" alt="Close"
+                data-translate-alt="close">
+        </button>
+
+        <h1 class="titleMyProjects no-select" data-translate="MyProjects">Мои Проекты</h1>
+
+        <div class="MyProjects-content">
+
+            <!-- Белые иконки через Icons8 -->
+            <img src="https://img.icons8.com/ios-glyphs/50/FFFFFF/plus-math.png" class="plus-button" alt="Add"
+                data-translate-alt="add">
+
+            <img src="https://img.icons8.com/ios-glyphs/50/FFFFFF/upload.png" class="import-button" alt="Import"
+                data-translate-alt="import">
+
+            <!-- Список проектов -->
+            <div class="project-list" id="projectList"></div>
+
+            <!-- Модальное окно -->
+            <div class="modals" id="projectModal">
+                <div class="modals-content">
+                    <h2 class='no-select' data-translate="projectNamePrompt">Введите название проекта</h2>
+                    <input type="text" id="projectName" data-translate-placeholder="projectNamePlaceholder"
+                        placeholder="Название проекта">
+                    <button class='no-select' id="submitProject" data-translate="ready">Готово</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Новости -->
+    <div id="newsPanel" class="news-panel" style="display: none;">
+        <button class="news-close" onclick="closeNews()">
+            <img src="https://img.icons8.com/ios-glyphs/30/FFFFFF/macos-close.png" alt="Close"
+                data-translate-alt="close" />
+        </button>
+
+        <h1 class="news-title no-select" data-translate="newsTitle">Новости</h1>
+
+        <div class="news-list" id="newsList"></div>
+    </div>
+
+    <!-- === ПОЛНАЯ НОВОСТЬ === -->
+    <div id="fullNewsPanel" class="full-news-panel no-select" style="display: none;">
+        <button class="news-close" onclick="closeFullNews()">
+            <img src="https://img.icons8.com/ios-glyphs/30/FFFFFF/macos-close.png" alt="Close"
+                data-translate-alt="close" />
+        </button>
+
+        <div class="full-news-content" id="fullNewsContent"></div>
+    </div>
+
+    <!-- Пункт благодарности -->
+    <div id="thanksPanel" class="thanks-panel" style="display: none;">
+        <button class="thanks-close" onclick="closeThanks()">
+            <img src="https://img.icons8.com/ios-glyphs/30/FFFFFF/macos-close.png" alt="Close"
+                data-translate-alt="close">
+        </button>
+
+        <h1 class="thanks-title" data-translate="thanksTitle">Благодарности</h1>
+
+        <div class="thanks-credits">
+
+            <h2 class="credits-title" data-translate="bestPeople">Лучшие Ребята!</h2>
+            <p class="credits-subtitle" data-translate="thanksSubtitle">Я хочу выразить благодарность следующим людям:
+            </p>
+
+            <!-- Программисты -->
+            <section class="credits-section">
+                <h3 data-translate="programmers">Программисты</h3>
+                <ul>
+                    <li>[[RUSLAN'S ACCOUNT]] - <span data-translate="helpWithCode">за помощь с кодом</span></li>
+                    <li>Shodiyor - <span data-translate="helpWithCode">за помощь с кодом</span></li>
+                    <li>Dragon Reis - <span data-translate="helpWithCode">за помощь с кодом</span></li>
+                    <li>Sevasik - <span data-translate="helpWithCode">за помощь с кодом</span></li>
+                    <li>Vasilii1411 - <span data-translate="helpWithCode">за помощь с кодом</span></li>
+                    <li>Prodemo70 - <span data-translate="helpWithCode">за помощь с кодом</span></li>
+                    <li>Romanchik - <span data-translate="helpWithCode">за помощь с кодом</span></li>
+                </ul>
+            </section>
+
+            <!-- Beta Testers -->
+            <section class="credits-section">
+                <h3 data-translate="betaTesters">Beta Testers</h3>
+                <ul>
+                    <li>W1NDOW - <span data-translate="forTesting">за тестирование</span></li>
+                    <li>Квистер - <span data-translate="forTesting">за тестирование</span></li>
+                    <li>Sevasik - <span data-translate="forTesting">за тестирование</span></li>
+                    <li>ПростiЙ - <span data-translate="forTesting">за тестирование</span></li>
+                    <li>[[RUSLAN'S ACCOUNT]] - <span data-translate="forTesting">за тестирование</span></li>
+                    <li>FingerGD2.2 - <span data-translate="forTesting">за тестирование</span></li>
+                    <li>Dark Games - <span data-translate="forTesting">за тестирование</span></li>
+                    <li>Mr. pro - <span data-translate="forTesting">за тестирование</span></li>
+                    <li>Учёный Года - <span data-translate="forTesting">за тестирование</span></li>
+                    <li>WhyLorn - <span data-translate="forTesting">за тестирование</span></li>
+                    <li>Prodemo70 - <span data-translate="forTesting">за тестирование</span></li>
+                    <li>Spayk 2.0 - <span data-translate="forTesting">за тестирование</span></li>
+                    <li>Romanchik - <span data-translate="forTesting">за тестирование</span></li>
+                </ul>
+            </section>
+
+            <!-- Поддержка -->
+            <section class="credits-section">
+                <h3 data-translate="support">Поддержка</h3>
+                <ul>
+                    <li><span data-translate="mySubscribers">Моим подписчикам</span> - <span
+                            data-translate="moralSupport">за моральную поддержку</span></li>
+                    <li>Квистер - <span data-translate="forCriticism">за критику и отзывы</span></li>
+                    <li>Mate - <span data-translate="forFriendship">за дружбу</span></li>
+                    <li>Romanchik - <span data-translate="forFriendship">за дружбу</span></li>
+                </ul>
+            </section>
+
+            <!-- Дизайнеры -->
+            <section class="credits-section">
+                <h3 data-translate="designers">Дизайнеры</h3>
+                <ul>
+                    <li>WesllemCG - <span data-translate="helpWithDesign">за помощь с дизайном</span></li>
+                    <li>Humbleoff - <span data-translate="helpWithDesign">за помощь с дизайном</span></li>
+                    <li>Totalitarian Utopia - <span data-translate="helpWithDesign">за помощь с дизайном</span></li>
+                    <li>Sevasik - <span data-translate="helpWithDesign">за помощь с дизайном</span></li>
+                </ul>
+            </section>
+
+            <!-- Окончательная благодарность -->
+            <div class="credits-final" data-translate="finalThanks">
+                Отдельное спасибо всем, кто пользуется Ecrous Engine.
+                <br>Ваше участие помогает проекту расти и развиваться.
+            </div>
+            <br>
+        </div>
+    </div>
+
+    <!-- Туториалы -->
+    <div id="tutorialsPanel" class="tutorials-panel" style="display: none;">
+        <div class="tutorials-header">
+            <div class="tutorials-header-left">
+                <h1 class="tutorials-title">Туториалы</h1>
+                <div class="tutorials-controls">
+                    <select id="categoryFilter" class="category-filter" onchange="changeCategory(this.value)">
+                        <option value="all">Все категории</option>
+                        <option value="beginner">Для начинающих</option>
+                        <option value="graphics">Графика</option>
+                        <option value="ui">Интерфейс</option>
+                        <option value="physics">Физика</option>
+                        <option value="advanced">Продвинутые</option>
+                    </select>
+
+                    <select id="sortFilter" class="sort-filter" onchange="changeSort(this.value)">
+                        <option value="default">По умолчанию</option>
+                        <option value="duration">По длительности</option>
+                        <option value="level">По сложности</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="tutorials-close" onclick="closeTutorials()">
+                <img src="https://img.icons8.com/ios-glyphs/30/FFFFFF/macos-close.png" alt="Close">
+            </button>
+        </div>
+
+        <div class="tutorials-content" id="tutorialsContent">
+            <!-- Содержимое будет генерироваться через JavaScript -->
+        </div>
+    </div>
+
+    <!-- === ПАНЕЛЬ НАСТРОЕК === -->
+    <div id="settingsPanel" class="settings-panel" style="display: none;">
+
+        <!-- Кнопка закрытия -->
+        <button class="settings-close" onclick="closeSettings()">
+            <img src="https://img.icons8.com/ios-glyphs/30/FFFFFF/macos-close.png" alt="Close"
+                data-translate-alt="close" />
+        </button>
+
+        <h1 class="settings-title no-select" data-translate="settingsTitle">Настройки</h1>
+
+        <div class="settings-content">
+
+            <!-- Тема -->
+            <div class="settings-section no-select">
+                <h3 data-translate="theme">Тема</h3>
+
+                <select id="ThemeSelect" onchange="changeTheme()">
+                    <option value="Dark" data-translate="themeDark">Тёмная</option>
+                    <option value="Light" data-translate="themeLight">Светлая</option>
+                    <option value="Night" data-translate="themeNight">Ночная</option>
+
+                    <option value="Ruby" data-translate="themeRuby">Рубиновая (Тёмная)</option>
+                    <option value="RubyLight" data-translate="themeRubyLight">Рубиновая (Светлая)</option>
+                    <option value="RubyNeon" data-translate="themeRubyNeon">Рубиновая (Неоновая)</option>
+                    <option value="Gray" data-translate="themeGray">Серая</option>
+
+                    <option value="Emerald" data-translate="themeEmerald">Изумрудная</option>
+                    <option value="Gold" data-translate="themeGold">Золотая</option>
+                    <option value="Diamond" data-translate="themeDiamond">Алмазная</option>
+                    <option value="Sapphire" data-translate="themeSapphire">Сапфировая</option>
+
+                    <option value="Mint" data-translate="themeMint">Мятная</option>
+                    <option value="Sakura" data-translate="themeSakura">Сакура</option>
+                    <option value="Sunset" data-translate="themeSunset">Пустынный закат</option>
+                    <option value="Frost" data-translate="themeFrost">Ледяная</option>
+                </select>
+
+                <button id="uploadThemeBtn" class="theme-upload-btn" data-translate="uploadTheme">
+                    Загрузить тему
+                </button>
+                <input type="file" id="themeFileInput" accept=".css" style="display:none;">
+            </div>
+
+            <!-- Язык -->
+            <div class="settings-section no-select">
+                <h3 data-translate="language">Язык</h3>
+
+                <select id="languageSelect" onchange="changeLanguage()">
+                    <option value="ru" data-translate="languageRu">Русский</option>
+                    <option value="en" data-translate="languageEn">English</option>
+                    <option value="kz" data-translate="languageKz">Қазақша</option>
+                    <option value="uk" data-translate="languageUk">Українська</option>
+                </select>
+            </div>
+
+            <!-- Обучение -->
+            <div class="settings-section no-select">
+                <h3 data-translate="training">Обучение</h3>
+
+                <button id="uploadThemeBtn" class="theme-upload-btn tutorial-reset-btn" data-translate="StartTraining"
+                    onclick="closeSettings(); setTimeout(resetAndStartTraining, 300)">
+                    Пройти Обучение
+                </button>
+            </div>
+
+            <!-- Музыка -->
+            <!-- <div class="settings-section no-select">
+                <h3 data-translate="music">Музыка</h3>
+
+                <button id="uploadMusicBtn" class="music-upload-btn" data-translate="uploadMusic">
+                    Загрузить музыку
+                </button>
+                <input type="file" id="musicFileInput" accept=".mp3,.wav,.ogg" style="display:none;">
+
+                <!-- Плеер -->
+            <!-- <div id="musicPlayer" class="music-player" style="display:none;">
+                    <button id="playPauseBtn" data-translate="pause">⏸ Пауза</button>
+                    <div class="music-time">
+                        <span id="currentTime">0:00</span>
+                        <span id="duration">0:00</span>
+                    </div>
+                    <input type="range" id="seekBar" min="0" value="0">
+                    <div class="volume-control">
+                        <span data-translate="volume">Громкость:</span>
+                        <input type="range" id="volumeBar" min="0" max="1" step="0.01" value="1">
+                    </div>
+                </div>
+            </div> -->
+
+            <!-- UI настройки -->
+            <!-- <div class="settings-section no-select">
+                <h3 data-translate="interface">Интерфейс</h3>
+
+                <label class="switch-row">
+                    <span data-translate="uiAnimations">Анимации интерфейса</span>
+                    <label class="switch">
+                        <input id="uiAnimations" type="checkbox" checked onchange="toggleUIAnimations()">
+                        <span class="slider"></span>
+                    </label>
+                </label>
+
+                <label class="switch-row">
+                    <span data-translate="showHints">Показывать подсказки</span>
+                    <label class="switch">
+                        <input id="uiHints" type="checkbox" checked onchange="toggleHints()">
+                        <span class="slider"></span>
+                    </label>
+                </label>
+            </div> -->
+        </div>
+    </div>
+
+    <!-- <div id="welcomeModal" class="auth-panel" style="display: none; z-index: 20000;">
+        <div class="auth-content" style="text-align: center;">
+            <h1 class="auth-title" data-translate="welcomeTitle">Добро пожаловать!</h1>
+            <p style="margin-bottom: 20px; color: var(--text-soft);">
+                <span data-translate="pleaseEnterNickname">Пожалуйста, укажите ваш никнейм.</span><br>
+                <span style="color: var(--danger); font-size: 14px;" data-translate="onlyOnce">Это можно сделать только
+                    один раз.</span>
+            </p>
+
+            <div class="auth-form">
+                <input type="text" id="welcomeNicknameInput" data-translate-placeholder="yourNickname"
+                    placeholder="Ваш никнейм" maxlength="20">
+                <button class="auth-button" onclick="saveInitialNickname()"
+                    data-translate="continue">Продолжить</button>
+            </div>
+        </div>
+    </div> -->
+
+    <!-- <div id="achievementsOverlay" class="achievements-overlay" onclick="closeAchievements()" style="display: none;">
+    </div>
+
+    <div id="achievementsPanel" class="achievements-panel" style="display: none;">
+        <button class="achievements-close" onclick="closeAchievements()">
+            <img src="https://img.icons8.com/ios-glyphs/30/FFFFFF/macos-close.png" alt="Close">
+        </button>
+
+        <h1 class="achievements-title" data-translate="achievementsTitle">Достижения</h1>
+
+        <div class="achievements-summary">
+            <div class="summary-item">
+                <span id="completedCount">0</span> / <span id="totalCount">0</span>
+                <p data-translate="completed">Выполнено</p>
+            </div>
+        </div>
+
+        <div class="achievements-list" id="achievementsList"></div>
+    </div> -->
+
+    <div id="deleteConfirmModal" class="modals">
+        <div class="modals-content confirm-modal-size">
+            <div class="confirm-icon">
+                <img src="https://img.icons8.com/ios-filled/100/ff5070/trash.png" alt="Delete">
+            </div>
+            <h2>Удалить проект?</h2>
+            <p class="confirm-text">Вы уверены, что хотите удалить этот проект?<br>Это действие нельзя будет отменить.
+            </p>
+
+            <div class="confirm-buttons">
+                <button class="btn-secondary" onclick="closeDeleteModal()">Отмена</button>
+                <button class="btn-danger" id="confirmDeleteBtn">Удалить</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="customAlertModal" class="modals" style="z-index: 10000;">
+        <div class="modals-content confirm-modal-size">
+            <div class="confirm-icon">
+                <img src="https://img.icons8.com/ios-filled/100/4cd137/checkmark--v1.png" alt="Success">
+            </div>
+            <h2 id="alertTitle">Успешно!</h2>
+            <p class="confirm-text" id="alertMessage">Действие выполнено.</p>
+
+            <div class="confirm-buttons">
+                <button class="btn-primary-action" onclick="closeCustomAlert()">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="customPromptModal" class="modals" style="z-index: 10000;">
+        <div class="modals-content confirm-modal-size">
+            <h2 id="promptTitle" style="margin-bottom: 10px;">Введите значение</h2>
+            <p class="confirm-text" id="promptMessage" style="margin-bottom: 20px;">Описание действия</p>
+
+            <input type="text" id="promptInput" class="styled-input" placeholder="Название..." autocomplete="off">
+
+            <div class="confirm-buttons">
+                <button class="btn-secondary" onclick="closeCustomPrompt()">Отмена</button>
+                <button class="btn-primary-action" id="promptConfirmBtn">Продолжить</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="loading">
+        <div class="loading-logo">EE</div>
+        <div class="loading-text">Ecrous Engine</div>
+        <div class="loading-bar">
+            <div class="loading-progress"></div>
+        </div>
+    </div>
+
+    <!-- ===================================
+         FIREBASE SCRIPTS
+    =================================== -->
+
+    <!-- Firebase Core -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+    <!-- ===================================
+         APP SCRIPTS
+    =================================== -->
+    <script src="src/scripts/loading.js"></script>
+    <script src="src/scripts/script.js"></script>
+    <script src="src/scripts/Language.js"></script>
+
+    <!-- Menu -->
+    <script src="src/scripts/Menu/MyProjects.js"></script>
+    <script src="src/scripts/Menu/thanks.js"></script>
+    <script src="src/scripts/Menu/News.js"></script>
+    <script src="src/scripts/Menu/Settings.js"></script>
+    <script src="src/scripts/Menu/UploadMusic.js"></script>
+    <script src="src/scripts/Menu/level.js"></script>
+    <script src="src/scripts/Menu/Tutorial.js"></script>
+
+    <!-- Training -->
+    <script src="src/scripts/training/training.js"></script>
+
+</body>
+</html>

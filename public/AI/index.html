@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TabbyAI | Intelligent Coding Assistant</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* --- CORE VARIABLES --- */
+        :root {
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.5);
+            --secondary: #8b5cf6;
+            --accent: #f59e0b;
+            --bg-dark: #0f1115;
+            --text-main: #ffffff;
+            --text-muted: #9ca3af;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --font-main: 'Inter', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--font-main);
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(59, 130, 246, 0.15), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.15), transparent 25%);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* --- NAVIGATION --- */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid transparent;
+            transition: 0.3s;
+        }
+
+        nav.scrolled {
+            background: rgba(15, 17, 21, 0.8);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-skip {
+            padding: 10px 20px;
+            border-radius: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            border: 1px solid var(--glass-border);
+            cursor: pointer;
+        }
+
+        .btn-skip:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 120px 20px 60px;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 64px;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 24px;
+            line-height: 1.1;
+            opacity: 0;
+            animation: fadeUp 0.8s ease forwards 0.2s;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 20px;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin-bottom: 40px;
+            opacity: 0;
+            animation: fadeUp 0.8s ease forwards 0.4s;
+        }
+
+        .cta-btn {
+            padding: 16px 40px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--primary) 0%, #2563eb 100%);
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 10px 30px -10px var(--primary-glow);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            opacity: 0;
+            animation: fadeUp 0.8s ease forwards 0.6s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 20px 40px -10px var(--primary-glow);
+        }
+
+        /* --- FLOATING UI MOCKUP --- */
+        .mockup-container {
+            margin-top: 60px;
+            width: 100%;
+            max-width: 800px;
+            perspective: 1000px;
+            opacity: 0;
+            animation: fadeUp 1s ease forwards 0.8s;
+        }
+
+        .mockup {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(20px);
+            transform: rotateX(10deg) scale(0.95);
+            box-shadow: 0 50px 100px -20px rgba(0,0,0,0.5);
+            transition: transform 0.5s ease;
+        }
+
+        .mockup:hover {
+            transform: rotateX(0deg) scale(1);
+        }
+
+        .mockup-header {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .red { background: #ef4444; }
+        .yellow { background: #f59e0b; }
+        .green { background: #10b981; }
+
+        .chat-line {
+            height: 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
+            margin-bottom: 12px;
+            width: 100%;
+        }
+        .chat-line.short { width: 60%; }
+        .chat-line.user { background: var(--primary); width: 40%; margin-left: auto; opacity: 0.8; }
+
+        /* --- FEATURES SECTION --- */
+        .features {
+            padding: 100px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 60px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            padding: 30px;
+            border-radius: 24px;
+            transition: 0.3s;
+            cursor: default;
+        }
+
+        .card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-10px);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .card h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        /* --- ENGINE SECTION --- */
+        .engine-section {
+            padding: 100px 20px;
+            text-align: center;
+            background: linear-gradient(180deg, transparent 0%, rgba(59, 130, 246, 0.05) 100%);
+        }
+
+        .engine-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+
+        /* --- FOOTER CTA --- */
+        .footer-cta {
+            padding: 80px 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .footer-cta h2 {
+            font-size: 42px;
+            margin-bottom: 30px;
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 42px; }
+            .hero p { font-size: 16px; }
+            .mockup { transform: rotateX(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <nav id="navbar">
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--primary);">
+                <path d="M12 2a10 10 0 0 1 10 10v0a10 10 0 0 1-10 10v0a10 10 0 0 1-10-10v0a10 10 0 0 1 10-10z"></path>
+                <path d="M8 11h.01"/><path d="M16 11h.01"/><path d="M9 16s1.5 1.5 3 1.5 3-1.5 3-1.5"/>
+            </svg>
+            TabbyAI
+        </div>
+        <button class="btn-skip" onclick="goToApp()">Пропустить</button>
+    </nav>
+
+    <section class="hero">
+        <h1>Ваш код. <br><span>Умнее и быстрее.</span></h1>
+        <p>Интеллектуальный помощник на базе Ecrous Engine с поддержкой TabbyAI API и NexLang. Создан для современных разработчиков.</p>
+        
+        <button class="cta-btn" onclick="goToApp()">
+            Запустить TabbyAI
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+        </button>
+
+        <div class="mockup-container">
+            <div class="mockup">
+                <div class="mockup-header">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="chat-line user"></div>
+                <div class="chat-line short"></div>
+                <div class="chat-line"></div>
+                <div class="chat-line short"></div>
+                <div class="chat-line" style="width: 80%"></div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <h2 class="section-title">Почему TabbyAI?</h2>
+        <div class="grid">
+            <div class="card">
+                <div class="card-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2a10 10 0 0 1 10 10v0a10 10 0 0 1-10 10v0a10 10 0 0 1-10-10v0a10 10 0 0 1 10-10z"></path>
+                    </svg>
+                </div>
+                <h3>TabbyAI API</h3>
+                <p>Подключайтесь к мощным нейросетям через наш проприетарный API для получения самых актуальных и точных ответов в реальном времени.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon" style="color: var(--secondary); background: rgba(139, 92, 246, 0.1);">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="16 18 22 12 16 6"></polyline>
+                        <polyline points="8 6 2 12 8 18"></polyline>
+                    </svg>
+                </div>
+                <h3>NexLang Ready</h3>
+                <p>Эксклюзивная база знаний по языку NexLang. Единственный ИИ, который понимает тонкости этого синтаксиса.</p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon" style="color: var(--accent); background: rgba(245, 158, 11, 0.1);">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                    </svg>
+                </div>
+                <h3>PRO Mode</h3>
+                <p>Разблокируйте Genius-модель и приоритетный доступ для решения архитектурных задач любой сложности.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="engine-section">
+        <span class="engine-badge">Powered by</span>
+        <h2>Ecrous Engine &trade;</h2>
+        <p style="color: var(--text-muted); max-width: 500px; margin: 20px auto;">
+            Гибкий движок обработки естественного языка, объединяющий локальные базы данных и облачные API.
+        </p>
+    </section>
+
+    <footer class="footer-cta">
+        <h2>Готовы начать кодить?</h2>
+        <button class="cta-btn" onclick="goToApp()">
+            Открыть чат
+        </button>
+        <p style="margin-top: 20px; font-size: 12px; color: var(--text-muted);">
+            TabbyAI v3.1 • Free & Pro versions available
+        </p>
+    </footer>
+
+    <script>
+        // Функция перехода на основное приложение
+        function goToApp() {
+            // Добавляем эффект исчезновения перед переходом
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.5s ease';
+            
+            setTimeout(() => {
+                window.location.href = 'TabbyAI.html';
+            }, 500);
+        }
+
+        // Эффект скролла для навбара
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        // Простая анимация появления элементов при скролле
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = 1;
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.card, .section-title, .engine-section h2').forEach(el => {
+            el.style.opacity = 0;
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'all 0.6s ease';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

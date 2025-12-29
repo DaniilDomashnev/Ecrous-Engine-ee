@@ -1,0 +1,110 @@
+#loading {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: #0a0a0a;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	z-index: 9999;
+	transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.loading-logo {
+	width: 60px;
+	height: 60px;
+	border-radius: 16px;
+
+	background: conic-gradient(from 220deg, #3c3c3c, #5a5a5a, #707070, #3c3c3c);
+
+	box-shadow: 0 0 35px rgba(255, 255, 255, 0.15);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 800;
+	font-size: 28px;
+	color: #1a1a1a;
+	margin-bottom: 16px;
+	animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; /* improved: smoother pulse */
+	will-change: transform; /* improved: performance hint */
+}
+
+/* Respect user's reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+	.loading-logo {
+		animation: none;
+	}
+	.loading-progress {
+		animation: none;
+		width: 60%;
+	}
+}
+
+.loading-text {
+	font-size: 18px;
+	color: #e0e0e0;
+	margin-bottom: 20px;
+	font-weight: 600;
+	letter-spacing: 0.06em;
+	opacity: 0.9; /* improved: less harsh white */
+}
+
+.loading-bar {
+	width: 200px;
+	height: 4px;
+	background: rgba(255, 255, 255, 0.08);
+	border-radius: 2px;
+	overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); /* improved: inner depth */
+}
+
+.loading-progress {
+	height: 100%;
+
+	background: linear-gradient(90deg, #aaaaaa, #ffffff);
+	border-radius: 2px;
+	width: 0%;
+	animation: loading 1.5s ease-in-out infinite;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3); /* improved: glow effect */
+}
+
+@keyframes pulse {
+	0%,
+	100% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.05);
+	}
+}
+
+@keyframes loading {
+	0% {
+		width: 0%;
+		transform: translateX(-100%);
+	}
+	50% {
+		width: 100%;
+		transform: translateX(0%);
+	}
+	100% {
+		width: 0%;
+		transform: translateX(100%);
+	}
+}
+
+body.loaded #loading {
+	opacity: 0;
+	visibility: hidden;
+}
+
+.loading-logo {
+	font-family: 'Khand', sans-serif;
+}
+
+.loading-text {
+	font-family: 'Global', sans-serif;
+}

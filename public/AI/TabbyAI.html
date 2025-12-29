@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta charset="UTF-8" />
+		<meta
+			name="viewport"
+			content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+		/>
+		<title>TabbyAI | Chat</title>
+		<link rel="icon" type="image/png" href="TabbyAI Icon.png" />
+		<!-- Стили -->
+		<link rel="stylesheet" href="style.css" />
+		<link rel="stylesheet" href="styles/profile.css" />
+		<!-- Прочии стили -->
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+			rel="stylesheet"
+		/>
+	</head>
+	<body class="new-chat">
+		<div class="app-layout">
+			<div id="sidebar" class="sidebar">
+				<div class="sidebar-header">
+					<button id="new-chat-btn" class="btn-new-chat">
+						<svg
+							width="16"
+							height="16"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+						>
+							<line x1="12" y1="5" x2="12" y2="19"></line>
+							<line x1="5" y1="12" x2="19" y2="12"></line>
+						</svg>
+						Новый чат
+					</button>
+					<button id="close-sidebar" class="btn-icon-sm">
+						<svg
+							width="20"
+							height="20"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+						>
+							<line x1="18" y1="6" x2="6" y2="18"></line>
+							<line x1="6" y1="6" x2="18" y2="18"></line>
+						</svg>
+					</button>
+				</div>
+				<div class="sessions-list" id="sessions-list"></div>
+				<div class="sidebar-footer">
+					<div id="user-profile-trigger" class="user-profile-btn">
+						<div class="user-avatar-small" id="sidebar-avatar">DA</div>
+						<div class="user-info">
+							<div class="user-name" id="sidebar-username">User</div>
+							<div class="user-plan" id="sidebar-plan">Free Plan</div>
+						</div>
+						<div class="user-settings-icon">
+							<svg
+								width="16"
+								height="16"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+							>
+								<circle cx="12" cy="12" r="1"></circle>
+								<circle cx="19" cy="12" r="1"></circle>
+								<circle cx="5" cy="12" r="1"></circle>
+							</svg>
+						</div>
+					</div>
+
+					<div id="profile-dropdown" class="profile-dropdown hidden">
+						<div class="dropdown-group">
+							<div class="menu-item" id="menu-upgrade">
+								<svg
+									width="16"
+									height="16"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+								>
+									<polygon
+										points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+									></polygon>
+								</svg>
+								Обновить план
+							</div>
+							<div class="menu-item" id="menu-settings">
+								<svg
+									width="16"
+									height="16"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+								>
+									<circle cx="12" cy="12" r="3"></circle>
+									<path
+										d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+									></path>
+								</svg>
+								Настройки
+							</div>
+						</div>
+						<div class="dropdown-divider"></div>
+						<div class="menu-item danger" id="menu-logout">
+							<svg
+								width="16"
+								height="16"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+							>
+								<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+								<polyline points="16 17 21 12 16 7"></polyline>
+								<line x1="21" y1="12" x2="9" y2="12"></line>
+							</svg>
+							Выйти
+						</div>
+					</div>
+				</div>
+			</div>
+			<div
+				id="sidebar-overlay"
+				class="modal-overlay hidden"
+				style="z-index: 90"
+			></div>
+
+			<header>
+				<div class="container header-inner">
+					<div class="brand">
+						<button id="menu-btn" class="btn-icon" style="margin-right: 10px">
+							<svg
+								width="24"
+								height="24"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+							>
+								<line x1="3" y1="12" x2="21" y2="12"></line>
+								<line x1="3" y1="6" x2="21" y2="6"></line>
+								<line x1="3" y1="18" x2="21" y2="18"></line>
+							</svg>
+						</button>
+
+						<div class="logo-wrapper">
+							<span class="logo-text">TabbyAI</span>
+						</div>
+
+						<div class="version-select-wrapper">
+							<button id="version-menu-btn" class="version-trigger-btn">
+								<span id="current-version-text">TabbyAI v1.3</span>
+								<svg
+									class="select-arrow"
+									width="12"
+									height="12"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									stroke-width="2"
+								>
+									<polyline points="6 9 12 15 18 9"></polyline>
+								</svg>
+							</button>
+						</div>
+
+						<span id="plan-badge" class="badge badge-free">FREE</span>
+					</div>
+
+					<div class="header-controls">
+						<div class="model-selector-wrapper">
+							<select id="model-select">
+                <option value="standard">Standard</option>
+                <option value="fast" disabled>Fast (Pro)</option>
+                <option value="genius" disabled>Genius (Pro)</option>
+                <option value="gemini-real">✨ Tabby (API)</option>
+            </select>
+						</div>
+
+						<button id="open-pro-modal" class="btn-upgrade">
+							<svg
+								width="16"
+								height="16"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							>
+								<polygon
+									points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+								></polygon>
+							</svg>
+							<span class="desktop-only">Get PRO</span>
+						</button>
+
+						<button
+							id="cancel-pro-btn"
+							class="btn-danger hidden"
+							title="Отменить подписку"
+						>
+							<svg
+								width="20"
+								height="20"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							>
+								<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+								<polyline points="16 17 21 12 16 7"></polyline>
+								<line x1="21" y1="12" x2="9" y2="12"></line>
+							</svg>
+						</button>
+
+						<button id="theme-toggle" class="btn-icon" title="Сменить тему">
+							<svg
+								class="icon-moon"
+								width="20"
+								height="20"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+							>
+								<path
+									d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+								></path>
+							</svg>
+							<svg
+								class="icon-sun"
+								width="20"
+								height="20"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+							>
+								<circle cx="12" cy="12" r="5"></circle>
+								<line x1="12" y1="1" x2="12" y2="3"></line>
+								<line x1="12" y1="21" x2="12" y2="23"></line>
+								<line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+								<line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+								<line x1="1" y1="12" x2="3" y2="12"></line>
+								<line x1="21" y1="12" x2="23" y2="12"></line>
+								<line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+								<line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+							</svg>
+						</button>
+					</div>
+				</div>
+			</header>
+
+			<div id="chat-window">
+				<div id="welcome-message" class="welcome-message">
+					<h1>Что у тебя сегодня на уме?</h1>
+				</div>
+				<div class="container" id="messages-list"></div>
+			</div>
+
+			<div class="input-area">
+				<div class="container input-container-width">
+					<div class="input-wrapper">
+						<textarea
+							id="user-input"
+							rows="1"
+							placeholder="Спросите что-нибудь..."
+						></textarea>
+						<button id="send-btn">
+							<svg
+								width="22"
+								height="22"
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							>
+								<line x1="22" y1="2" x2="11" y2="13"></line>
+								<polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+							</svg>
+						</button>
+					</div>
+					<div class="disclaimer">
+						TabbyAI может ошибаться. Проверяйте информацию.
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="modal-overlay" class="modal-overlay hidden">
+			<div class="modal" id="modal-activate">
+				<button class="modal-close" id="close-modal">&times;</button>
+				<div class="modal-header">
+					<div class="modal-icon">
+						<svg
+							width="32"
+							height="32"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+						>
+							<rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+							<path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+						</svg>
+					</div>
+					<h2>Активация PRO</h2>
+					<p>
+						Введите ключ доступа, чтобы разблокировать Genius-модель и снять
+						лимиты.
+					</p>
+				</div>
+				<div class="modal-body">
+					<input
+						type="text"
+						id="license-key"
+						placeholder="XXXX-XXXX-PRO"
+						autocomplete="off"
+					/>
+					<div id="key-error" class="error-msg hidden">
+						Неверный ключ активации
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button id="activate-btn" class="btn-primary">Активировать</button>
+				</div>
+				<div class="modal-note">
+					<small>Подсказка: ключ <b>TABBY-PRO</b></small>
+				</div>
+			</div>
+		</div>
+
+		<div id="cancel-overlay" class="modal-overlay hidden">
+			<div class="modal" id="modal-cancel">
+				<div class="modal-header">
+					<div class="modal-icon icon-danger">
+						<svg
+							width="32"
+							height="32"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+						>
+							<path
+								d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+							></path>
+							<line x1="12" y1="9" x2="12" y2="13"></line>
+							<line x1="12" y1="17" x2="12.01" y2="17"></line>
+						</svg>
+					</div>
+					<h2>Отмена подписки</h2>
+					<p>
+						Вы уверены? Вы потеряете доступ к моделям Genius и Fast, а также
+						вернетесь к стандартным лимитам.
+					</p>
+				</div>
+				<div class="modal-footer" style="display: flex; gap: 10px">
+					<button id="keep-sub-btn" class="btn-secondary">Оставить PRO</button>
+					<button id="confirm-cancel-btn" class="btn-danger-solid">
+						Отменить
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<div
+			id="delete-modal-overlay"
+			class="modal-overlay hidden"
+			style="z-index: 200"
+		>
+			<div class="modal" id="modal-delete">
+				<div class="modal-header">
+					<div class="modal-icon icon-danger">
+						<svg
+							width="32"
+							height="32"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						>
+							<path d="M3 6h18"></path>
+							<path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+							<path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+							<line x1="10" y1="11" x2="10" y2="17"></line>
+							<line x1="14" y1="11" x2="14" y2="17"></line>
+						</svg>
+					</div>
+					<h2>Удаление чата</h2>
+					<p>
+						Вы уверены, что хотите удалить этот диалог? <br />Это действие
+						нельзя отменить.
+					</p>
+				</div>
+				<div class="modal-footer" style="display: flex; gap: 10px">
+					<button id="cancel-delete-btn" class="btn-secondary">Отмена</button>
+					<button id="confirm-delete-chat-btn" class="btn-danger-solid">
+						Удалить
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<div id="auth-overlay" class="auth-overlay">
+			<div class="auth-card">
+				<div class="auth-icon">
+					<svg
+						width="40"
+						height="40"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+					>
+						<path
+							d="M12 2a10 10 0 0 1 10 10v0a10 10 0 0 1-10 10v0a10 10 0 0 1-10-10v0a10 10 0 0 1 10-10z"
+						></path>
+						<path d="M8 11h.01" />
+						<path d="M16 11h.01" />
+						<path d="M9 16s1.5 1.5 3 1.5 3-1.5 3-1.5" />
+					</svg>
+				</div>
+				<h2>Добро пожаловать в TabbyAI</h2>
+				<p>Давай знакомиться. Как тебя называть?</p>
+
+				<div class="auth-input-wrapper">
+					<input
+						type="text"
+						id="auth-name-input"
+						placeholder="Твое имя..."
+						autocomplete="off"
+					/>
+				</div>
+
+				<button id="auth-start-btn" class="btn-primary auth-btn">
+					Начать общение
+					<svg
+						width="16"
+						height="16"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+					>
+						<line x1="5" y1="12" x2="19" y2="12"></line>
+						<polyline points="12 5 19 12 12 19"></polyline>
+					</svg>
+				</button>
+			</div>
+		</div>
+
+		<div
+			id="clear-all-overlay"
+			class="modal-overlay hidden"
+			style="z-index: 200"
+		>
+			<div class="modal">
+				<div class="modal-header">
+					<div class="modal-icon icon-danger">
+						<svg
+							width="32"
+							height="32"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						>
+							<path
+								d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+							></path>
+							<line x1="10" y1="11" x2="10" y2="17"></line>
+							<line x1="14" y1="11" x2="14" y2="17"></line>
+							<path d="M3 6h18"></path>
+							<path d="M12 2v4"></path>
+						</svg>
+					</div>
+					<h2>Очистить всё?</h2>
+					<p>
+						Вы собираетесь удалить <b>всю историю переписок</b>. Это действие
+						необратимо. Все ваши чаты будут утеряны.
+					</p>
+				</div>
+				<div class="modal-footer" style="display: flex; gap: 10px">
+					<button id="cancel-clear-btn" class="btn-secondary">Оставить</button>
+					<button id="confirm-clear-all-btn" class="btn-danger-solid">
+						Удалить всё
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<div
+			id="version-modal-overlay"
+			class="modal-overlay hidden"
+			style="z-index: 150"
+		>
+			<div class="modal version-modal">
+				<div class="modal-header">
+					<div class="modal-icon">
+						<svg
+							width="32"
+							height="32"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+						>
+							<path
+								d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+							/>
+						</svg>
+					</div>
+					<h2>Выберите версию</h2>
+					<p>Переключайтесь между разными эпохами развития TabbyAI.</p>
+				</div>
+
+				<div id="versions-list-container" class="versions-list"></div>
+
+				<div class="modal-footer">
+					<button id="close-version-modal-btn" class="btn-secondary">
+						Закрыть
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<div
+			id="settings-overlay"
+			class="modal-overlay hidden"
+			style="z-index: 200"
+		>
+			<div class="modal settings-modal">
+				<div class="settings-sidebar">
+					<div class="settings-tab active" data-tab="general">
+						<svg
+							width="18"
+							height="18"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+						>
+							<circle cx="12" cy="12" r="3"></circle>
+							<path
+								d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+							></path>
+						</svg>
+						Общее
+					</div>
+					<div class="settings-tab" data-tab="data">
+						<svg
+							width="18"
+							height="18"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+						>
+							<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+							<polyline points="7 10 12 15 17 10"></polyline>
+							<line x1="12" y1="15" x2="12" y2="3"></line>
+						</svg>
+						Управление данными
+					</div>
+				</div>
+
+				<div class="settings-content">
+					<div class="settings-header-mobile">Настройки</div>
+					<button class="settings-close" id="close-settings-btn">
+						&times;
+					</button>
+
+					<div class="settings-panel active" id="panel-general">
+						<div class="setting-group">
+							<div class="setting-item">
+								<div class="setting-label">Тема</div>
+								<select id="setting-theme" class="setting-select">
+									<option value="system">Системная</option>
+									<option value="dark">Тёмная</option>
+									<option value="light">Светлая</option>
+								</select>
+							</div>
+							<div class="setting-item">
+								<div class="setting-label">Язык интерфейса</div>
+								<select id="setting-lang" class="setting-select">
+									<option value="ru">Русский</option>
+									<option value="en">English</option>
+								</select>
+							</div>
+							<div
+								class="setting-group"
+								style="
+									margin-top: 20px;
+									border-top: 1px solid var(--border-light);
+									padding-top: 20px;
+								"
+							>
+								<div
+									class="setting-item"
+									style="
+										flex-direction: column;
+										align-items: flex-start;
+										gap: 10px;
+									"
+								>
+									<div class="setting-label">Google Gemini API Key</div>
+									<div
+										class="setting-desc"
+										style="font-size: 12px; color: var(--text-secondary)"
+									>
+										Нужен для работы реального ИИ.
+									</div>
+									<input
+										type="password"
+										id="setting-api-key"
+										placeholder="Вставьте ключ AIza..."
+										style="
+											width: 100%;
+											padding: 10px;
+											border-radius: 8px;
+											border: 1px solid var(--border-light);
+											background: var(--bg-app);
+											color: var(--text-main);
+										"
+									/>
+									<button
+										id="save-key-btn"
+										class="btn-secondary"
+										style="width: 100%; margin-top: 5px"
+									>
+										Сохранить ключ
+									</button>
+								</div>
+							</div>
+						</div>
+						<div class="setting-group">
+							<div class="setting-item">
+								<div class="setting-label">Показывать аватары</div>
+								<label class="toggle-switch">
+									<input type="checkbox" id="setting-avatars" checked />
+									<span class="slider"></span>
+								</label>
+							</div>
+						</div>
+					</div>
+
+					<div class="settings-panel" id="panel-data">
+						<div class="setting-group">
+							<div class="setting-item">
+								<div class="setting-info">
+									<div class="setting-label">Удалить все чаты</div>
+									<div class="setting-desc">
+										Удаляет всю историю переписок с этого устройства.
+									</div>
+								</div>
+								<button class="btn-danger-solid btn-sm" id="setting-clear-all">
+									Удалить все
+								</button>
+							</div>
+						</div>
+						<div class="setting-group">
+							<div class="setting-item">
+								<div class="setting-info">
+									<div class="setting-label">Сбросить аккаунт</div>
+									<div class="setting-desc">
+										Удаляет имя, PRO-статус и историю.
+									</div>
+								</div>
+								<button
+									class="btn-danger-solid btn-sm"
+									id="setting-reset-account"
+								>
+									Сбросить
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div
+			id="upgrade-modal-overlay"
+			class="modal-overlay hidden"
+			style="z-index: 210"
+		>
+			<div class="modal modal-lg upgrade-modal glass-container">
+				<button class="modal-close-btn" id="close-upgrade-btn">×</button>
+
+				<div class="upgrade-header">
+					<h2>Улучшите свой опыт</h2>
+					<p>
+						Получите доступ к самым мощным моделям ИИ и эксклюзивным функциям.
+					</p>
+				</div>
+
+				<div class="pricing-grid">
+					<div class="plan-card current-plan">
+						<div class="plan-header">
+							<h3 class="plan-title">Free</h3>
+							<div class="plan-price">
+								<span class="amount">$0</span>
+								<span class="period">/ месяц</span>
+							</div>
+							<div class="plan-badge">Ваш текущий план</div>
+						</div>
+						<div class="plan-features">
+							<ul>
+								<li class="feature-item">
+									<svg class="feature-icon check" viewBox="0 0 24 24">
+										<polyline points="20 6 9 17 4 12"></polyline>
+									</svg>
+									Доступ к базовым моделям (Gemma 2, Llama 3)
+								</li>
+								<li class="feature-item">
+									<svg class="feature-icon check" viewBox="0 0 24 24">
+										<polyline points="20 6 9 17 4 12"></polyline>
+									</svg>
+									Стандартная скорость ответа
+								</li>
+								<li class="feature-item text-muted">
+									<svg class="feature-icon x" viewBox="0 0 24 24">
+										<line x1="18" y1="6" x2="6" y2="18"></line>
+										<line x1="6" y1="6" x2="18" y2="18"></line>
+									</svg>
+									Премиум модели (GPT-4o, Claude 3.5)
+								</li>
+								<li class="feature-item text-muted">
+									<svg class="feature-icon x" viewBox="0 0 24 24">
+										<line x1="18" y1="6" x2="6" y2="18"></line>
+										<line x1="6" y1="6" x2="18" y2="18"></line>
+									</svg>
+									Приоритетный доступ во время нагрузки
+								</li>
+								<li class="feature-item text-muted">
+									<svg class="feature-icon x" viewBox="0 0 24 24">
+										<line x1="18" y1="6" x2="6" y2="18"></line>
+										<line x1="6" y1="6" x2="18" y2="18"></line>
+									</svg>
+									Увеличенный контекст
+								</li>
+							</ul>
+						</div>
+					</div>
+
+					<div class="plan-card pro-plan prominent">
+						<div class="absolute-pro-badge">Рекомендуем</div>
+						<div class="plan-header">
+							<h3 class="plan-title">TabbyAI Plus</h3>
+							<div class="plan-price">
+								<span class="amount">$20</span>
+								<span class="period">/ месяц</span>
+							</div>
+						</div>
+						<div class="plan-features">
+							<ul>
+								<li class="feature-item">
+									<svg class="feature-icon check prominent" viewBox="0 0 24 24">
+										<polyline points="20 6 9 17 4 12"></polyline>
+									</svg>
+									<b>Все преимущества Free плана</b>
+								</li>
+								<li class="feature-item">
+									<svg class="feature-icon check prominent" viewBox="0 0 24 24">
+										<polyline points="20 6 9 17 4 12"></polyline>
+									</svg>
+									Доступ к <b>GPT-4o, Claude 3.5 Sonnet</b> и др.
+								</li>
+								<li class="feature-item">
+									<svg class="feature-icon check prominent" viewBox="0 0 24 24">
+										<polyline points="20 6 9 17 4 12"></polyline>
+									</svg>
+									Максимальная скорость ответов
+								</li>
+								<li class="feature-item">
+									<svg class="feature-icon check prominent" viewBox="0 0 24 24">
+										<polyline points="20 6 9 17 4 12"></polyline>
+									</svg>
+									Приоритетный доступ 24/7
+								</li>
+								<li class="feature-item">
+									<svg class="feature-icon check prominent" viewBox="0 0 24 24">
+										<polyline points="20 6 9 17 4 12"></polyline>
+									</svg>
+									Увеличенное окно контекста (память)
+								</li>
+							</ul>
+						</div>
+						<div class="plan-action">
+							<button id="confirm-upgrade-btn" class="btn-pro-large">
+								Активировать TabbyAI Plus
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div
+			id="logout-modal-overlay"
+			class="modal-overlay hidden"
+			style="z-index: 220"
+		>
+			<div class="modal">
+				<div class="modal-header">
+					<div class="modal-icon icon-danger">
+						<svg
+							width="32"
+							height="32"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+						>
+							<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+							<polyline points="16 17 21 12 16 7"></polyline>
+							<line x1="21" y1="12" x2="9" y2="12"></line>
+						</svg>
+					</div>
+					<h2>Выход из аккаунта</h2>
+					<p>
+						Вы уверены, что хотите выйти? <br />Ваша история чатов останется на
+						этом устройстве.
+					</p>
+				</div>
+				<div class="modal-footer" style="display: flex; gap: 10px">
+					<button id="cancel-logout-btn" class="btn-secondary">Отмена</button>
+					<button id="confirm-logout-btn" class="btn-danger-solid">
+						Выйти
+					</button>
+				</div>
+			</div>
+		</div>
+
+		<div
+			id="already-pro-modal-overlay"
+			class="modal-overlay hidden"
+			style="z-index: 220"
+		>
+			<div class="modal">
+				<button class="modal-close" id="close-already-pro-btn">&times;</button>
+				<div class="modal-header">
+					<div class="modal-icon icon-success">
+						<svg
+							width="32"
+							height="32"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+						>
+							<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+							<polyline points="22 4 12 14.01 9 11.01"></polyline>
+						</svg>
+					</div>
+					<h2>У вас уже есть PRO!</h2>
+					<p>
+						Ваш план <b>TabbyAI Plus</b> активен. <br />Вам доступны все модели
+						без ограничений.
+					</p>
+				</div>
+				<div class="modal-footer">
+					<button id="ok-already-pro-btn" class="btn-primary">Отлично!</button>
+				</div>
+			</div>
+		</div>
+
+		<script src="auth.js"></script>
+		<script src="script.js"></script>
+		<script src="scripts/profile.js"></script>
+	</body>
+</html>

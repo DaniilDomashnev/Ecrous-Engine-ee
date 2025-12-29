@@ -1,0 +1,545 @@
+/* =========================================
+   Profile & Settings (ChatGPT Style)
+   ========================================= */
+
+/* --- Sidebar Profile Button --- */
+.user-profile-btn {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px;
+	border-radius: 12px;
+	cursor: pointer;
+	transition: background 0.2s;
+	user-select: none;
+	position: relative;
+}
+
+.user-profile-btn:hover,
+.user-profile-btn.active {
+	background: var(--border-light);
+}
+
+.user-avatar-small {
+	width: 32px;
+	height: 32px;
+	background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+	color: white;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 600;
+	font-size: 13px;
+	flex-shrink: 0;
+}
+
+.user-info {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+.user-name {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--text-main);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.user-plan {
+	font-size: 11px;
+	color: var(--text-secondary);
+}
+
+.user-settings-icon {
+	color: var(--text-secondary);
+	opacity: 0.5;
+}
+
+/* --- Dropdown Menu --- */
+.profile-dropdown {
+	position: absolute;
+	bottom: 70px; /* Над кнопкой профиля */
+	left: 10px;
+	width: 260px;
+	background: var(--bg-app);
+	border: 1px solid var(--border-light);
+	border-radius: 16px;
+	padding: 6px;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+	z-index: 200;
+	transform-origin: bottom left;
+	animation: scaleIn 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+@keyframes scaleIn {
+	from {
+		opacity: 0;
+		transform: scale(0.95) translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1) translateY(0);
+	}
+}
+
+.dropdown-group {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.menu-item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 12px;
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--text-main);
+	cursor: pointer;
+	transition: background 0.15s;
+}
+
+.menu-item:hover {
+	background: var(--border-light);
+}
+
+.menu-item svg {
+	color: var(--text-secondary);
+}
+
+.menu-item.danger {
+	color: var(--danger);
+}
+.menu-item.danger svg {
+	color: var(--danger);
+}
+
+.dropdown-divider {
+	height: 1px;
+	background: var(--border-light);
+	margin: 6px 0;
+}
+
+/* --- Settings Modal (GPT Layout) --- */
+.settings-modal {
+	width: 700px;
+	max-width: 95%;
+	height: 500px;
+	padding: 0; /* Сбрасываем паддинги обычного модала */
+	display: flex;
+	flex-direction: row;
+	overflow: hidden;
+	background: var(--bg-app);
+}
+
+/* Left Sidebar */
+.settings-sidebar {
+	width: 220px;
+	background: var(--border-light); /* Чуть темнее фона */
+	padding: 20px 10px;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	border-right: 1px solid var(--glass-border);
+}
+
+.settings-tab {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 10px 12px;
+	border-radius: 8px;
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--text-main);
+	cursor: pointer;
+	transition: all 0.2s;
+}
+
+.settings-tab:hover {
+	background: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme='dark'] .settings-tab:hover {
+	background: rgba(255, 255, 255, 0.05);
+}
+
+.settings-tab.active {
+	background: var(--bg-app); /* Цвет фона контента */
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+	font-weight: 600;
+}
+
+/* Right Content */
+.settings-content {
+	flex: 1;
+	padding: 40px;
+	position: relative;
+	overflow-y: auto;
+}
+
+.settings-close {
+	position: absolute;
+	top: 15px;
+	right: 15px;
+	background: transparent;
+	border: none;
+	font-size: 24px;
+	cursor: pointer;
+	color: var(--text-secondary);
+}
+.settings-close:hover {
+	color: var(--text-main);
+}
+
+.settings-panel {
+	display: none;
+	animation: fadeIn 0.3s;
+}
+.settings-panel.active {
+	display: block;
+}
+
+.settings-header-mobile {
+	display: none;
+	font-size: 18px;
+	font-weight: 700;
+	margin-bottom: 20px;
+	border-bottom: 1px solid var(--border-light);
+	padding-bottom: 10px;
+}
+
+/* Setting Items */
+.setting-group {
+	margin-bottom: 30px;
+	border-bottom: 1px solid var(--border-light);
+	padding-bottom: 20px;
+}
+.setting-group:last-child {
+	border-bottom: none;
+}
+
+.setting-item {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px;
+}
+
+.setting-label {
+	font-size: 15px;
+	font-weight: 500;
+	color: var(--text-main);
+}
+
+.setting-desc {
+	font-size: 13px;
+	color: var(--text-secondary);
+	margin-top: 4px;
+	max-width: 300px;
+}
+
+.setting-select {
+	padding: 8px 12px;
+	border-radius: 8px;
+	border: 1px solid var(--border-light);
+	background: var(--bg-app);
+	color: var(--text-main);
+	font-size: 14px;
+	cursor: pointer;
+	min-width: 120px;
+}
+
+.btn-sm {
+	padding: 8px 16px;
+	font-size: 13px;
+	border-radius: 8px;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+	position: relative;
+	display: inline-block;
+	width: 44px;
+	height: 24px;
+}
+
+.toggle-switch input {
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.slider {
+	position: absolute;
+	cursor: pointer;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: var(--border-light); /* Серый выкл */
+	transition: 0.4s;
+	border-radius: 34px;
+	border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.slider:before {
+	position: absolute;
+	content: '';
+	height: 18px;
+	width: 18px;
+	left: 3px;
+	bottom: 2px;
+	background-color: white;
+	transition: 0.4s;
+	border-radius: 50%;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+input:checked + .slider {
+	background-color: #10a37f; /* Зеленый GPT */
+}
+
+input:checked + .slider:before {
+	transform: translateX(20px);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 600px) {
+	.settings-modal {
+		flex-direction: column;
+		height: 85vh;
+	}
+
+	.settings-sidebar {
+		width: 100%;
+		flex-direction: row;
+		overflow-x: auto;
+		padding: 10px;
+		border-bottom: 1px solid var(--border-light);
+		border-right: none;
+		flex-shrink: 0;
+	}
+
+	.settings-tab {
+		white-space: nowrap;
+		font-size: 13px;
+	}
+
+	.settings-content {
+		padding: 20px;
+	}
+
+	.settings-header-mobile {
+		display: block;
+	}
+
+	.profile-dropdown {
+		width: 220px;
+		bottom: 80px;
+		left: 20px;
+	}
+}
+
+/* =========================================
+   Upgrade Modal Styling
+   ========================================= */
+
+.upgrade-modal {
+    max-width: 900px; /* Шире обычного модала */
+    padding: 30px;
+    background: var(--glass-bg) !important; /* Усиливаем эффект стекла */
+    border: 1px solid var(--glass-border);
+}
+
+.upgrade-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.upgrade-header h2 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, var(--text-main) 0%, var(--accent-color) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.upgrade-header p {
+    color: var(--text-secondary);
+    font-size: 16px;
+}
+
+.pricing-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.plan-card {
+    border-radius: 20px;
+    padding: 25px;
+    border: 1px solid var(--border-light);
+    background: rgba(255, 255, 255, 0.03);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+}
+
+[data-theme="dark"] .plan-card {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+/* Стили для PRO карточки */
+.plan-card.prominent {
+    border: 2px solid transparent; /* Место под градиент */
+    background-image: linear-gradient(var(--bg-modal), var(--bg-modal)), 
+                      linear-gradient(135deg, #8b5cf6, #d946ef); /* Градиент рамки */
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    box-shadow: 0 10px 30px -10px rgba(139, 92, 246, 0.3);
+    transform: scale(1.02);
+}
+
+.absolute-pro-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #8b5cf6, #d946ef);
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.plan-header {
+    text-align: center;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.plan-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.plan-price .amount {
+    font-size: 42px;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.plan-price .period {
+    color: var(--text-secondary);
+    font-size: 16px;
+}
+
+.plan-badge {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 6px 12px;
+    background: var(--border-light);
+    border-radius: 12px;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.plan-features ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    font-size: 15px;
+    color: var(--text-main);
+}
+
+.feature-item.text-muted {
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+.feature-icon {
+    width: 20px;
+    height: 20px;
+    stroke-width: 2.5;
+    fill: none;
+    stroke: currentColor;
+    flex-shrink: 0;
+}
+
+.feature-icon.check { color: #10a37f; } /* Зеленый цвет GPT */
+.feature-icon.x { color: var(--text-secondary); opacity: 0.5; }
+.feature-icon.check.prominent { color: #d946ef; /* Фиолетовый для PRO */ }
+
+.plan-action {
+    margin-top: auto;
+    padding-top: 25px;
+}
+
+.btn-pro-large {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, #8b5cf6, #d946ef);
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: filter 0.2s, transform 0.2s;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+}
+
+.btn-pro-large:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+    .pricing-grid {
+        grid-template-columns: 1fr;
+        gap: 35px;
+    }
+    .plan-card.prominent {
+        transform: none;
+        order: -1; /* PRO план показать первым на мобилках */
+    }
+    .upgrade-modal {
+        padding: 20px;
+    }
+}
+
+/* Success Icon Style */
+.modal-icon.icon-success {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), transparent);
+  color: #10b981; /* Зеленый */
+  border-color: rgba(16, 185, 129, 0.3);
+  box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.3);
+}
+
+.modal-icon.icon-success svg {
+    stroke-width: 3; /* Чуть жирнее галочка */
+}

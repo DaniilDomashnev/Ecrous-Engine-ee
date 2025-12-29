@@ -1,0 +1,186 @@
+.music-upload-btn {
+	padding: 12px 22px;
+	border-radius: var(--radius-lg);
+	border: none;
+
+	font-size: 17px;
+	font-weight: 600;
+
+	cursor: pointer;
+
+	background: var(--accent);
+	color: white;
+
+	margin-top: 18px; /* <<< КНОПКА ТЕПЕРЬ НИЖЕ */
+
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), 0 0 12px var(--accent-soft);
+
+	transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease,
+		opacity 0.25s ease;
+}
+
+/* Hover */
+.music-upload-btn:hover {
+	background: var(--accent-strong);
+	transform: translateY(-3px);
+	box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45), 0 0 14px var(--accent);
+}
+
+/* Active */
+.music-upload-btn:active {
+	transform: translateY(0);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 10px var(--accent-soft);
+}
+
+/* Контейнер плеера */
+.music-player {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding: 14px 18px;
+	background: var(--bg-elevated);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-lg);
+	box-shadow: var(--shadow-soft);
+	color: var(--text);
+	margin-top: 12px;
+	animation: fadeIn 0.3s ease;
+}
+
+.music-player {
+	/* small container tweaks kept here for future tweaks */
+}
+.music-player #playPauseBtn {
+	min-height: 44px;
+	padding: 12px 18px;
+	font-size: 16px;
+}
+
+#seekBar,
+#volumeBar {
+	height: 10px;
+	appearance: none;
+	-webkit-appearance: none;
+	background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+	border-radius: 6px;
+}
+
+#seekBar::-webkit-slider-thumb,
+#volumeBar::-webkit-slider-thumb {
+	appearance: none;
+	-webkit-appearance: none;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	background: #fff;
+	border: 3px solid var(--bg-elevated);
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+
+/* Responsive: stack in small screens and increase spacing */
+@media (max-width: 600px) {
+	.music-player {
+		padding: 18px;
+		gap: 14px;
+	}
+	.music-player #playPauseBtn {
+		width: 100%;
+	}
+	#seekBar,
+	#volumeBar {
+		height: 14px;
+	}
+}
+
+/* Кнопка Play/Pause */
+.music-player #playPauseBtn {
+	padding: 8px 16px;
+	background: var(--accent);
+	border: none;
+	color: white;
+	border-radius: var(--radius-pill);
+	cursor: pointer;
+	font-weight: 600;
+	transition: 0.15s ease;
+	width: fit-content;
+}
+
+.music-player #playPauseBtn:hover {
+	background: var(--accent-strong);
+	transform: translateY(-1px);
+}
+
+.music-player #playPauseBtn:active {
+	transform: translateY(0);
+}
+
+/* Время */
+.music-time {
+	display: flex;
+	justify-content: space-between;
+	font-size: 14px;
+	color: var(--text-soft);
+}
+
+/* Ползунок перемотки */
+#seekBar {
+	width: 100%;
+	-webkit-appearance: none;
+	height: 6px;
+	background: var(--bg-elevated-soft);
+	border-radius: var(--radius-pill);
+	cursor: pointer;
+}
+
+/* Линия прогресса */
+#seekBar::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	width: 14px;
+	height: 14px;
+	background: var(--accent);
+	border-radius: 50%;
+	cursor: pointer;
+	box-shadow: 0 0 10px var(--accent);
+}
+
+#seekBar:active::-webkit-slider-thumb {
+	transform: scale(1.1);
+}
+
+/* Громкость */
+.volume-control {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	color: var(--text-soft);
+	font-size: 14px;
+}
+
+#volumeBar {
+	width: 100%;
+	-webkit-appearance: none;
+	height: 6px;
+	background: var(--bg-elevated-soft);
+	border-radius: var(--radius-pill);
+}
+
+#volumeBar::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	width: 12px;
+	height: 12px;
+	background: var(--accent);
+	border-radius: 50%;
+	box-shadow: 0 0 6px var(--accent);
+}
+
+/* Анимация появления */
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}

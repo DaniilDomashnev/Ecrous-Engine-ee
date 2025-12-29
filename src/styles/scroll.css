@@ -1,0 +1,90 @@
+/* ========================================
+   GLOBAL SCROLLBAR — NO ARROWS (ALL THEMES)
+======================================== */
+
+/* === Firefox === */
+* {
+	scrollbar-width: thin;
+	scrollbar-color: var(--accent) var(--bg);
+}
+
+/* === Chromium (Chrome, Edge, Yandex, Opera) === */
+*::-webkit-scrollbar {
+	width: 12px;
+	height: 12px;
+}
+
+/* ✅ ТРЕК */
+*::-webkit-scrollbar-track {
+	background: var(--bg);
+	border-radius: var(--radius-pill);
+    margin: 4px; /* improved: spacing from edges */
+}
+
+/* ✅ ПОЛЗУНОК */
+*::-webkit-scrollbar-thumb {
+	background: linear-gradient(180deg, var(--accent), var(--accent-strong));
+	border-radius: var(--radius-pill);
+	border: 3px solid var(--bg);
+	box-shadow: var(--shadow-soft);
+	transition: background 0.2s ease, box-shadow 0.2s ease;
+    min-height: 40px; /* improved: usability */
+}
+
+/* Hover */
+*::-webkit-scrollbar-thumb:hover {
+	background: linear-gradient(180deg, var(--accent-strong), var(--accent));
+	box-shadow: 0 0 6px var(--accent), 0 0 14px var(--accent-soft);
+    border-width: 2px; /* improved: slight expansion on hover */
+}
+
+/* Active */
+*::-webkit-scrollbar-thumb:active {
+	background: var(--accent-strong);
+	box-shadow: 0 0 10px var(--accent), 0 0 22px var(--accent-soft);
+}
+
+/* ✅ УГОЛ */
+*::-webkit-scrollbar-corner {
+	background: var(--bg);
+}
+
+/* ========================================
+   ✅ ПОЛНОСТЬЮ УБРАНЫ СТРЕЛКИ
+======================================== */
+
+*::-webkit-scrollbar-button {
+	display: none;
+	width: 0;
+	height: 0;
+	background: transparent;
+}
+
+/* ========================================
+   ✅ ВНУТРЕННИЕ КОНТЕЙНЕРЫ
+======================================== */
+
+.scrollable,
+.editor,
+.panel,
+.sidebar,
+.content,
+.modal,
+.dropdown {
+	scrollbar-width: thin;
+	scrollbar-color: var(--accent) var(--bg);
+    overflow-y: auto; /* improved: ensure scroll behavior */
+    scroll-behavior: smooth; /* improved: smoother scrolling within containers */
+}
+
+/* ========================================
+   ✅ ТОНКИЙ РЕЖИМ (ОПЦИОНАЛЬНО)
+======================================== */
+
+.scroll-thin::-webkit-scrollbar {
+	width: 6px;
+}
+
+.scroll-thin::-webkit-scrollbar-thumb {
+	border: 1px solid var(--bg);
+}

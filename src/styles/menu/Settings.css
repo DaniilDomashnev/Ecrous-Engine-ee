@@ -1,0 +1,269 @@
+/* ======================================
+   ПАНЕЛЬ НАСТРОЕК
+====================================== */
+
+.settings-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+
+    width: 420px;
+    max-width: 90%;
+    /* Ограничиваем высоту и добавляем скролл */
+    max-height: 85vh; 
+    overflow-y: auto;
+
+    background: var(--bg-elevated);
+    border-radius: var(--radius-xl);
+    padding: 28px;
+    color: var(--text);
+
+    box-shadow: var(--shadow-soft);
+    z-index: 1500;
+
+    /* Исправляем центрирование контента */
+    display: none; 
+    flex-direction: column;
+    align-items: stretch;
+
+    animation: settingsAppear 0.35s ease forwards;
+}
+
+@keyframes settingsAppear {
+	from {
+		opacity: 0;
+		transform: translate(-50%, -50%) scale(0.85);
+	}
+	to {
+		opacity: 1;
+		transform: translate(-50%, -50%) scale(1);
+	}
+}
+
+/* Кнопка закрытия */
+.settings-close {
+	position: absolute;
+	top: 16px;
+	right: 16px;
+	background: none;
+	border: none;
+	cursor: pointer;
+}
+
+.settings-close img {
+	width: 26px;
+	opacity: 0.8;
+	transition: 0.2s;
+	filter: brightness(0) invert(1); /* автоматически белая в любой теме */
+}
+
+.settings-close img:hover {
+	opacity: 1;
+	transform: scale(1.1);
+}
+
+/* Заголовок */
+.settings-title {
+	text-align: center;
+	font-size: 26px;
+	margin-bottom: 20px;
+	color: var(--text);
+}
+
+/* Основной контейнер */
+.settings-content {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+/* Блок настройки */
+.settings-section {
+	background: var(--bg-elevated-soft);
+	padding: 16px;
+	border-radius: var(--radius-lg);
+	box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+	border: 1px solid var(--border);
+}
+
+.settings-section h3 {
+	margin: 0 0 10px 0;
+	font-size: 20px;
+	color: var(--accent);
+}
+
+/* Строка с переключателем */
+.switch-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 8px 0;
+	color: var(--text);
+}
+
+/* Тумблер */
+.switch {
+	position: relative;
+	display: inline-block;
+	width: 50px;
+	height: 24px;
+}
+
+.switch input {
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+/* Ползунок */
+.slider {
+	position: absolute;
+	cursor: pointer;
+	inset: 0;
+	background-color: var(--border);
+	transition: 0.3s;
+	border-radius: 24px;
+}
+
+.slider:before {
+	content: '';
+	position: absolute;
+	width: 18px;
+	height: 18px;
+
+	left: 3px;
+	bottom: 3px;
+
+	background-color: var(--text);
+	border-radius: 50%;
+	transition: 0.3s;
+}
+
+/* Активный тумблер */
+.switch input:checked + .slider {
+	background-color: var(--accent);
+}
+
+.switch input:checked + .slider:before {
+	transform: translateX(26px);
+}
+
+/* Выпадающий список */
+.settings-section select {
+	width: 100%;
+	padding: 12px;
+
+	border-radius: var(--radius-lg);
+	background: var(--bg);
+	color: var(--text);
+
+	font-size: 16px;
+	border: 2px solid var(--accent);
+	outline: none;
+
+	transition: 0.2s ease;
+}
+
+.settings-section select:hover {
+	border-color: var(--accent-strong);
+}
+
+.theme-upload-btn {
+	padding: 12px 22px;
+	border-radius: var(--radius-lg);
+	border: none;
+
+	font-size: 17px;
+	font-weight: 600;
+
+	cursor: pointer;
+
+	background: var(--accent);
+	color: white;
+
+	margin-top: 18px; /* <<< КНОПКА ТЕПЕРЬ НИЖЕ */
+
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35), 0 0 12px var(--accent-soft);
+
+	transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease,
+		opacity 0.25s ease;
+}
+
+/* Hover */
+.theme-upload-btn:hover {
+	background: var(--accent-strong);
+	transform: translateY(-3px);
+	box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45), 0 0 14px var(--accent);
+}
+
+/* Active */
+.theme-upload-btn:active {
+	transform: translateY(0);
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 10px var(--accent-soft);
+}
+
+/* Мобильная адаптация */
+@media (max-width: 450px) {
+	.theme-upload-btn {
+		width: 100%;
+		padding: 12px;
+		font-size: 16px;
+		margin-top: 14px;
+	}
+}
+
+/* ======================================
+   OVERLAY / BACKDROP FOR MODALS
+   Adds dimming + blur behind the settings panel
+====================================== */
+.modal-overlay {
+	position: fixed;
+	inset: 0; /* top:0; right:0; bottom:0; left:0 */
+	background: rgba(0, 0, 0, 0.45);
+	backdrop-filter: blur(6px) saturate(1.05);
+	-webkit-backdrop-filter: blur(6px) saturate(1.05);
+	/* Keep overlay below panels (panels use z-index >= 1200). */
+	z-index: 1000;
+	display: block;
+	opacity: 0;
+	transition: opacity 240ms ease;
+	pointer-events: none; /* disable clicks when hidden */
+}
+
+.modal-overlay.visible {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+.settings-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%; /* Гарантирует, что контент не сожмется */
+}
+
+.settings-section {
+    background: var(--bg-elevated-soft);
+    padding: 16px;
+    border-radius: var(--radius-lg);
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border);
+    width: 100%; /* Растягиваем секции */
+    box-sizing: border-box; /* Важно для правильных отступов */
+}
+
+/* Красивый скроллбар для настроек */
+.settings-panel::-webkit-scrollbar {
+    width: 6px;
+}
+
+.settings-panel::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 10px;
+}
+
+.settings-panel::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 10px;
+}

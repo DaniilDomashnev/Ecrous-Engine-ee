@@ -1,0 +1,23 @@
+@font-face {
+	font-family: 'Global';
+	src: url('../fonts/font.otf') format('opentype');
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'Khand';
+	src: url('../fonts/Khand-Bold.ttf') format('opentype');
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'CustomFont3';
+	src: url('../fonts/04b03.ttf') format('opentype');
+	font-display: swap;
+}
+
+@font-face {
+	font-family: 'ubuntu';
+	src: url('../fonts/ubuntu.ttf') format('opentype');
+	font-display: swap;
+}

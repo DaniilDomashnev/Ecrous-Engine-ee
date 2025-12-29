@@ -1,0 +1,441 @@
+/* ОБЩИЕ ПРИНЦИПЫ:
+   - Избегаем #000000 и #ffffff в чистом виде для больших поверхностей.
+   - Акцентные цвета чуть приглушены для фонов, но яркие для элементов.
+   - Текст всегда имеет высокий контраст.
+*/
+
+.theme-dark {
+	--bg: #121214; /* Чуть глубже, чем было */
+	--bg-elevated: #1c1c1f;
+	--bg-elevated-soft: #252529;
+
+	--accent: #9b5cff;
+	--accent-soft: rgba(155, 92, 255, 0.15);
+	--accent-strong: #b685ff;
+
+	--text: #ececf0;
+	--text-soft: #a0a0b0;
+
+	--danger: #ff4f6b;
+	--success: #4fff7a;
+	--warning: #ffb45b;
+	--info: #7dc8ff;
+	--new: #b08cff;
+
+	--border: #2e2e33;
+	--code-bg: #0d0d10;
+
+	--shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.5);
+
+	--radius-lg: 18px;
+	--radius-xl: 24px;
+	--radius-pill: 999px;
+	--nav-height: 60px;
+}
+
+.theme-light {
+	/* Мягкий светлый ("Paper White") */
+	--bg: #fdfdfd; 
+	--bg-elevated: #ffffff;
+	--bg-elevated-soft: #f4f4f6;
+
+	--accent: #8e44ad; /* Более спокойный фиолетовый */
+	--accent-soft: rgba(142, 68, 173, 0.1);
+	--accent-strong: #9b59b6;
+
+	--text: #2c2c34; /* Тёмно-серый, не черный */
+	--text-soft: #707080;
+
+	--danger: #e74c3c;
+	--success: #27ae60;
+	--warning: #f39c12;
+	--info: #3498db;
+	--new: #9b59b6;
+
+	--border: #e0e0e6;
+	--code-bg: #f8f8fa;
+
+	--shadow-soft: 0 8px 20px rgba(0, 0, 0, 0.08);
+
+	--radius-lg: 18px;
+	--radius-xl: 24px;
+	--radius-pill: 999px;
+	--nav-height: 60px;
+}
+
+.theme-night {
+	/* Глубокая ночь (синеватый оттенок) */
+	--bg: #050508;
+	--bg-elevated: #0f0f16;
+	--bg-elevated-soft: #181824;
+
+	--accent: #6c5ce7;
+	--accent-soft: rgba(108, 92, 231, 0.15);
+	--accent-strong: #a29bfe;
+
+	--text: #e0e0ff;
+	--text-soft: #8080a0;
+
+	--danger: #ff6b6b;
+	--success: #51cf66;
+	--warning: #fcc419;
+	--info: #339af0;
+	--new: #845ef7;
+
+	--border: #1f1f2e;
+	--code-bg: #030305;
+
+	--shadow-soft: 0 15px 40px rgba(0, 0, 0, 0.8);
+
+	--radius-lg: 18px;
+	--radius-xl: 24px;
+	--radius-pill: 999px;
+}
+
+.theme-ruby {
+	/* Благородный винный, а не "светофорный" красный */
+	--bg: #140a0a; 
+	--bg-elevated: #1f1212;
+	--bg-elevated-soft: #2b1919;
+
+	--accent: #d63031; 
+	--accent-soft: rgba(214, 48, 49, 0.15);
+	--accent-strong: #ff7675;
+
+	--text: #fbecec;
+	--text-soft: #c4a6a6;
+
+	--danger: #ff4757;
+	--success: #2ed573;
+	--warning: #ffa502;
+	--info: #ff6b81;
+	--new: #ff4757;
+
+	--border: #3d2222;
+	--code-bg: #0f0505;
+
+	--shadow-soft: 0 15px 35px rgba(50, 0, 0, 0.4);
+
+	--radius-lg: 18px;
+	--radius-xl: 24px;
+	--radius-pill: 999px;
+}
+
+.theme-ruby-light {
+	/* Розовое золото / Мягкий рубин */
+	--bg: #fff5f5;
+	--bg-elevated: #ffffff;
+	--bg-elevated-soft: #ffe3e3;
+
+	--accent: #c0392b; /* Темно-красный для контраста */
+	--accent-soft: rgba(192, 57, 43, 0.1);
+	--accent-strong: #e74c3c;
+
+	--text: #4a2c2c; /* Коричневато-серый */
+	--text-soft: #947c7c;
+
+	--danger: #d63031;
+	--success: #27ae60;
+	--warning: #f39c12;
+	--info: #e84393;
+	--new: #d63031;
+
+	--border: #ebd4d4;
+	--code-bg: #fffbfb;
+
+	--shadow-soft: 0 10px 25px rgba(192, 57, 43, 0.1);
+
+	--radius-lg: 18px;
+	--radius-xl: 24px;
+	--radius-pill: 999px;
+}
+
+.theme-ruby-neon {
+	/* Cyberpunk Red */
+	--bg: #0a0005;
+	--bg-elevated: #17000b;
+	--bg-elevated-soft: #240012;
+
+	--accent: #ff0055;
+	--accent-soft: rgba(255, 0, 85, 0.2);
+	--accent-strong: #ff3377;
+
+	--text: #ffe6ee;
+	--text-soft: #b38090;
+
+	--danger: #ff003c;
+	--success: #00ff9d;
+	--warning: #ffcc00;
+	--info: #00d2ff;
+	--new: #ff00cc;
+
+	--border: #33001a;
+	--code-bg: #050003;
+
+	--shadow-soft: 0 0 30px rgba(255, 0, 85, 0.2);
+
+	--radius-lg: 18px;
+	--radius-xl: 24px;
+	--radius-pill: 999px;
+}
+
+.theme-gray {
+	/* Монохром, профессиональный */
+	--bg: #f2f2f2;
+	--bg-elevated: #ffffff;
+	--bg-elevated-soft: #e6e6e6;
+
+	--accent: #57606f; 
+	--accent-soft: rgba(87, 96, 111, 0.1);
+	--accent-strong: #2f3542;
+
+	--text: #2f3542;
+	--text-soft: #747d8c;
+
+	--danger: #ff4757;
+	--success: #2ed573;
+	--warning: #ffa502;
+	--info: #1e90ff;
+	--new: #3742fa;
+
+	--border: #ced6e0;
+	--code-bg: #fbfbfb;
+
+	--shadow-soft: 0 10px 25px rgba(0, 0, 0, 0.1);
+
+	--radius-lg: 18px;
+	--radius-xl: 24px;
+	--radius-pill: 999px;
+}
+
+.theme-emerald {
+	/* Глубокий лес */
+	--bg: #050f0a;
+	--bg-elevated: #0d1f16;
+	--bg-elevated-soft: #142b20;
+
+	--accent: #2ecc71;
+	--accent-soft: rgba(46, 204, 113, 0.15);
+	--accent-strong: #58d68d;
+
+	--text: #e8f8f0;
+	--text-soft: #8abeb0;
+
+	--danger: #e74c3c;
+	--success: #27ae60;
+	--warning: #f1c40f;
+	--info: #1abc9c;
+	--new: #2ecc71;
+
+	--border: #1a4233;
+	--code-bg: #020a06;
+
+	--shadow-soft: 0 15px 35px rgba(46, 204, 113, 0.15);
+
+	--radius-lg: 18px;
+	--radius-xl: 24px;
+	--radius-pill: 999px;
+}
+
+.theme-gold {
+	/* Luxury Dark Gold (не желтый, а бронза/золото) */
+	--bg: #12100b;
+	--bg-elevated: #1e1b12;
+	--bg-elevated-soft: #2b261a;
+
+	--accent: #d4af37;
+	--accent-soft: rgba(212, 175, 55, 0.15);
+	--accent-strong: #f1c40f;
+
+	--text: #fdfcf5;
+	--text-soft: #c2bca3;
+
+	--danger: #e15f41;
+	--success: #badc58;
+	--warning: #f6e58d;
+	--info: #7ed6df;
+	--new: #d4af37;
+
+	--border: #42381c;
+	--code-bg: #0a0906;
+
+	--shadow-soft: 0 15px 40px rgba(212, 175, 55, 0.2);
+
+	--radius-lg: 18px;
+	--radius-xl: 24px;
+	--radius-pill: 999px;
+}
+
+.theme-diamond {
+	/* Чистый лед */
+	--bg: #f0f8ff;
+	--bg-elevated: #ffffff;
+	--bg-elevated-soft: #e6f2ff;
+
+	--accent: #00a8ff;
+	--accent-soft: rgba(0, 168, 255, 0.1);
+	--accent-strong: #0097e6;
+
+	--text: #2c3e50;
+	--text-soft: #7f8fa6;
+
+	--danger: #ff4757;
+	--success: #2ed573;
+	--warning: #ffa502;
+	--info: #70a1ff;
+	--new: #1e90ff;
+
+	--border: #cceeff;
+	--code-bg: #fafdff;
+
+	--shadow-soft: 0 10px 25px rgba(0, 168, 255, 0.12);
+
+	--radius-lg: 18px;
+	--radius-xl: 24px;
+	--radius-pill: 999px;
+}
+
+.theme-sapphire {
+	/* Глубокий океан */
+	--bg: #080a12;
+	--bg-elevated: #0f1324;
+	--bg-elevated-soft: #171d36;
+
+	--accent: #4834d4;
+	--accent-soft: rgba(72, 52, 212, 0.2);
+	--accent-strong: #686de0;
+
+	--text: #e6e6fa;
+	--text-soft: #9090b0;
+
+	--danger: #eb4d4b;
+	--success: #6ab04c;
+	--warning: #f9ca24;
+	--info: #22a6b3;
+	--new: #4834d4;
+
+	--border: #1e2552;
+	--code-bg: #04050a;
+
+	--shadow-soft: 0 15px 40px rgba(72, 52, 212, 0.25);
+
+	--radius-lg: 18px;
+	--radius-xl: 24px;
+	--radius-pill: 999px;
+}
+
+.theme-mint {
+	/* Мятный шоколад (темный) */
+	--bg: #0b1210;
+	--bg-elevated: #121c19;
+	--bg-elevated-soft: #1a2924;
+
+	--accent: #00b894;
+	--accent-soft: rgba(0, 184, 148, 0.15);
+	--accent-strong: #55efc4;
+
+	--text: #f0fffb;
+	--text-soft: #95a5a6;
+
+	--danger: #ff7675;
+	--success: #55efc4;
+	--warning: #ffeaa7;
+	--info: #81ecec;
+	--new: #00cec9;
+
+	--border: #1e3b33;
+	--code-bg: #060a09;
+
+	--shadow-soft: 0 15px 35px rgba(0, 184, 148, 0.15);
+
+	--radius-lg: 18px;
+	--radius-xl: 24px;
+	--radius-pill: 999px;
+}
+
+.theme-sakura {
+	/* Нежная сакура (убрал кислотность) */
+	--bg: #fff0f5;
+	--bg-elevated: #ffffff;
+	--bg-elevated-soft: #ffeef2;
+
+	--accent: #e84393;
+	--accent-soft: rgba(232, 67, 147, 0.1);
+	--accent-strong: #fd79a8;
+
+	--text: #2d3436; /* Контрастный темный */
+	--text-soft: #636e72;
+
+	--danger: #d63031;
+	--success: #00b894;
+	--warning: #fdcb6e;
+	--info: #e84393;
+	--new: #fd79a8;
+
+	--border: #f8cdda;
+	--code-bg: #fffafa;
+
+	--shadow-soft: 0 10px 25px rgba(232, 67, 147, 0.15);
+
+	--radius-lg: 18px;
+	--radius-xl: 24px;
+	--radius-pill: 999px;
+}
+
+.theme-sunset {
+	/* Закат (теплый, но темный) */
+	--bg: #140d0b;
+	--bg-elevated: #1f1410;
+	--bg-elevated-soft: #2b1c16;
+
+	--accent: #e17055;
+	--accent-soft: rgba(225, 112, 85, 0.15);
+	--accent-strong: #ff7675;
+
+	--text: #ffece6;
+	--text-soft: #bfaea8;
+
+	--danger: #d63031;
+	--success: #55efc4;
+	--warning: #fdcb6e;
+	--info: #fab1a0;
+	--new: #e17055;
+
+	--border: #42251e;
+	--code-bg: #0a0605;
+
+	--shadow-soft: 0 15px 35px rgba(225, 112, 85, 0.2);
+
+	--radius-lg: 18px;
+	--radius-xl: 24px;
+	--radius-pill: 999px;
+}
+
+.theme-frost {
+	/* Северное сияние (очень темный с холодным акцентом) */
+	--bg: #0a0e14;
+	--bg-elevated: #111620;
+	--bg-elevated-soft: #192130;
+
+	--accent: #74b9ff;
+	--accent-soft: rgba(116, 185, 255, 0.15);
+	--accent-strong: #0984e3;
+
+	--text: #eef5fb;
+	--text-soft: #8da6bd;
+
+	--danger: #ff6b6b;
+	--success: #55efc4;
+	--warning: #ffeaa7;
+	--info: #74b9ff;
+	--new: #0984e3;
+
+	--border: #202b3d;
+	--code-bg: #05070a;
+
+	--shadow-soft: 0 15px 35px rgba(116, 185, 255, 0.15);
+
+	--radius-lg: 18px;
+	--radius-xl: 24px;
+	--radius-pill: 999px;
+}

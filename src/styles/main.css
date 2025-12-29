@@ -1,0 +1,410 @@
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+	font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+	-webkit-font-smoothing: antialiased; 
+	-moz-osx-font-smoothing: grayscale; /* improved: better text rendering on macOS */
+}
+
+body,
+html {
+	height: 100%;
+	width: 100%;
+	overflow: hidden; 
+}
+
+body {
+	display: flex;
+	background-color: var(--bg);
+	color: var(--text);
+	justify-content: center;
+	align-items: center; 
+	flex-direction: column;
+	text-rendering: optimizeLegibility; /* improved: better kerning and ligatures */
+	transition: background 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); /* improved: smoother theme switching */
+}
+
+/* =========================================
+   ЗАГОЛОВОК
+   ========================================= */
+
+.title {
+	position: absolute;
+	top: 8%; 
+	left: 50%; 
+	transform: translateX(-50%);
+
+	font-size: 72px; 
+	line-height: 1.1;
+	opacity: 0;
+	font-weight: 700;
+	font-family: 'Khand', sans-serif;
+	letter-spacing: -1px;
+
+	animation: fadeInTitle 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; 
+	white-space: nowrap;
+	color: var(--text);
+	
+	text-shadow: 0 4px 20px rgba(0,0,0,0.05);
+	z-index: 10;
+	will-change: transform, opacity; /* improved: performance hint */
+	user-select: none; /* improved: prevent accidental selection */
+}
+
+@keyframes fadeInTitle {
+	from { opacity: 0; transform: translate(-50%, -30px); }
+	to   { opacity: 1; transform: translate(-50%, 0); }
+}
+
+/* =========================================
+   БОКОВАЯ ПАНЕЛЬ (Glassmorphism)
+   ========================================= */
+
+.side-panel {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	z-index: 100;
+
+	width: 280px; 
+	height: 100%;
+
+	background-color: rgba(var(--bg-elevated-rgb), 0.85); 
+	background-color: var(--bg-elevated); 
+
+	backdrop-filter: blur(15px);
+	-webkit-backdrop-filter: blur(15px);
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+
+	padding-top: 40px;
+	border-right: 1px solid var(--border); 
+	box-shadow: 20px 0 40px rgba(0, 0, 0, 0.05); 
+
+	transform: translateY(100%);
+	animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+	will-change: transform; /* improved: performance hint */
+}
+
+@keyframes slideUp {
+	from { transform: translateY(100%); }
+	to   { transform: translateY(0); }
+}
+
+/* Версия билда */
+.build-info {
+	position: absolute;
+	top: 30px;
+	width: 100%;
+	
+	color: var(--text-soft); 
+	text-align: center;
+	font-family: 'Khand', sans-serif;
+	letter-spacing: 1px;
+	opacity: 0.7;
+	user-select: none; /* improved: UI cleanup */
+
+	width: 150px;
+	height: 30px;
+	background: #1a1a1a;
+	border-radius: 10px;
+}
+
+.build-text {
+		font-size: 24px;
+		font-weight: 600;
+		font-weight: 600;
+		letter-spacing: 0.5px;
+		font-family: 'Khand', sans-serif;
+}
+
+/* =========================================
+   КНОПКИ МЕНЮ
+   ========================================= */
+
+.side-panel .menu-button {
+	width: 85%; 
+	max-width: 240px;
+	height: 54px;
+
+	margin: 8px 0;
+	padding: 0 20px;
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	color: var(--text);
+	font-size: 18px;
+	font-weight: 500;
+	letter-spacing: 0.5px;
+
+	background: var(--bg-elevated-soft);
+	border-radius: 12px;
+	border: 1px solid transparent; /* improved: prepares for border transition */
+
+	cursor: pointer;
+	transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* improved: snappier interaction */
+	position: relative;
+	overflow: hidden;
+	user-select: none; /* improved: standard for buttons */
+}
+
+/* Focus visibility for accessibility */
+.side-panel .menu-button:focus-visible {
+    outline: 2px solid var(--accent); /* improved: accessibility */
+    outline-offset: 2px;
+}
+
+.side-panel .menu-button:hover {
+	background: var(--bg);
+	border-color: var(--accent);
+	color: var(--accent-strong);
+	transform: translateY(-2px);
+	box-shadow: 0 8px 20px -5px var(--accent-soft);
+}
+
+.side-panel .menu-button:active {
+	transform: translateY(0); /* improved: better tactile feedback */
+	background: var(--bg-elevated);
+	box-shadow: 0 2px 10px -2px var(--accent-soft); /* improved: subtle depth press */
+}
+
+.menu-button-disable {
+	opacity: 0.5;
+	pointer-events: none;
+	width: 85%;
+	max-width: 240px;
+	height: 54px;
+	margin: 8px 0;
+	padding: 0 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--text-soft);
+	font-size: 18px;
+	font-weight: 500;
+	background: var(--bg);
+	border-radius: 12px;
+	border: 1px solid var(--border);
+	box-shadow: none;
+	user-select: none; /* improved */
+}
+
+/* =========================================
+   СОЦИАЛЬНЫЕ ИКОНКИ И МЕНЮ СПРАВА
+   ========================================= */
+
+.social-links, 
+.ButtonsMenuSmall {
+	position: absolute;
+	right: 25px;
+	display: flex;
+	gap: 12px;
+	
+	background-color: var(--bg-elevated);
+	border: 1px solid var(--border); 
+	border-radius: 20px;
+	
+	padding: 10px 14px;
+	
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+	
+	box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+	opacity: 0;
+	z-index: 50;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease; /* improved: subtle interaction */
+}
+
+.social-links:hover, 
+.ButtonsMenuSmall:hover {
+    border-color: var(--accent-soft); /* improved: subtle container highlight */
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15); /* improved: float effect */
+}
+
+.social-links {
+	bottom: 25px;
+	animation: fadeInRight 0.8s 0.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.ButtonsMenuSmall {
+	top: 25px;
+	animation: fadeInRight 0.8s 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes fadeInRight {
+	from { opacity: 0; transform: translateX(20px); }
+	to   { opacity: 1; transform: translateX(0); }
+}
+
+.social-links img,
+.ButtonsMenuSmall img {
+	width: 36px;
+	height: 36px;
+	border-radius: 10px;
+	transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease; /* improved: smoother spring effect */
+	display: block;
+    backface-visibility: hidden; /* improved: prevents blur during scale */
+}
+
+.social-links img:hover,
+.ButtonsMenuSmall img:hover {
+	transform: scale(1.15);
+	filter: drop-shadow(0 4px 8px var(--accent-soft));
+}
+
+.ButtonsMenuSmall a {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-decoration: none;
+}
+
+.ButtonsMenuSmall a:focus-visible,
+.social-links a:focus-visible {
+    outline: none;
+    border-radius: 10px;
+    box-shadow: 0 0 0 2px var(--accent); /* improved: accessibility */
+}
+
+/* =========================================
+   ЦЕНТРАЛЬНЫЙ КОНТЕЙНЕР
+   ========================================= */
+
+.center-container {
+	position: absolute;
+	top: 0;
+	left: 0; 
+	width: 100%; 
+	height: 100%;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	
+	pointer-events: none; 
+	z-index: 5;
+}
+
+.container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	max-width: 600px; 
+	padding: 0 20px;
+	
+	opacity: 0;
+	animation: fadeInUp 1s 0.5s ease-out forwards;
+}
+
+.center-image {
+	width: 140px;
+	height: auto;
+	margin-bottom: 24px;
+	filter: drop-shadow(0 10px 20px rgba(0,0,0,0.15));
+    transition: transform 0.3s ease; /* improved: allows subtle interaction if needed */
+}
+
+.center-text {
+	color: var(--text);
+	font-size: 20px;
+	line-height: 1.6;
+	font-weight: 400;
+	text-align: center;
+	text-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+@keyframes fadeInUp {
+	from { opacity: 0; transform: translateY(30px); }
+	to   { opacity: 1; transform: translateY(0); }
+}
+
+.TabbyAI {
+	opacity: 0.5;
+	filter: grayscale(100%);
+	cursor: not-allowed;
+	transition: all 0.3s ease; /* improved: explicit timing function */
+}
+
+/* =========================================
+   АДАПТИВНОСТЬ
+   ========================================= */
+
+@media (max-width: 768px) {
+	.title {
+		font-size: 48px;
+		top: 5%;
+	}
+	
+	.side-panel {
+		width: 100%;
+		height: auto;
+		min-height: 250px;
+		bottom: 0;
+		border-right: none;
+		border-top: 1px solid var(--border);
+		border-radius: 20px 20px 0 0;
+        box-shadow: 0 -10px 30px rgba(0,0,0,0.1); /* improved: separation shadow for mobile panel */
+	}
+	
+	.center-container {
+		justify-content: flex-start;
+		padding-top: 120px;
+	}
+	
+	.ButtonsMenuSmall, .social-links {
+		padding: 8px;
+	}
+	
+	.ButtonsMenuSmall img, .social-links img {
+		width: 32px;
+		height: 32px;
+	}
+}
+
+.no-select {
+  -webkit-user-select: none; 
+  -moz-user-select: none;    
+  -ms-user-select: none;     
+  user-select: none;         
+}
+
+.ui-no-select {
+  user-select: none;
+}
+
+.ui-image {
+  -webkit-user-drag: none;
+  user-select: none;
+  pointer-events: none;
+}
+
+.social-links a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.social-links a:hover img {
+  transform: scale(1.08);
+  filter: brightness(1.2);
+}
+
+.social-links img {
+  transition: transform 0.2s ease, filter 0.2s ease; /* improved: consistent timing */
+}
+
+.ButtonsMenuSmall a:hover img {
+  transform: scale(1.08);
+  filter: brightness(1.2);
+}
+
+.ButtonsMenuSmall img {
+  transition: transform 0.2s ease, filter 0.2s ease; /* improved: consistent timing */
+}
