@@ -1,73 +1,17 @@
-# React + TypeScript + Vite
+Ecrous Engine — это современный веб-ориентированный игровой движок, созданный для разработки 2D и 3D-игр прямо в браузере. Он ориентирован на независимых разработчиков, энтузиастов и небольшие команды, которым важно быстро создавать, тестировать и публиковать игровые проекты без сложной установки и тяжёлых инструментов.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Движок предоставляет визуальный редактор сцен, систему событий и логики, удобную работу с объектами, а также поддержку скриптов на JavaScript. Ecrous Engine делает упор на наглядность и доступность: большинство игровых механик можно реализовать через блоки и настройки, не углубляясь в низкоуровневое программирование.
 
-Currently, two official plugins are available:
+Ключевая особенность Ecrous Engine — глубокая интеграция с веб-технологиями. HTML, CSS и JavaScript используются не как дополнение, а как основа, что позволяет легко кастомизировать интерфейс редактора, создавать собственные инструменты и расширения, а также встраивать игры в сайты или веб-платформы.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Движок подходит для создания:
 
-## React Compiler
+инди-игр и прототипов,
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+хоррор-проектов и сюжетных игр,
 
-## Expanding the ESLint configuration
+обучающих и экспериментальных проектов,
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+сериалов и интерактивных историй.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Ecrous Engine развивается как гибкая и расширяемая платформа, с прицелом на собственный AI-ассистент, систему плагинов и удобный экспорт проектов. Его цель — дать разработчику максимум свободы и скорости, сохранив при этом контроль над логикой и визуалом игры.
