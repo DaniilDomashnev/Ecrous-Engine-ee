@@ -6,6 +6,13 @@
 	"thanks": "Credits",
 	"About": "About Project",
 	"centerText": "Looks like you don't have any projects yet.\nCreate a new one or import!",
+	"version": "Version",
+
+	"aboutDescription": "Ecrous Engine is a modern web game engine that runs directly in the browser. We strive to make development accessible, fast, and beautiful.",
+	"linkNews": "News and updates",
+	"linkTutorials": "Tutorials and guides",
+	"linkDocs": "Knowledge base",
+	"madeWithLove": "Made with ❤️ for developers",
 
 	"MyProjects": "My Projects",
 	"close": "Close",
