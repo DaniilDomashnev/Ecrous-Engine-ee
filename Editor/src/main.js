@@ -200,13 +200,24 @@ function getNextBlock(block, allBlocks, connections) {
 		const conn = connections.find(c => c.from === block.id)
 		return conn ? allBlocks.find(b => b.id === conn.to) : null
 	} else {
-		// Stack mode: ищем ближайший снизу
+		// --- STACK MODE FIX ---
+		// Увеличиваем дистанцию поиска, так как блоки могут быть высокими (особенно диалоги)
+		const SEARCH_HEIGHT = 500 // Было 150
+		const ALIGN_TOLERANCE = 50 // Насколько криво могут стоять блоки по X
+
 		let candidates = allBlocks.filter(b => {
 			if (b.id === block.id) return false
 			const dy = b.y - block.y
-			return dy > 0 && dy < 150 && Math.abs(b.x - block.x) < 50
+			const dx = Math.abs(b.x - block.x)
+
+			// Ищем блок, который строго ниже (dy > 0), но не слишком далеко
+			// И стоит примерно на той же вертикальной линии
+			return dy > 0 && dy < SEARCH_HEIGHT && dx < ALIGN_TOLERANCE
 		})
+
+		// Сортируем: берем самый ближний по вертикали (верхний из нижних)
 		candidates.sort((a, b) => a.y - b.y)
+
 		return candidates[0]
 	}
 }
@@ -1692,6 +1703,27 @@ function executeBlockLogic(block) {
 					}
 					break
 				}
+				case 'obj_set_visible': {
+					const el = document.getElementById(v[0]) // Находим объект по ID
+					if (el) {
+						const mode = v[1] // hide, show, toggle
+
+						if (mode === 'hide') {
+							el.style.display = 'none'
+						} else if (mode === 'show') {
+							// Восстанавливаем отображение (обычно block подходит для div)
+							el.style.display = 'block'
+						} else if (mode === 'toggle') {
+							// Если сейчас 'none', то показываем, иначе скрываем
+							if (el.style.display === 'none') {
+								el.style.display = 'block'
+							} else {
+								el.style.display = 'none'
+							}
+						}
+					}
+					break
+				}
 
 				// --- КОМПОНЕНТЫ ---
 				case 'comp_add':
@@ -1759,42 +1791,172 @@ function executeBlockLogic(block) {
 
 				// --- ДИАЛОГИ ---
 				case 'ui_dialog_show': {
-					let dlg = document.getElementById('game-dialog-overlay')
-					if (!dlg) {
-						dlg = document.createElement('div')
+					return new Promise(resolve => {
+						// Считываем параметры
+						const name = resolveValue(v[0]) || 'NPC'
+						const text = resolveValue(v[1]) || '...' // Защита от пустого текста
+						const avaUrl = resolveValue(v[2])
+						const showAvatar = v[3] === 'yes'
+						const position = v[4] || 'bottom'
+						const style = v[5] || 'classic'
+						const closeMode = v[6] || 'click_anywhere'
+						const statusVar = v[7]
+
+						const old = document.getElementById('game-dialog-overlay')
+						if (old) old.remove()
+
+						const dlg = document.createElement('div')
 						dlg.id = 'game-dialog-overlay'
+
+						// Переменные для цветов
+						let bgColor = 'rgba(0, 0, 0, 0.85)'
+						let textColor = '#ffffff'
+						let nameColor = '#ff9800'
+						let borderColor = '#ffffff'
+						let borderRadius = '8px'
+						let boxCSS = ''
+
+						// --- НАСТРОЙКА СТИЛЕЙ ---
+						if (style === 'pixel') {
+							bgColor = '#2d2d2d'
+							textColor = '#ffffff'
+							borderColor = '#ffffff'
+							borderRadius = '0'
+							nameColor = '#ffcc00'
+							boxCSS = `
+                left: 0; width: 100%;
+                border-top: 4px solid ${borderColor}; 
+                border-bottom: 4px solid ${borderColor};
+                font-family: 'Courier New', monospace;
+                image-rendering: pixelated;
+                ${
+									position === 'center'
+										? ''
+										: position === 'top'
+										? 'top:0;'
+										: 'bottom:0;'
+								}
+            `
+						} else if (style === 'modern') {
+							bgColor = 'rgba(255, 255, 255, 0.95)'
+							textColor = '#333333' // Темный текст для светлого фона
+							borderColor = 'transparent'
+							borderRadius = '12px'
+							nameColor = '#E91E63'
+							boxCSS = `
+                left: 50%; width: 600px; max-width: 90%;
+                ${
+									position === 'center'
+										? 'transform: translate(-50%, -50%);'
+										: 'transform: translateX(-50%);'
+								}
+                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                font-family: sans-serif;
+            `
+						} else {
+							// Classic
+							boxCSS = `
+                left: 5%; width: 90%;
+                border: 2px solid ${borderColor};
+                font-family: monospace;
+                ${position === 'center' ? 'transform: translateY(-50%);' : ''}
+            `
+						}
+
+						// --- ПОЗИЦИЯ (TOP / BOTTOM / CENTER) ---
+						let posCSS = ''
+						if (style !== 'pixel') {
+							// Pixel прижимается сам
+							if (position === 'top') posCSS = 'top: 20px; bottom: auto;'
+							else if (position === 'center') posCSS = 'top: 50%; bottom: auto;'
+							else posCSS = 'bottom: 20px; top: auto;'
+						}
+
+						// Применяем стили контейнера
 						dlg.style.cssText = `
-                            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-                            width: 80%; background: rgba(0,0,0,0.85); border: 2px solid #fff;
-                            border-radius: 10px; padding: 15px; color: #fff; z-index: 10000;
-                            display: flex; gap: 15px; align-items: center; font-family: monospace;
-                        `
+            position: absolute; z-index: 10000; 
+            display: flex; align-items: flex-start; gap: 15px;
+            box-sizing: border-box; padding: 15px;
+            transition: opacity 0.3s; opacity: 0;
+            background: ${bgColor};
+            color: ${textColor};
+            border-radius: ${borderRadius};
+            ${posCSS}
+            ${boxCSS}
+        `
+
+						// --- АВАТАР ---
+						let htmlAvatar = ''
+						if (showAvatar && avaUrl) {
+							htmlAvatar = `<img src="${getAssetUrl(avaUrl)}" style="
+                width: 60px; height: 60px; object-fit: cover; flex-shrink: 0;
+                border-radius: ${style === 'pixel' ? '0' : '50%'}; 
+                border: 2px solid rgba(255,255,255,0.2);
+            ">`
+						}
+
+						// --- КОНТЕНТ (С ЯВНЫМ ЦВЕТОМ ТЕКСТА) ---
+						let htmlContent = `
+            ${htmlAvatar}
+            <div style="flex:1; min-width: 0;"> 
+                <div style="font-weight:bold; color:${nameColor}; margin-bottom:6px; font-size:1.1em;">
+                    ${name}
+                </div>
+                <div style="
+                    line-height:1.4; 
+                    white-space: pre-wrap; 
+                    word-wrap: break-word; 
+                    color: ${textColor}; 
+                ">${text}</div>
+            </div>
+        `
+
+						// --- КНОПКА ЗАКРЫТИЯ ---
+						let btnHtml = ''
+						if (closeMode === 'button_next') {
+							btnHtml = `
+                <button id="dlg-next-btn" style="
+                    align-self: flex-end; margin-left:10px; flex-shrink:0;
+                    background: ${style === 'modern' ? '#E91E63' : '#fff'}; 
+                    color: ${style === 'modern' ? '#fff' : '#000'}; 
+                    border: none; padding: 8px 16px; border-radius: 4px; 
+                    font-weight: bold; cursor: pointer;
+                ">OK</button>
+            `
+						} else if (closeMode === 'click_anywhere') {
+							btnHtml = `<div style="position:absolute; bottom:5px; right:10px; font-size:10px; opacity:0.5;">▼</div>`
+						}
+
+						dlg.innerHTML = htmlContent + btnHtml
 						document.getElementById('game-stage').appendChild(dlg)
-					}
 
-					const name = resolveValue(v[0])
-					const text = resolveValue(v[1])
-					const avaUrl = resolveValue(v[2]) // Можно добавить картинку
+						requestAnimationFrame(() => (dlg.style.opacity = '1'))
 
-					dlg.innerHTML = `
-                        ${
-													avaUrl
-														? `<img src="${avaUrl}" style="width:50px; height:50px; border-radius:50%; object-fit:cover;">`
-														: ''
-												}
-                        <div style="flex:1;">
-                            <div style="color: #ff9800; font-weight: bold; margin-bottom: 5px;">${name}</div>
-                            <div style="font-size: 14px; line-height: 1.4;">${text}</div>
-                        </div>
-                        <div style="font-size: 10px; opacity: 0.7;">Нажми чтобы закрыть</div>
-                    `
-					dlg.style.display = 'flex'
+						// Логика закрытия
+						const closeDialog = () => {
+							dlg.style.opacity = '0'
+							setTimeout(() => {
+								if (dlg.parentNode) dlg.parentNode.removeChild(dlg)
+								if (statusVar) gameVariables[statusVar] = 1
+								resolve()
+							}, 250)
+						}
 
-					// Блокируем клик, чтобы диалог не прокликивался мгновенно
-					dlg.onclick = () => {
-						dlg.style.display = 'none'
-					}
-					break
+						if (closeMode === 'wait_3s') {
+							setTimeout(closeDialog, 3000)
+						} else if (closeMode === 'button_next') {
+							const btn = document.getElementById('dlg-next-btn')
+							if (btn)
+								btn.onclick = e => {
+									e.stopPropagation()
+									closeDialog()
+								}
+						} else {
+							setTimeout(() => {
+								dlg.onclick = closeDialog
+							}, 100)
+						}
+					})
 				}
 				case 'ui_dialog_hide': {
 					const dlg = document.getElementById('game-dialog-overlay')

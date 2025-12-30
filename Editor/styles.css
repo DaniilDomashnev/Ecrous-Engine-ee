@@ -516,3 +516,9 @@ header {
     background-color: var(--accent);
     opacity: 0.5;
 }
+
+.dialog-text {
+    white-space: pre-wrap; /* Сохраняет переносы строк и переносит длинные слова */
+    word-wrap: break-word; /* Разбивает длинные слова */
+    overflow-y: auto;      /* Добавляет скролл, если текста слишком много */
+}

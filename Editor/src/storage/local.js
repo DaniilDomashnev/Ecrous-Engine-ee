@@ -139,7 +139,9 @@ function saveCurrentWorkspace() {
 
 	const data = []
 	document.querySelectorAll('.node-block').forEach(el => {
-		const inputs = Array.from(el.querySelectorAll('input')).map(i => i.value)
+		const inputs = Array.from(el.querySelectorAll('input, textarea')).map(
+			i => i.value
+		)
 		data.push({
 			id: el.id,
 			type: el.dataset.type,

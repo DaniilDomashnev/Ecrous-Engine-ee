@@ -129,9 +129,9 @@ function duplicateBlock(originalId) {
 
 	const type = original.dataset.type
 	// Копируем значения инпутов
-	const inputs = Array.from(original.querySelectorAll('input, select')).map(
-		i => i.value
-	)
+	const inputs = Array.from(
+		original.querySelectorAll('input, select, textarea')
+	).map(i => i.value)
 
 	// Создаем чуть правее и ниже
 	const rect = original.getBoundingClientRect()

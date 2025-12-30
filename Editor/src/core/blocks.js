@@ -1747,6 +1747,24 @@ const BLOCK_DEFINITIONS = [
 		],
 	},
 
+	{
+		id: 'obj_set_visible',
+		category: 'Объекты',
+		label: 'Видимость объекта',
+		desc: 'Скрывает или показывает объект на сцене.',
+		icon: 'ri-eye-line',
+		color: '#2979FF',
+		inputs: [
+			{ label: 'Объект', default: 'box1' }, // v[0]
+			{
+				label: 'Режим',
+				type: 'select',
+				default: 'hide',
+				options: ['hide', 'show', 'toggle'],
+			}, // v[1]
+		],
+	},
+
 	// ==========================================
 	// --- КОМПОНЕНТНАЯ СИСТЕМА (ECS) ---
 	// ==========================================
@@ -1810,13 +1828,42 @@ const BLOCK_DEFINITIONS = [
 		id: 'ui_dialog_show',
 		category: 'Интерфейс',
 		label: 'Показать диалог',
-		desc: 'Показывает окно с текстом и именем говорящего.',
-		icon: 'ri-message-3-fill',
+		desc: 'Диалоговое окно (по умолчанию без аватара).',
+		icon: 'ri-chat-3-fill',
 		color: '#FF9800',
 		inputs: [
-			{ label: 'Имя', default: 'Незнакомец' },
-			{ label: 'Текст', default: 'Привет, путник!' },
-			{ label: 'Аватар (URL)', default: '' },
+			{ label: 'Имя', default: 'NPC' }, // v[0]
+			{
+				label: 'Текст',
+				type: 'textarea',
+				default: 'Привет! Это диалог без аватара.',
+			}, // v[1]
+			{ label: 'Аватар (URL)', default: '' }, // v[2] (Пусто)
+			{
+				label: 'Показать аватар?',
+				type: 'select',
+				default: 'no', // <--- ТЕПЕРЬ 'no' ПО УМОЛЧАНИЮ
+				options: ['yes', 'no'],
+			}, // v[3]
+			{
+				label: 'Позиция',
+				type: 'select',
+				default: 'bottom',
+				options: ['bottom', 'top', 'center'],
+			}, // v[4]
+			{
+				label: 'Стиль',
+				type: 'select',
+				default: 'classic',
+				options: ['classic', 'pixel', 'modern'],
+			}, // v[5]
+			{
+				label: 'Закрытие',
+				type: 'select',
+				default: 'click_anywhere',
+				options: ['click_anywhere', 'button_next', 'wait_3s'],
+			}, // v[6]
+			{ label: 'Статус в (var)', default: 'dialog_status' }, // v[7]
 		],
 	},
 	{
