@@ -87,13 +87,15 @@ window.addEventListener('DOMContentLoaded', () => {
 	// 5. Загрузка библиотек и событий
 	loadCustomTemplates()
 	initToolbox()
+	initResizableLayout()
 	initMobileLibrary()
 	initCanvasEvents()
 	initContextMenu()
 	initGameWindowDrag()
 
-	// 6. Загрузка проекта
+	// 6. Загрузка проекта (Добавляем await)
 	loadProjectFromLocal()
+	// -----------------------
 
 	if (!projectData) {
 		// Создаем новый проект, если нет сохраненного
@@ -108,10 +110,16 @@ window.addEventListener('DOMContentLoaded', () => {
 					],
 				},
 			],
+			assets: [], // Инициализируем массив ассетов
 		}
 		activeSceneId = 'scene_1'
 		activeObjectId = 'obj_1'
+
+		// Сохраняем новый проект (тоже async, но тут await не критичен)
 		saveProjectToLocal()
+	} else {
+		// Если проект загружен, убедимся что assets существует
+		if (!projectData.assets) projectData.assets = []
 	}
 
 	// Имя проекта в шапке
@@ -120,9 +128,12 @@ window.addEventListener('DOMContentLoaded', () => {
 		brandTitle.innerHTML = `<i class="ri-settings-3-line" style="font-size:20px; color:var(--accent);"></i> ${currentProjectName}`
 	}
 
-	// 7. Отрисовка интерфейса
+	// 7. Отрисовка интерфейса (Теперь вызывается когда данные точно готовы)
 	renderSidebar()
 	loadWorkspace()
+
+	// Принудительно рендерим ассеты, так как они загрузились асинхронно
+	if (typeof renderAssetList === 'function') renderAssetList()
 
 	// 8. Обработчики кнопок
 	window.addEventListener('keydown', e => (activeKeys[e.code] = true))
@@ -367,187 +378,186 @@ function renderSidebar() {
  * Показывает окно подтверждения (Да/Нет)
  * Возвращает Promise<boolean>: true если нажали "Удалить", false если "Отмена"
  */
-function showConfirmDialog(title, message, yesLabel = "Удалить") {
-    return new Promise((resolve) => {
-        const overlay = document.getElementById('modal-general-confirm');
-        const titleEl = document.getElementById('confirm-gen-title');
-        const msgEl = document.getElementById('confirm-gen-message');
-        const btnYes = document.getElementById('btn-confirm-yes');
-        const btnNo = document.getElementById('btn-confirm-no');
+function showConfirmDialog(title, message, yesLabel = 'Удалить') {
+	return new Promise(resolve => {
+		const overlay = document.getElementById('modal-general-confirm')
+		const titleEl = document.getElementById('confirm-gen-title')
+		const msgEl = document.getElementById('confirm-gen-message')
+		const btnYes = document.getElementById('btn-confirm-yes')
+		const btnNo = document.getElementById('btn-confirm-no')
 
-        // Настраиваем тексты
-        titleEl.innerHTML = `<i class="ri-delete-bin-line" style="color:var(--danger)"></i> ${title}`;
-        msgEl.innerText = message;
-        btnYes.innerText = yesLabel;
+		// Настраиваем тексты
+		titleEl.innerHTML = `<i class="ri-delete-bin-line" style="color:var(--danger)"></i> ${title}`
+		msgEl.innerText = message
+		btnYes.innerText = yesLabel
 
-        // Показываем окно
-        overlay.classList.remove('hidden');
-        setTimeout(() => overlay.classList.add('active'), 10);
+		// Показываем окно
+		overlay.classList.remove('hidden')
+		setTimeout(() => overlay.classList.add('active'), 10)
 
-        // Функция закрытия
-        const close = (result) => {
-            overlay.classList.remove('active');
-            setTimeout(() => overlay.classList.add('hidden'), 200);
-            
-            // Очищаем события, чтобы не дублировались
-            btnYes.onclick = null;
-            btnNo.onclick = null;
-            resolve(result);
-        };
+		// Функция закрытия
+		const close = result => {
+			overlay.classList.remove('active')
+			setTimeout(() => overlay.classList.add('hidden'), 200)
 
-        btnYes.onclick = () => close(true);
-        btnNo.onclick = () => close(false);
-    });
+			// Очищаем события, чтобы не дублировались
+			btnYes.onclick = null
+			btnNo.onclick = null
+			resolve(result)
+		}
+
+		btnYes.onclick = () => close(true)
+		btnNo.onclick = () => close(false)
+	})
 }
 
 /**
  * Использует уже существующее в index.html окно #custom-prompt-overlay
  */
 function showCustomPrompt(title, message, defaultValue = '') {
-    return new Promise(resolve => {
-        const overlay = document.getElementById('custom-prompt-overlay');
-        const titleEl = document.getElementById('modalTitle');
-        const msgEl = document.getElementById('modalMessage');
-        const inputEl = document.getElementById('modalInput');
-        const btnConfirm = document.getElementById('btnModalConfirm');
-        const btnCancel = document.getElementById('btnModalCancel');
+	return new Promise(resolve => {
+		const overlay = document.getElementById('custom-prompt-overlay')
+		const titleEl = document.getElementById('modalTitle')
+		const msgEl = document.getElementById('modalMessage')
+		const inputEl = document.getElementById('modalInput')
+		const btnConfirm = document.getElementById('btnModalConfirm')
+		const btnCancel = document.getElementById('btnModalCancel')
 
-        titleEl.innerText = title;
-        msgEl.innerText = message;
-        inputEl.value = defaultValue;
-        inputEl.style.borderColor = '';
+		titleEl.innerText = title
+		msgEl.innerText = message
+		inputEl.value = defaultValue
+		inputEl.style.borderColor = ''
 
-        overlay.classList.remove('hidden');
-        setTimeout(() => {
-            overlay.classList.add('active');
-            inputEl.focus();
-            inputEl.select(); // Выделяем текст для удобства
-        }, 10);
+		overlay.classList.remove('hidden')
+		setTimeout(() => {
+			overlay.classList.add('active')
+			inputEl.focus()
+			inputEl.select() // Выделяем текст для удобства
+		}, 10)
 
-        const close = (val) => {
-            overlay.classList.remove('active');
-            setTimeout(() => overlay.classList.add('hidden'), 200);
-            btnConfirm.onclick = null;
-            btnCancel.onclick = null;
-            inputEl.onkeydown = null;
-            resolve(val);
-        };
+		const close = val => {
+			overlay.classList.remove('active')
+			setTimeout(() => overlay.classList.add('hidden'), 200)
+			btnConfirm.onclick = null
+			btnCancel.onclick = null
+			inputEl.onkeydown = null
+			resolve(val)
+		}
 
-        btnConfirm.onclick = () => {
-            const val = inputEl.value.trim();
-            if (val) close(val);
-            else {
-                inputEl.style.borderColor = 'var(--danger)';
-                inputEl.focus();
-            }
-        };
+		btnConfirm.onclick = () => {
+			const val = inputEl.value.trim()
+			if (val) close(val)
+			else {
+				inputEl.style.borderColor = 'var(--danger)'
+				inputEl.focus()
+			}
+		}
 
-        btnCancel.onclick = () => close(null);
+		btnCancel.onclick = () => close(null)
 
-        // Enter для подтверждения
-        inputEl.onkeydown = (e) => {
-            inputEl.style.borderColor = '';
-            if (e.key === 'Enter') btnConfirm.click();
-            if (e.key === 'Escape') btnCancel.click();
-        };
-    });
+		// Enter для подтверждения
+		inputEl.onkeydown = e => {
+			inputEl.style.borderColor = ''
+			if (e.key === 'Enter') btnConfirm.click()
+			if (e.key === 'Escape') btnCancel.click()
+		}
+	})
 }
-
 
 // ==========================================
 // --- ЛОГИКА УПРАВЛЕНИЯ (ОБНОВЛЕННАЯ) ---
 // ==========================================
 
 async function renameObject(id) {
-    const scene = getActiveScene();
-    const obj = scene.objects.find(o => o.id === id);
-    if (!obj) return;
+	const scene = getActiveScene()
+	const obj = scene.objects.find(o => o.id === id)
+	if (!obj) return
 
-    // Вызываем кастомное окно ввода
-    const newName = await showCustomPrompt(
-        "Переименование объекта", 
-        "Введите новое имя:", 
-        obj.name
-    );
-    
-    if (newName) {
-        obj.name = newName;
-        renderSidebar();      
-        saveProjectToLocal(); 
-    }
+	// Вызываем кастомное окно ввода
+	const newName = await showCustomPrompt(
+		'Переименование объекта',
+		'Введите новое имя:',
+		obj.name
+	)
+
+	if (newName) {
+		obj.name = newName
+		renderSidebar()
+		saveProjectToLocal()
+	}
 }
 
 async function deleteObject(id) {
-    const scene = getActiveScene();
-    const index = scene.objects.findIndex(o => o.id === id);
-    if (index === -1) return;
+	const scene = getActiveScene()
+	const index = scene.objects.findIndex(o => o.id === id)
+	if (index === -1) return
 
-    const objName = scene.objects[index].name;
+	const objName = scene.objects[index].name
 
-    // Вызываем кастомное окно подтверждения
-    const confirmed = await showConfirmDialog(
-        "Удаление объекта",
-        `Вы уверены, что хотите удалить объект "${objName}"? Это действие нельзя отменить.`
-    );
+	// Вызываем кастомное окно подтверждения
+	const confirmed = await showConfirmDialog(
+		'Удаление объекта',
+		`Вы уверены, что хотите удалить объект "${objName}"? Это действие нельзя отменить.`
+	)
 
-    if (confirmed) {
-        scene.objects.splice(index, 1);
-        
-        if (activeObjectId === id) {
-            const nextObj = scene.objects[0];
-            activeObjectId = nextObj ? nextObj.id : null;
-            if(!activeObjectId) loadWorkspace();
-        }
-        
-        renderSidebar();
-        saveProjectToLocal();
-    }
+	if (confirmed) {
+		scene.objects.splice(index, 1)
+
+		if (activeObjectId === id) {
+			const nextObj = scene.objects[0]
+			activeObjectId = nextObj ? nextObj.id : null
+			if (!activeObjectId) loadWorkspace()
+		}
+
+		renderSidebar()
+		saveProjectToLocal()
+	}
 }
 
 async function renameScene(id) {
-    const scene = projectData.scenes.find(s => s.id === id);
-    if (!scene) return;
+	const scene = projectData.scenes.find(s => s.id === id)
+	if (!scene) return
 
-    const newName = await showCustomPrompt(
-        "Переименование сцены", 
-        "Новое название сцены:", 
-        scene.name
-    );
-    
-    if (newName) {
-        scene.name = newName;
-        renderSidebar();
-        saveProjectToLocal();
-    }
+	const newName = await showCustomPrompt(
+		'Переименование сцены',
+		'Новое название сцены:',
+		scene.name
+	)
+
+	if (newName) {
+		scene.name = newName
+		renderSidebar()
+		saveProjectToLocal()
+	}
 }
 
 async function deleteScene(id) {
-    if (projectData.scenes.length <= 1) {
-        // Тут можно тоже сделать красивый alert, если хотите
-        alert("Нельзя удалить единственную сцену!"); 
-        return;
-    }
+	if (projectData.scenes.length <= 1) {
+		// Тут можно тоже сделать красивый alert, если хотите
+		alert('Нельзя удалить единственную сцену!')
+		return
+	}
 
-    const index = projectData.scenes.findIndex(s => s.id === id);
-    if (index === -1) return;
-    
-    const sceneName = projectData.scenes[index].name;
+	const index = projectData.scenes.findIndex(s => s.id === id)
+	if (index === -1) return
 
-    const confirmed = await showConfirmDialog(
-        "Удаление сцены",
-        `Удалить сцену "${sceneName}" и все объекты внутри неё?`
-    );
+	const sceneName = projectData.scenes[index].name
 
-    if (confirmed) {
-        projectData.scenes.splice(index, 1);
-        
-        if (activeSceneId === id) {
-            switchScene(projectData.scenes[0].id);
-        } else {
-            renderSidebar();
-        }
-        saveProjectToLocal();
-    }
+	const confirmed = await showConfirmDialog(
+		'Удаление сцены',
+		`Удалить сцену "${sceneName}" и все объекты внутри неё?`
+	)
+
+	if (confirmed) {
+		projectData.scenes.splice(index, 1)
+
+		if (activeSceneId === id) {
+			switchScene(projectData.scenes[0].id)
+		} else {
+			renderSidebar()
+		}
+		saveProjectToLocal()
+	}
 }
 
 function switchScene(id) {
@@ -719,9 +729,9 @@ function initToolbox() {
 
 // Новая функция: Создание переменной
 function createNewVariable() {
-    // --- ИСПРАВЛЕНИЕ: Гарантируем, что массив существует ---
-    if (!projectData.variables) projectData.variables = [] 
-    // -------------------------------------------------------
+	// --- ИСПРАВЛЕНИЕ: Гарантируем, что массив существует ---
+	if (!projectData.variables) projectData.variables = []
+	// -------------------------------------------------------
 
 	const name = prompt('Имя новой переменной:')
 	if (!name) return
@@ -731,10 +741,10 @@ function createNewVariable() {
 		alert('Такая переменная уже есть!')
 		return
 	}
-    
+
 	projectData.variables.push(name)
 	initToolbox() // Перерисовать тулбокс
-	if(typeof saveCurrentWorkspace === 'function') saveCurrentWorkspace();
+	if (typeof saveCurrentWorkspace === 'function') saveCurrentWorkspace()
 }
 
 // Новая функция: Создание "пилюли" (Scratch style)

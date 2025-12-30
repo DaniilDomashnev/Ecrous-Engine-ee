@@ -1080,19 +1080,33 @@ async function exportMobileBundle(platform) {
 	const btn = document.getElementById(
 		platform === 'iOS' ? 'exportIOS' : 'exportAndroid'
 	)
-	const oldText = btn.innerHTML
-	btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Сборка...'
+
+	let oldText = ''
+	if (btn) {
+		oldText = btn.innerHTML
+		btn.innerHTML = '<i class="ri-loader-4-line ri-spin"></i> Сборка...'
+	}
 
 	const zip = new JSZip()
+
+	// Генерируем HTML (он уже учитывает disableSplash внутри generateGameHTML)
 	const html = await generateGameHTML()
+
 	const iconBase64 = await getProjectIconData()
 
+	// --- ПРИМЕНЕНИЕ НАСТРОЕК ---
+	const orient = projectData.settings?.orientation || 'landscape'
+	const pkgId = projectData.settings?.packageId || 'com.ecrous.game'
+	const appName = projectData.settings?.name || 'Game'
+
+	// Формируем манифест
 	const manifest = {
-		name: projectData.settings?.name || 'Game',
-		short_name: 'Game',
+		name: appName,
+		short_name: appName,
+		id: pkgId, // Используем Package ID
 		start_url: './index.html',
 		display: 'standalone',
-		orientation: 'landscape',
+		orientation: orient, // Применяем ориентацию (portrait/landscape/any)
 		background_color: '#000000',
 		theme_color: '#000000',
 		icons: [{ src: 'icon.png', sizes: '512x512', type: 'image/png' }],
@@ -1100,6 +1114,7 @@ async function exportMobileBundle(platform) {
 
 	zip.file('index.html', html)
 
+	// Ассеты
 	if (projectData.assets) {
 		for (const asset of projectData.assets) {
 			if (asset.data.startsWith('data:')) {
@@ -1113,14 +1128,17 @@ async function exportMobileBundle(platform) {
 		}
 	}
 
-	zip.file('manifest.json', JSON.stringify(manifest))
+	// Сохраняем манифест
+	zip.file('manifest.json', JSON.stringify(manifest, null, 2))
 
+	// Сохраняем иконку
 	const [, iconData] = iconBase64.split('base64,')
 	zip.file('icon.png', iconData, { base64: true })
 
+	// Скачиваем
 	zip.generateAsync({ type: 'blob' }).then(content => {
 		downloadFile(`Game_${platform}.zip`, content, 'application/zip')
-		btn.innerHTML = oldText
+		if (btn) btn.innerHTML = oldText
 	})
 }
 

@@ -34,6 +34,7 @@ let editorMode = 'stack'
 let connections = []
 window.currentSessionId = 0 // Глобальный счетчик сессий
 window.loadedSounds = {} // Глобальное хранилище звуков
+let currentAssetFolderId = null; // null = корневая папка
 let isWiring = false
 let wireStartBlock = null
 let tempWireNode = null
@@ -1292,15 +1293,104 @@ function executeBlockLogic(block) {
 					const varName = v[0]
 					const val1 = parseFloat(resolveValue(v[1])) || 0
 					const op = v[2]
-					const val2 = parseFloat(resolveValue(v[3])) || 0
+					const val2 = parseFloat(resolveValue(v[3])) || 0 // Используется только для бинарных операций (+, -, min...)
 
 					let res = 0
-					if (op === '+') res = val1 + val2
-					else if (op === '-') res = val1 - val2
-					else if (op === '*') res = val1 * val2
-					else if (op === '/') res = val2 !== 0 ? val1 / val2 : 0
-					else if (op === '%') res = val1 % val2
-					else if (op === '^' || op === 'pow') res = Math.pow(val1, val2)
+
+					switch (op) {
+						// Базовые операции (Нужны А и Б)
+						case '+':
+							res = val1 + val2
+							break
+						case '-':
+							res = val1 - val2
+							break
+						case '*':
+							res = val1 * val2
+							break
+						case '/':
+							res = val2 !== 0 ? val1 / val2 : 0
+							break
+						case '%':
+							res = val1 % val2
+							break
+						case '^':
+						case 'pow':
+							res = Math.pow(val1, val2)
+							break
+
+						// Сравнение (Нужны А и Б)
+						case 'min':
+							res = Math.min(val1, val2)
+							break
+						case 'max':
+							res = Math.max(val1, val2)
+							break
+						case 'random':
+							res = Math.random() * (val2 - val1) + val1
+							break // Рандом float между А и Б
+
+						// Одиночные операции (Нужно только А, "Число Б" игнорируется)
+						case 'sqrt':
+							res = Math.sqrt(val1)
+							break // Корень
+						case 'abs':
+							res = Math.abs(val1)
+							break // Модуль
+						case 'round':
+							res = Math.round(val1)
+							break // Округление
+						case 'floor':
+							res = Math.floor(val1)
+							break // Округление вниз
+						case 'ceil':
+							res = Math.ceil(val1)
+							break // Округление вверх
+
+						// Тригонометрия (Вход в радианах)
+						case 'sin':
+							res = Math.sin(val1)
+							break
+						case 'cos':
+							res = Math.cos(val1)
+							break
+						case 'tan':
+							res = Math.tan(val1)
+							break
+						case 'asin':
+							res = Math.asin(val1)
+							break
+						case 'acos':
+							res = Math.acos(val1)
+							break
+						case 'atan':
+							res = Math.atan(val1)
+							break // Обычно atan2 полезнее, но для простоты atan
+
+						// Конвертация
+						case 'deg2rad':
+							res = val1 * (Math.PI / 180)
+							break // Градусы -> Радианы
+						case 'rad2deg':
+							res = val1 * (180 / Math.PI)
+							break // Радианы -> Градусы
+
+						// Логарифмы
+						case 'log':
+						case 'ln':
+							res = Math.log(val1)
+							break // Натуральный
+						case 'log10':
+							res = Math.log10(val1)
+							break
+						case 'exp':
+							res = Math.exp(val1)
+							break
+
+						default:
+							res = val1
+							break
+					}
 
 					gameVariables[varName] = res
 					if (typeof updateDynamicText === 'function') updateDynamicText()

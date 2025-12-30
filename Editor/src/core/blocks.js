@@ -669,20 +669,6 @@ const BLOCK_DEFINITIONS = [
 		inputs: [{ label: 'Текст/Перем.', default: 'Привет' }],
 	},
 	{
-		id: 'var_math',
-		category: 'Переменные',
-		label: 'Математика',
-		desc: 'Выполняет операцию и сохраняет результат.',
-		icon: 'ri-calculator-line',
-		color: '#D50000',
-		inputs: [
-			{ label: 'Перем. A', default: 'result' },
-			{ label: 'Знач. 1', default: '0' },
-			{ label: 'Опер (+ - * / % ^)', default: '+' },
-			{ label: 'Знач. 2', default: '1' },
-		],
-	},
-	{
 		id: 'var_random',
 		category: 'Переменные',
 		label: 'Случайное число',
@@ -693,6 +679,57 @@ const BLOCK_DEFINITIONS = [
 			{ label: 'Результат в', default: 'rnd' },
 			{ label: 'Мин', default: '1' },
 			{ label: 'Макс', default: '10' },
+		],
+	},
+	{
+		id: 'var_math',
+		category: 'Переменные',
+		label: 'Математика',
+		desc: 'Выполняет математическую операцию.',
+		icon: 'ri-calculator-line',
+		color: '#D50000',
+		inputs: [
+			{ label: 'Куда записать', default: 'result' }, // v[0]
+			{ label: 'Число А', default: '0' }, // v[1]
+			{
+				label: 'Операция', // v[2]
+				type: 'select',
+				default: '+',
+				options: [
+					// Базовые
+					'+',
+					'-',
+					'*',
+					'/',
+					'%',
+					'^',
+					// Алгебра
+					'sqrt',
+					'abs',
+					'round',
+					'floor',
+					'ceil',
+					// Тригонометрия (Радианы)
+					'sin',
+					'cos',
+					'tan',
+					'asin',
+					'acos',
+					'atan',
+					// Конвертация
+					'deg2rad',
+					'rad2deg',
+					// Логарифмы
+					'log',
+					'log10',
+					'exp',
+					// Сравнение
+					'min',
+					'max',
+					'random',
+				],
+			},
+			{ label: 'Число Б (если нужно)', default: '0' }, // v[3]
 		],
 	},
 
