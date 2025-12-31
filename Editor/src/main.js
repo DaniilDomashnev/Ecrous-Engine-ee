@@ -491,10 +491,36 @@ function executeBlockLogic(block) {
 				}
 				case 'log_print': {
 					const msg = resolveValue(v[0])
+					const isNewLine = v[1] === 'yes' || v[1] === undefined // По умолчанию да
+
 					console.log('[LOG]:', msg)
 					const consoleEl = document.getElementById('game-console')
+
 					if (consoleEl) {
-						consoleEl.innerHTML += `<div class="console-line">${msg}</div>`
+						if (isNewLine) {
+							// Создаем новую строку
+							const line = document.createElement('div')
+							line.className = 'console-line'
+							line.innerText = msg
+							consoleEl.appendChild(line)
+						} else {
+							// Пытаемся найти последнюю строку
+							let lastLine = consoleEl.lastElementChild
+
+							// Если строк нет или последняя строка системная/скрытая - создаем новую
+							if (!lastLine) {
+								lastLine = document.createElement('div')
+								lastLine.className = 'console-line'
+								consoleEl.appendChild(lastLine)
+							}
+
+							// Дописываем текст (используем span для безопасности стилей)
+							const span = document.createElement('span')
+							span.innerText = msg
+							lastLine.appendChild(span)
+						}
+
+						// Автоскролл вниз
 						consoleEl.scrollTop = consoleEl.scrollHeight
 					}
 					break

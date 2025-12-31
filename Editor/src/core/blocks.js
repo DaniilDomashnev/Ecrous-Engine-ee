@@ -714,10 +714,18 @@ const BLOCK_DEFINITIONS = [
 		category: 'Переменные',
 		subcategory: 'Основное',
 		label: 'Вывести в консоль',
-		desc: 'Выводит указанный текст или значение переменной в консоль разработчика.',
+		desc: 'Выводит текст. Можно отключить перенос строки.',
 		icon: 'ri-terminal-line',
 		color: '#D50000',
-		inputs: [{ label: 'Текст/Перем.', default: 'Привет' }],
+		inputs: [
+			{ label: 'Текст/Перем.', default: 'Score: ' }, // v[0]
+			{
+				label: 'С новой строки?', // v[1]
+				type: 'select',
+				default: 'yes',
+				options: ['yes', 'no'],
+			},
+		],
 	},
 
 	{

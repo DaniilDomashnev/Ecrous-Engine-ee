@@ -6,6 +6,7 @@
 let currentKeyDownHandler = null
 let currentClickHandler = null
 let runtimeSceneId = null
+let isGameResizing = false
 
 // --- НОВЫЕ ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ---
 let activeCollisionsPair = new Set() // Чтобы событие срабатывало 1 раз при входе
@@ -23,38 +24,71 @@ let gameDragOffset = { x: 0, y: 0 }
 function initGameWindowDrag() {
 	const win = document.querySelector('.game-window')
 	const header = document.querySelector('.game-header')
+	const resizer = document.querySelector('.game-window-resizer') // Находим ресайзер
 
 	if (!win || !header) return
 
+	// --- ЛОГИКА ПЕРЕМЕЩЕНИЯ (DRAG) ---
 	header.addEventListener('mousedown', e => {
-		// Игнорируем клик по кнопке закрытия
 		if (e.target.closest('.close-game-btn')) return
-
 		isGameWindowDragging = true
 
-		// Считаем смещение мыши относительно угла окна
+		// Когда начинаем тащить, убираем CSS центрирование (transform)
+		// и переходим на абсолютные координаты
 		const rect = win.getBoundingClientRect()
-		gameDragOffset.x = e.clientX - rect.left
-		gameDragOffset.y = e.clientY - rect.top
-
-		// Убираем transform translate, чтобы управлять через top/left напрямую
-		// Но нужно сохранить текущую визуальную позицию
 		win.style.transform = 'none'
 		win.style.left = rect.left + 'px'
 		win.style.top = rect.top + 'px'
+
+		gameDragOffset.x = e.clientX - rect.left
+		gameDragOffset.y = e.clientY - rect.top
 	})
 
-	window.addEventListener('mousemove', e => {
-		if (!isGameWindowDragging) return
-		const x = e.clientX - gameDragOffset.x
-		const y = e.clientY - gameDragOffset.y
+	// --- ЛОГИКА ИЗМЕНЕНИЯ РАЗМЕРА (RESIZE) ---
+	if (resizer) {
+		resizer.addEventListener('mousedown', e => {
+			e.stopPropagation() // Чтобы не срабатывал драг окна
+			isGameResizing = true
+			// Убираем transition если есть, чтобы не лагало
+			win.style.transition = 'none'
+		})
+	}
 
-		win.style.left = x + 'px'
-		win.style.top = y + 'px'
+	// --- ОБЩИЙ СЛУШАТЕЛЬ ДВИЖЕНИЯ ---
+	window.addEventListener('mousemove', e => {
+		// 1. Перемещение
+		if (isGameWindowDragging) {
+			const x = e.clientX - gameDragOffset.x
+			const y = e.clientY - gameDragOffset.y
+			win.style.left = x + 'px'
+			win.style.top = y + 'px'
+		}
+
+		// 2. Изменение размера
+		if (isGameResizing) {
+			const rect = win.getBoundingClientRect()
+			// Вычисляем новую ширину/высоту на основе положения мыши
+			const newW = e.clientX - rect.left
+			const newH = e.clientY - rect.top
+
+			if (newW > 320) win.style.width = newW + 'px'
+			if (newH > 240) {
+				// +40px учитываем шапку, если нужно, но проще менять высоту всего контейнера
+				win.style.height = newH + 'px'
+
+				// Также нужно обновить размер stage внутри
+				const stage = document.getElementById('game-stage')
+				if (stage) {
+					// Высота окна минус шапка (примерно 40px)
+					stage.style.height = newH - 40 + 'px'
+				}
+			}
+		}
 	})
 
 	window.addEventListener('mouseup', () => {
 		isGameWindowDragging = false
+		isGameResizing = false
 	})
 }
 
@@ -65,15 +99,51 @@ function runProject() {
 	// UI
 	document.getElementById('game-overlay').classList.remove('hidden')
 
+	// === [ИСПРАВЛЕНИЕ] ===
+	// 1. Сначала объявляем переменную!
+	const gameWindow = document.querySelector('.game-window')
+
+	// 2. Теперь настраиваем позицию
+	if (gameWindow) {
+		// Сбрасываем координаты от перетаскивания и возвращаем в центр
+		gameWindow.style.top = '50%'
+		gameWindow.style.left = '50%'
+		gameWindow.style.transform = 'translate(-50%, -50%)'
+
+		// Важно: убираем плавность на момент сброса, чтобы окно не "ехало", а сразу встало
+		gameWindow.style.transition = 'none'
+
+		// Размеры из конфига
+		const w =
+			window.gameConfig && window.gameConfig.width
+				? window.gameConfig.width
+				: 800
+		const h =
+			window.gameConfig && window.gameConfig.height
+				? window.gameConfig.height
+				: 600
+
+		gameWindow.style.width = w + 'px'
+		gameWindow.style.height = parseInt(h) + 40 + 'px' // +40 на шапку
+
+		// Сброс размеров внутренней сцены
+		const stage = document.getElementById('game-stage')
+		if (stage) {
+			stage.style.width = '100%'
+			stage.style.height = h + 'px'
+		}
+	}
+	// =====================
+
 	// --- ИНИЦИАЛИЗАЦИЯ MATTER.JS ---
 	const Engine = Matter.Engine,
 		World = Matter.World,
 		Runner = Matter.Runner
 
 	matterEngine = Engine.create()
-	matterEngine.world.gravity.y = 1 // Дефолтная гравитация
+	matterEngine.world.gravity.y = 1
 
-	// Обработка коллизий Matter.js
+	// Обработка коллизий
 	Matter.Events.on(matterEngine, 'collisionStart', event => {
 		event.pairs.forEach(pair => {
 			const idA = pair.bodyA.label
@@ -84,23 +154,10 @@ function runProject() {
 
 	bodyMap.clear()
 
-	// --- НАСТРОЙКА ОКНА ---
-	const gameWindow = document.querySelector('.game-window')
-	if (gameWindow) {
-		const w =
-			window.gameConfig && window.gameConfig.width
-				? window.gameConfig.width
-				: 800
-		const h =
-			window.gameConfig && window.gameConfig.height
-				? window.gameConfig.height
-				: 600
-		gameWindow.style.width = w + 'px'
-		gameWindow.style.height = h + 'px'
-	}
-
 	document.querySelector('.game-header span').innerText = 'ИГРОВОЙ ПРОЦЕСС'
 	document.getElementById('game-console').style.display = 'block'
+
+	// (Ниже удалите повторное объявление const gameWindow, если оно осталось)
 
 	// Сброс данных
 	gameVariables = {}
@@ -117,21 +174,18 @@ function runProject() {
 		shakeInfo: { power: 0, time: 0 },
 	}
 
-	// Сброс коллизий
 	activeCollisionsPair.clear()
 
-	// Хак для звука
 	const audioUnlock = new Audio()
 	audioUnlock.play().catch(e => {})
 
-	// --- ФИНАЛЬНЫЙ ЗАПУСК (Удален дублирующий код отсюда) ---
+	// --- ФИНАЛЬНЫЙ ЗАПУСК ---
 	isRunning = true
 	isGamePaused = false
 	showFps = false
 	fpsCounter = 0
 	lastTime = performance.now()
 
-	// Объявляем переменную один раз
 	const startScene = getActiveScene()
 
 	if (startScene) {

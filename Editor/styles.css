@@ -400,23 +400,45 @@ header {
 	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-/* Обновляем класс .game-window */
+/* Находим и обновляем .game-window */
 .game-window {
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-	background: #000;
-	display: flex;
-	flex-direction: column;
-	/* Улучшенная тень */
-	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6),
-		0 0 0 1px rgba(255, 255, 255, 0.05);
-	border-radius: 12px; /* Скругленные углы самого окна */
-	overflow: hidden;
-	min-width: 320px;
-	min-height: 240px;
-	border: none; /* Убираем жесткий бордер, заменяем тенью */
+    position: absolute;
+    /* Центрирование по умолчанию */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    
+    background: #000;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    overflow: hidden;
+    
+    /* Дефолтные размеры, если JS не задал */
+    width: 800px; 
+    height: 600px;
+    min-width: 320px;
+    min-height: 240px;
+    
+    /* Важно для ресайзера */
+    resize: none; 
+}
+
+/* НОВОЕ: Стили для уголка изменения размера */
+.game-window-resizer {
+    width: 15px;
+    height: 15px;
+    background: linear-gradient(135deg, transparent 50%, var(--accent) 50%);
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    cursor: nwse-resize;
+    z-index: 20;
+    opacity: 0.7;
+}
+.game-window-resizer:hover {
+    opacity: 1;
 }
 
 /* Обновляем заголовок игры */
