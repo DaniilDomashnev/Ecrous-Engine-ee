@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="src/styles/menu/UploadMusic.css">
     <link rel="stylesheet" href="src/styles/menu/Tutorial.css">
     <link rel="stylesheet" href="src/styles/menu/About.css">
+    <link rel="stylesheet" href="src/styles/menu/AboutNew.css">
 
     <!-- Training -->
     <link rel="stylesheet" href="src/styles/training/training.css">
@@ -35,12 +36,15 @@
     <div class="title no-select" data-translate="title">Ecrous Engine</div>
     <div class="side-panel">
         <button class="menu-button" onclick="openMyProjects()" data-translate="myProjects">Мои Проекты</button>
-        <button class="menu-button-disable no-select" data-translate="AssetStore">Магазин Ассетов</button>
+        <button class="menu-button" data-translate="AssetStore" onclick="openAssetStore()">
+            Магазин Ассетов
+        </button>
         <button class="menu-button-disable no-select" data-translate="blackStore">BlackStore</button>
         <button id="myBtn" class="menu-button" data-translate="thanks" onclick="openThanks()">Благодарности</button>
         <button id="About" class="menu-button" data-translate="About" onclick="openAbout()">О Проекте</button>
+        <button id="AboutNew" class="menu-button" data-translate="AboutNew" onclick="openAboutNew()">Что Нового?</button>
         <div class="build-info">
-            <span class="build-text">ECX 2025.31.12</span>
+            <span class="build-text">ECX 2025.01.01</span>
         </div>
     </div>
 
@@ -56,10 +60,10 @@
                 draggable="false">
         </a>
 
-        <a href="https://boosty.to/ecrousengine" target="_blank">
+        <!-- <a href="https://boosty.to/ecrousengine" target="_blank">
             <img src="https://logo-teka.com/wp-content/uploads/2025/06/boosty-sign-logo.svg" alt="Boosty" class="ui-image"
                 draggable="false">
-        </a>
+        </a> -->
     </div>
 
     <div class="ButtonsMenuSmall ui-no-select">
@@ -522,6 +526,34 @@
         </div>
     </div>
 
+    <div id="aboutNewPanel" class="about-panel" style="display: none;">
+        <button class="about-close" onclick="closeAboutNew()">
+            <img src="https://img.icons8.com/ios-glyphs/30/FFFFFF/macos-close.png" alt="Close" data-translate-alt="close">
+        </button>
+    
+        <div class="about-content-wrapper">
+            <div class="about-header-section">
+                <div class="whats-new-icon">
+                    <img src="https://img.icons8.com/ios-filled/100/FFFFFF/confetti.png" alt="New">
+                </div>
+                <h1 class="about-title no-select" data-translate="whatsNewTitle">Что Нового?</h1>
+                <div class="about-version">
+                    <span data-translate="version">Версия</span>: <span class="version-number" id="newVersionNumber">ECX
+                        2025.31.12</span>
+                </div>
+            </div>
+    
+            <div class="about-scrollable-content">
+                <div id="changelogContainer" class="changelog-list"></div>
+    
+                <div class="about-footer">
+                    <button class="btn-primary-action" onclick="closeAboutNew()" data-translate="awesomeBtn">Круто,
+                        спасибо!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="loading">
         <div class="loading-logo">EE</div>
         <div class="loading-text">Ecrous Engine</div>
@@ -555,6 +587,7 @@
     <script src="src/scripts/Menu/level.js"></script>
     <script src="src/scripts/Menu/Tutorial.js"></script>
     <script src="src/scripts/Menu/About.js"></script>
+    <script src="src/scripts/Menu/AboutNew.js"></script>
 
     <!-- Training -->
     <script src="src/scripts/training/training.js"></script>
