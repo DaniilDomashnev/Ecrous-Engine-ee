@@ -18,6 +18,7 @@ import {
 	orderBy,
 	deleteDoc,
 	doc,
+	updateDoc,
 } from 'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js'
 
 // ==========================================
@@ -246,7 +247,6 @@ async function loadAssets(filterCategory = 'all') {
 function renderAssets(assets, category) {
 	assetsContainer.innerHTML = ''
 
-	// Фильтрация
 	const filtered =
 		category === 'all' ? assets : assets.filter(a => a.category === category)
 
@@ -256,22 +256,27 @@ function renderAssets(assets, category) {
 		return
 	}
 
-	// Текущий пользователь для проверки прав
 	const currentUserEmail = auth.currentUser ? auth.currentUser.email : null
 
 	filtered.forEach(asset => {
 		const card = document.createElement('article')
 		card.className = 'asset-card'
 
-		// Проверка: автор ли текущий юзер?
 		const isOwner = currentUserEmail === asset.author
 
-		// HTML кнопки удаления (только для автора)
-		const deleteBtnHtml = isOwner
-			? `<button class="btn btn-delete delete-btn" data-id="${asset.id}" title="Удалить"><i class="fa-solid fa-trash"></i></button>`
-			: ''
+		// Генерируем кнопки действий
+		let actionButtonsHtml = ''
+		if (isOwner) {
+			actionButtonsHtml = `
+                <button class="btn btn-icon edit-btn" data-id="${asset.id}" title="Редактировать" style="margin-right: 5px; color: #fbbf24;">
+                    <i class="fa-solid fa-pen"></i>
+                </button>
+                <button class="btn btn-icon delete-btn" data-id="${asset.id}" title="Удалить" style="margin-right: 5px; color: #ef4444;">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            `
+		}
 
-		// Заглушка, если нет картинки
 		const imgUrl =
 			asset.previewUrl || 'https://via.placeholder.com/300x200?text=No+Preview'
 
@@ -288,8 +293,8 @@ function renderAssets(assets, category) {
                 
                 <div class="card-footer">
                     <span class="price-tag">FREE</span>
-                    <div style="display:flex; gap: 8px; align-items: center;">
-                        ${deleteBtnHtml}
+                    <div style="display:flex; align-items: center;">
+                        ${actionButtonsHtml}
                         <a href="${
 													asset.downloadUrl
 												}" target="_blank" class="btn btn-outline-sm">
@@ -302,27 +307,43 @@ function renderAssets(assets, category) {
 		assetsContainer.appendChild(card)
 	})
 
-	// Навешиваем обработчики на кнопки удаления ПОСЛЕ рендера
+	// 1. Обработчики удаления
 	document.querySelectorAll('.delete-btn').forEach(btn => {
 		btn.addEventListener('click', async e => {
-			e.stopPropagation() // Чтобы не сработал клик по карточке (если будет)
-
+			e.stopPropagation()
 			if (confirm('Вы уверены, что хотите удалить этот ассет?')) {
 				const id = btn.getAttribute('data-id')
 				try {
 					await deleteDoc(doc(db, 'assets', id))
 					showToast('Ассет удален', 'success')
 
-					// Удаляем визуально без перезагрузки
-					const card = btn.closest('.asset-card')
-					card.style.opacity = '0'
-					setTimeout(() => card.remove(), 300)
-
-					// Обновляем локальный массив
+					// Удаляем из массива и перерисовываем
 					allAssets = allAssets.filter(a => a.id !== id)
+					// Вместо полной перезагрузки можно просто удалить элемент из DOM
+					btn.closest('.asset-card').remove()
 				} catch (err) {
 					showToast('Ошибка удаления: ' + err.message, 'error')
 				}
+			}
+		})
+	})
+
+	// 2. Обработчики редактирования (НОВОЕ)
+	document.querySelectorAll('.edit-btn').forEach(btn => {
+		btn.addEventListener('click', e => {
+			e.stopPropagation()
+			const id = btn.getAttribute('data-id')
+			const assetToEdit = allAssets.find(a => a.id === id)
+
+			if (assetToEdit) {
+				// Заполняем форму данными
+				document.getElementById('edit-asset-id').value = id
+				document.getElementById('edit-name').value = assetToEdit.name
+				document.getElementById('edit-category').value = assetToEdit.category
+				document.getElementById('edit-preview').value = assetToEdit.previewUrl
+				document.getElementById('edit-file').value = assetToEdit.downloadUrl
+
+				window.openModal('edit-modal')
 			}
 		})
 	})
@@ -361,3 +382,58 @@ if (searchInput) {
 
 // Запуск при старте страницы
 loadAssets()
+
+// ==========================================
+// 8. ОБНОВЛЕНИЕ АССЕТА (UPDATE)
+// ==========================================
+const editForm = document.getElementById('edit-form')
+
+if (editForm) {
+    editForm.addEventListener('submit', async (e) => {
+        e.preventDefault()
+
+        const id = document.getElementById('edit-asset-id').value
+        const name = document.getElementById('edit-name').value
+        const category = document.getElementById('edit-category').value
+        const previewUrl = document.getElementById('edit-preview').value
+        const downloadUrl = document.getElementById('edit-file').value
+        
+        const btn = document.getElementById('save-changes-btn')
+        const originalText = btn.textContent
+        btn.textContent = 'Сохранение...'
+        btn.disabled = true
+
+        try {
+            const assetRef = doc(db, 'assets', id)
+            
+            // Отправляем обновленные данные в Firestore
+            await updateDoc(assetRef, {
+                name: name,
+                category: category,
+                previewUrl: previewUrl,
+                downloadUrl: downloadUrl
+                // author и createdAt не меняем
+            })
+
+            // Обновляем локальный массив allAssets, чтобы не делать лишний запрос к серверу
+            const assetIndex = allAssets.findIndex(a => a.id === id)
+            if (assetIndex !== -1) {
+                allAssets[assetIndex] = { ...allAssets[assetIndex], name, category, previewUrl, downloadUrl }
+            }
+
+            showToast('Ассет успешно обновлен!', 'success')
+            window.closeModal('edit-modal')
+            
+            // Перерисовываем текущую категорию
+            const currentActiveCat = document.querySelector('.category-list li.active')?.getAttribute('data-cat') || 'all'
+            renderAssets(allAssets, currentActiveCat)
+
+        } catch (error) {
+            console.error(error)
+            showToast('Ошибка обновления: ' + error.message, 'error')
+        } finally {
+            btn.textContent = originalText
+            btn.disabled = false
+        }
+    })
+}

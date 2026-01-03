@@ -1,35 +1,48 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="../public/vite.jpg" />
-    <title>Ecrous Asset Store</title>
+    <title data-translate="storeTitle">Ecrous Asset Store</title>
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css" rel="stylesheet">
 </head>
+
 <body>
 
     <nav class="navbar">
-        <a href="../index.html" class="icon-btn" style="text-decoration:none; margin-right: 10px;">
-            <i class="ri-home-4-line"></i>
-        </a>
-
-        <div class="nav-brand">
-            <span>Ecrous Store</span>
+        <div style="display:flex; align-items:center;">
+            <a href="../index.html" class="icon-btn"
+                style="text-decoration:none; margin-right: 10px; color: var(--text-muted);">
+                <i class="ri-home-4-line"></i>
+            </a>
+            <div class="nav-brand">
+                <span data-translate="storeBrand">Ecrous Store</span>
+            </div>
         </div>
-        
+
         <div class="search-container">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" id="search-input" placeholder="Поиск ассетов, скриптов, моделей...">
+            <input type="text" id="search-input" data-translate-placeholder="searchPlaceholder"
+                placeholder="Поиск ассетов, скриптов, моделей...">
         </div>
 
         <div class="nav-auth">
+            <select id="languageSelect" onchange="changeLanguage(this.value)" class="lang-select">
+                <option value="ru">RU</option>
+                <option value="en">EN</option>
+                <option value="kz">KZ</option>
+                <option value="uk">UA</option>
+            </select>
+
             <div id="auth-buttons">
-                <button class="btn btn-text" onclick="openModal('login-modal')">Войти</button>
-                <button class="btn btn-primary" onclick="openModal('register-modal')">Регистрация</button>
+                <button class="btn btn-text" onclick="openModal('login-modal')" data-translate="loginBtn">Войти</button>
+                <button class="btn btn-primary" onclick="openModal('register-modal')"
+                    data-translate="registerBtn">Регистрация</button>
             </div>
             <div id="user-panel" class="hidden">
                 <div class="user-info">
@@ -37,7 +50,7 @@
                     <span id="user-email">user@mail.com</span>
                 </div>
                 <button class="btn btn-accent" onclick="openModal('upload-modal')">
-                    <i class="fa-solid fa-plus"></i> Опубликовать
+                    <i class="fa-solid fa-plus"></i> <span data-translate="uploadBtn">Опубликовать</span>
                 </button>
                 <button class="btn btn-icon" id="logout-btn" title="Выйти">
                     <i class="fa-solid fa-right-from-bracket"></i>
@@ -47,37 +60,43 @@
     </nav>
 
     <div class="main-layout">
-        
+
         <aside class="sidebar">
             <div class="sidebar-section">
-                <h3>Категории</h3>
+                <h3 data-translate="categoriesTitle">Категории</h3>
                 <ul class="category-list">
-                    <li class="active" data-cat="all"><i class="fa-solid fa-border-all"></i> Все ассеты</li>
-                    <li data-cat="3d-models"><i class="fa-solid fa-cube"></i> 3D Модели</li>
-                    <li data-cat="textures"><i class="fa-solid fa-image"></i> Текстуры</li>
-                    <li data-cat="audio"><i class="fa-solid fa-music"></i> Аудио</li>
-                    <li data-cat="scripts"><i class="fa-solid fa-code"></i> Скрипты</li>
-                    <li data-cat="ui"><i class="fa-solid fa-layer-group"></i> Интерфейс (UI)</li>
+                    <li class="active" data-cat="all"><i class="fa-solid fa-border-all"></i> <span
+                            data-translate="catAll">Все ассеты</span></li>
+                    <li data-cat="3d-models"><i class="fa-solid fa-cube"></i> <span data-translate="cat3D">3D
+                            Модели</span></li>
+                    <li data-cat="textures"><i class="fa-solid fa-image"></i> <span
+                            data-translate="catTextures">Текстуры</span></li>
+                    <li data-cat="audio"><i class="fa-solid fa-music"></i> <span data-translate="catAudio">Аудио</span>
+                    </li>
+                    <li data-cat="scripts"><i class="fa-solid fa-code"></i> <span
+                            data-translate="catScripts">Скрипты</span></li>
+                    <li data-cat="ui"><i class="fa-solid fa-layer-group"></i> <span data-translate="catUI">Интерфейс
+                            (UI)</span></li>
                 </ul>
             </div>
-            
+
             <div class="sidebar-promo">
-                <h4>Ecrous Engine</h4>
-                <p>Создавайте игры быстрее с нашими инструментами.</p>
+                <h4 data-translate="promoTitle">Ecrous Engine</h4>
+                <p data-translate="promoText">Создавайте игры быстрее с нашими инструментами.</p>
             </div>
         </aside>
 
         <main class="content-area">
             <div class="hero-banner">
                 <div class="hero-content">
-                    <h1>Лучшие ассеты недели</h1>
-                    <p>Ускорьте разработку с проверенными инструментами</p>
+                    <h1 data-translate="heroTitle">Лучшие ассеты недели</h1>
+                    <p data-translate="heroText">Ускорьте разработку с проверенными инструментами</p>
                 </div>
             </div>
 
             <div class="filter-bar">
-                <h2>Популярные ассеты</h2>
-                <span class="sort-label">Сортировка: Новые</span>
+                <h2 data-translate="popularAssets">Популярные ассеты</h2>
+                <span class="sort-label" data-translate="sortNew">Сортировка: Новые</span>
             </div>
 
             <section id="assets-container" class="assets-grid">
@@ -91,17 +110,17 @@
     <div id="login-modal" class="modal-overlay">
         <div class="modal-box">
             <span class="close-modal" onclick="closeModal('login-modal')">&times;</span>
-            <h2>С возвращением</h2>
+            <h2 data-translate="modalLoginTitle">С возвращением</h2>
             <form id="login-form">
                 <div class="input-group">
-                    <label>Email</label>
+                    <label data-translate="emailLabel">Email</label>
                     <input type="email" id="login-email" required>
                 </div>
                 <div class="input-group">
-                    <label>Пароль</label>
+                    <label data-translate="passwordLabel">Пароль</label>
                     <input type="password" id="login-pass" required>
                 </div>
-                <button type="submit" class="btn btn-primary full-width">Войти</button>
+                <button type="submit" class="btn btn-primary full-width" data-translate="loginActionBtn">Войти</button>
             </form>
         </div>
     </div>
@@ -109,17 +128,18 @@
     <div id="register-modal" class="modal-overlay">
         <div class="modal-box">
             <span class="close-modal" onclick="closeModal('register-modal')">&times;</span>
-            <h2>Создать Ecrous ID</h2>
+            <h2 data-translate="modalRegTitle">Создать Ecrous ID</h2>
             <form id="register-form">
                 <div class="input-group">
-                    <label>Email</label>
+                    <label data-translate="emailLabel">Email</label>
                     <input type="email" id="reg-email" required>
                 </div>
                 <div class="input-group">
-                    <label>Пароль</label>
+                    <label data-translate="passwordLabel">Пароль</label>
                     <input type="password" id="reg-pass" required>
                 </div>
-                <button type="submit" class="btn btn-primary full-width">Зарегистрироваться</button>
+                <button type="submit" class="btn btn-primary full-width"
+                    data-translate="registerActionBtn">Зарегистрироваться</button>
             </form>
         </div>
     </div>
@@ -127,14 +147,14 @@
     <div id="upload-modal" class="modal-overlay">
         <div class="modal-box">
             <span class="close-modal" onclick="closeModal('upload-modal')">&times;</span>
-            <h2>Новый ассет</h2>
+            <h2 data-translate="modalUploadTitle">Новый ассет</h2>
             <form id="upload-form">
                 <div class="input-group">
-                    <label>Название</label>
+                    <label data-translate="assetName">Название</label>
                     <input type="text" id="asset-name" required>
                 </div>
                 <div class="input-group">
-                    <label>Категория</label>
+                    <label data-translate="assetCategory">Категория</label>
                     <select id="asset-category" required>
                         <option value="3d-models">3D Model</option>
                         <option value="textures">Texture</option>
@@ -144,34 +164,79 @@
                     </select>
                 </div>
                 <div class="input-group">
-                    <label>Картинка (URL)</label>
+                    <label data-translate="assetPreview">Картинка (URL)</label>
                     <input type="url" id="asset-preview" placeholder="https://imgur.com/..." required>
                 </div>
                 <div class="input-group">
-                    <label>Ссылка на файл (URL)</label>
+                    <label data-translate="assetFile">Ссылка на файл (URL)</label>
                     <input type="url" id="asset-file" placeholder="Google Drive / Яндекс" required>
                 </div>
-                <button type="submit" class="btn btn-accent full-width" id="upload-btn">Опубликовать</button>
+                <button type="submit" class="btn btn-accent full-width" id="upload-btn"
+                    data-translate="publishBtn">Опубликовать</button>
             </form>
         </div>
     </div>
 
     <div id="toast-container" class="toast-container"></div>
-    
+
     <div id="success-modal" class="modal-overlay">
-      <div class="modal-box success-box">
-        <div class="success-icon">
-          <i class="fa-solid fa-check"></i>
+        <div class="modal-box success-box" style="text-align: center;">
+            <div class="success-icon" style="font-size: 3rem; color: #10b981; margin-bottom: 20px;">
+                <i class="fa-solid fa-check-circle"></i>
+            </div>
+            <h2 data-translate="modalSuccessTitle">Готово!</h2>
+            <p data-translate="modalSuccessText" style="color: #9ca3af; margin-bottom: 20px;">Ваш ассет успешно
+                опубликован и доступен в магазине.</p>
+            <button class="btn btn-primary full-width" onclick="closeModal('success-modal')"
+                data-translate="awesomeBtn">Отлично</button>
         </div>
-        <h2>Готово!</h2>
-        <p>Ваш ассет успешно опубликован и доступен в магазине.</p>
-        <button class="btn btn-primary full-width" onclick="closeModal('success-modal')">Отлично</button>
-      </div>
     </div>
 
+    <div id="edit-modal" class="modal-overlay">
+        <div class="modal-box">
+            <span class="close-modal" onclick="closeModal('edit-modal')">&times;</span>
+            <h2 data-translate="modalEditTitle">Редактирование</h2>
+            <form id="edit-form">
+                <input type="hidden" id="edit-asset-id">
+                <div class="input-group">
+                    <label data-translate="assetName">Название</label>
+                    <input type="text" id="edit-name" required>
+                </div>
+                <div class="input-group">
+                    <label data-translate="assetCategory">Категория</label>
+                    <select id="edit-category" required>
+                        <option value="3d-models">3D Model</option>
+                        <option value="textures">Texture</option>
+                        <option value="audio">Audio</option>
+                        <option value="scripts">Script</option>
+                        <option value="ui">UI</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label data-translate="assetPreview">Картинка (URL)</label>
+                    <input type="url" id="edit-preview" required>
+                </div>
+                <div class="input-group">
+                    <label data-translate="assetFile">Ссылка на файл (URL)</label>
+                    <input type="url" id="edit-file" required>
+                </div>
+                <button type="submit" class="btn btn-primary full-width" id="save-changes-btn"
+                    data-translate="saveBtn">Сохранить изменения</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="../src/scripts/Language.js"></script>
     <script type="module" src="script.js"></script>
+
     <script>
-        // Простая логика открытия модалок для совместимости
+        // Ставим правильный язык в селект при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('lang') || 'ru';
+            const select = document.getElementById('languageSelect');
+            if (select) select.value = savedLang;
+        });
+
         window.openModal = (id) => {
             document.getElementById(id).classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -180,7 +245,7 @@
             document.getElementById(id).classList.remove('active');
             document.body.style.overflow = 'auto';
         }
-        window.onclick = function(e) {
+        window.onclick = function (e) {
             if (e.target.classList.contains('modal-overlay')) {
                 e.target.classList.remove('active');
                 document.body.style.overflow = 'auto';
