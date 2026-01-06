@@ -3,40 +3,33 @@
 // ==========================================
 
 function initCanvasEvents() {
+	// --- DRAG & DROP (Desktop) ---
 	canvas.addEventListener('dragover', e => e.preventDefault())
 	canvas.addEventListener('drop', e => {
 		e.preventDefault()
 		const data = e.dataTransfer.getData('text/plain')
 		const type = e.dataTransfer.getData('type')
-
 		if (!data) return
 
-		// --- 1. ЕСЛИ БРОСИЛИ В ИНПУТ (Scratch Style) ---
 		if (
 			e.target.tagName === 'INPUT' &&
 			e.target.classList.contains('node-input')
 		) {
-			e.target.value = data // Вставляем "{score}" прямо в поле
-			// Вызываем событие input, чтобы сохранить изменение в DOM (если есть listener)
+			e.target.value = data
 			e.target.dispatchEvent(new Event('input'))
 			return
 		}
 
-		// --- 2. ЕСЛИ БРОСИЛИ ПРОСТО НА ПОЛЕ ---
 		if (data.startsWith('TEMPLATE:')) {
 			instantiateTemplate(data.replace('TEMPLATE:', ''), e.clientX, e.clientY)
-		}
-		// Если это переменная, создадим блок "Получить переменную" (опционально)
-		else if (type === 'variable') {
-			// Можно автоматически создать блок log_print с этой переменной или get_var
-			// Пока просто игнорируем или можно сделать alert("Бросьте переменную в поле ввода!")
+		} else if (type === 'variable') {
+			// logic for vars
 		} else if (!customTemplates[data]) {
-			// Обычный блок
 			createBlock(data, e.clientX, e.clientY)
 		}
 	})
 
-	// --- МЫШЬ (ПК) ---
+	// --- ZOOM & PAN (Desktop Mouse) ---
 	canvas.addEventListener(
 		'wheel',
 		e => {
@@ -75,16 +68,22 @@ function initCanvasEvents() {
 		}
 	})
 
-	// --- СЕНСОР (ТЕЛЕФОН) ---
+	// ==========================================
+	// --- TOUCH HANDLING (MOBILE) ---
+	// ==========================================
+
 	let initialPinchDist = 0
 	let lastZoom = 1
 
 	canvas.addEventListener(
 		'touchstart',
 		e => {
-			// Если коснулись пустого места - начинаем двигать камеру
+			// Если мы в процессе создания нового блока из меню (mobile.js), игнорируем события холста
+			if (window.isMobileDraggingNewBlock) return
+
 			if (e.touches.length === 1) {
-				// Проверяем, что не попали по блоку (блоки обрабатывают себя сами)
+				// Один палец: Паннинг (сдвиг холста)
+				// Но только если мы НЕ попали по блоку и НЕ попали по контролам
 				if (
 					!e.target.closest('.node-block') &&
 					!e.target.closest('.canvas-controls')
@@ -96,8 +95,8 @@ function initCanvasEvents() {
 					}
 				}
 			} else if (e.touches.length === 2) {
-				// Два пальца - зум
-				isPanning = true
+				// Два пальца: Зум
+				isPanning = true // Тоже включаем режим панорамирования для центра зума
 				const dx = e.touches[0].clientX - e.touches[1].clientX
 				const dy = e.touches[0].clientY - e.touches[1].clientY
 				initialPinchDist = Math.sqrt(dx * dx + dy * dy)
@@ -111,24 +110,19 @@ function initCanvasEvents() {
 		{ passive: false }
 	)
 
-	// Настройка смещения для мобилок (чтобы видеть блок НАД пальцем)
-	// Можно вынести это в настройки проекта в будущем
-	const MOBILE_DRAG_OFFSET_Y = 80 // Пикселей вверх
+	// Настройка смещения для перетаскивания СУЩЕСТВУЮЩИХ блоков
+	const BLOCK_DRAG_OFFSET_Y = 80
 
-	// ГЛОБАЛЬНОЕ ДВИЖЕНИЕ (И мышь, и палец)
 	const handleMove = (clientX, clientY, isTouch = false) => {
 		const rect = canvas.getBoundingClientRect()
-
-		// Корректируем координаты
 		let rawX = clientX - rect.left
 		let rawY = clientY - rect.top
 
-		// Если это тач - поднимаем точку выше, чтобы блок был над пальцем
+		// Если это тач, поднимаем точку выше, чтобы блок был над пальцем
 		if (isTouch) {
-			rawY -= MOBILE_DRAG_OFFSET_Y
+			rawY -= BLOCK_DRAG_OFFSET_Y
 		}
 
-		// Переводим в координаты канваса с учетом зума и панорамирования
 		const x = (rawX - panX) / zoomLevel
 		const y = (rawY - panY) / zoomLevel
 
@@ -140,8 +134,8 @@ function initCanvasEvents() {
 
 		// 2. Тянем блок
 		if (draggedBlock) {
-			// dragOffset - это смещение внутри самого блока (за что взяли)
-			// Если dragOffset не задан (новый блок), ставим по центру
+			// Если мы схватили блок за конкретную точку (dragOffset), используем её
+			// Иначе (fallback) по центру
 			const offsetX = dragOffset ? dragOffset.x : draggedBlock.offsetWidth / 2
 			const offsetY = dragOffset ? dragOffset.y : draggedBlock.offsetHeight / 2
 
@@ -159,35 +153,43 @@ function initCanvasEvents() {
 			panY = e.clientY - panStart.y
 			updateTransform()
 		} else {
-        handleMove(e.clientX, e.clientY, false); // false = это мышь
-    }
+			handleMove(e.clientX, e.clientY, false) // false = мышь
+		}
 	})
 
 	document.addEventListener(
 		'touchmove',
 		e => {
+			// Если тащим новый блок из меню, здесь ничего не делаем (обрабатывает mobile.js)
+			if (window.isMobileDraggingNewBlock) return
+
 			if (e.touches.length === 1) {
 				if (draggedBlock || isWiring) {
-					e.preventDefault() // Чтобы не тянуть страницу пока тянем блок
-					handleMove(e.touches[0].clientX, e.touches[0].clientY)
+					e.preventDefault() // Блокируем скролл страницы
+					handleMove(e.touches[0].clientX, e.touches[0].clientY, true) // true = тач
 				} else if (isPanning) {
+					e.preventDefault() // Блокируем скролл страницы при панорамировании
 					panX = e.touches[0].clientX - panStart.x
 					panY = e.touches[0].clientY - panStart.y
 					updateTransform()
 				}
 			} else if (e.touches.length === 2) {
 				e.preventDefault()
-				// ЗУМ
+
+				// --- ZOOM ---
 				const dx = e.touches[0].clientX - e.touches[1].clientX
 				const dy = e.touches[0].clientY - e.touches[1].clientY
 				const dist = Math.sqrt(dx * dx + dy * dy)
 
 				if (initialPinchDist > 0) {
 					const scale = dist / initialPinchDist
-					zoomLevel = Math.min(Math.max(lastZoom * scale, 0.1), 5)
+					let newZoom = lastZoom * scale
+					if (newZoom < 0.1) newZoom = 0.1
+					if (newZoom > 5) newZoom = 5
+					zoomLevel = newZoom
 				}
 
-				// ПАН (центр щипка)
+				// --- PAN with 2 fingers ---
 				const cx = (e.touches[0].clientX + e.touches[1].clientX) / 2
 				const cy = (e.touches[0].clientY + e.touches[1].clientY) / 2
 				panX = cx - panStart.x
@@ -200,15 +202,29 @@ function initCanvasEvents() {
 		{ passive: false }
 	)
 
-	// ЗАВЕРШЕНИЕ ДЕЙСТВИЙ
 	const endAction = e => {
 		if (isWiring) {
-			// Если это TouchEnd, нужно найти элемент под пальцем
 			if (e.changedTouches) {
 				const t = e.changedTouches[0]
 				const target = document.elementFromPoint(t.clientX, t.clientY)
-				if (target && target.classList.contains('port-in')) {
-					const block = target.closest('.node-block')
+				// Расширенная зона поиска порта для мобилок
+				if (target) {
+					// Ищем порт или родителя порта
+					const port = target.closest('.port-in')
+					if (port) {
+						const block = port.closest('.node-block')
+						// Подменяем target на порт для корректной отработки endWireDrag
+						// (Хак, так как endWireDrag смотрит e.target)
+						// Но endWireDrag в editor/connections.js требует переработки под тач
+						// Пока вызываем endWireDrag с эмулированным событием
+						endWireDrag({ target: port }, block)
+						return
+					}
+				}
+			} else {
+				// Mouse
+				if (e.target.classList.contains('port-in')) {
+					const block = e.target.closest('.node-block')
 					endWireDrag(e, block)
 					return
 				}
@@ -228,15 +244,10 @@ function initCanvasEvents() {
 	document.addEventListener('mouseup', endAction)
 	document.addEventListener('touchend', endAction)
 }
+
 function updateTransform() {
-	// Применяем смещение и масштаб
 	container.style.transform = `translate(${panX}px, ${panY}px) scale(${zoomLevel})`
-
-	// Обновляем позицию сетки фона
 	canvas.style.backgroundPosition = `${panX}px ${panY}px`
-
-	// Масштабируем саму сетку, чтобы создать эффект глубины
-	// Базовый размер сетки был 24px (из CSS), умножаем его на зум
 	const gridSize = 24 * zoomLevel
 	canvas.style.backgroundSize = `${gridSize}px ${gridSize}px`
 }

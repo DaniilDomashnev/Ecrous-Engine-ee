@@ -32,7 +32,38 @@ body {
 }
 
 /* =========================================
-   GLOBAL FORM STYLES (Исправление исчезающего текста в инпутах)
+   GHOST DRAGGING (МОБИЛЬНОЕ ПЕРЕТАСКИВАНИЕ)
+   ========================================= */
+.dragging-ghost {
+    background: var(--bg-elevated) !important;
+    border: 2px solid var(--accent) !important;
+    color: var(--text) !important;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.5) !important;
+    padding: 10px 16px !important;
+    border-radius: 12px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    opacity: 0.9 !important;
+    pointer-events: none !important;
+    z-index: 99999 !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    /* Анимация появления */
+    animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.dragging-ghost i {
+    font-size: 20px;
+}
+
+@keyframes popIn {
+    from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+    to { transform: translate(-50%, -50%) scale(1.1); opacity: 0.9; }
+}
+
+/* =========================================
+   GLOBAL FORM STYLES
    ========================================= */
 input, select, textarea, .modal-input, .ui-input {
     background-color: var(--bg-elevated);
@@ -707,4 +738,3 @@ header {
 .modal-message {
     color: var(--text-soft);
 }
-
