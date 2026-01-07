@@ -1,5 +1,5 @@
 function openAssetStore() {
-	window.location.href = 'Asset Store/index.html'
+	window.location.href = 'Asset%20Store/index.html'
 }
 
 /* =========================================
