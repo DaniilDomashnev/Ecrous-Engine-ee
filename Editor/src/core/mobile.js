@@ -236,3 +236,4 @@ function initMobileLongPress() {
 window.addEventListener('DOMContentLoaded', () => {
 	initMobileLongPress()
 })
+

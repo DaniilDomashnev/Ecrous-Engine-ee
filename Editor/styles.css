@@ -8,20 +8,20 @@
 
 /* ГАРАНТИРОВАННЫЕ ПЕРЕМЕННЫЕ ДЛЯ НОЧНОЙ ТЕМЫ (На случай если в themes.css ошибка) */
 body.theme-night {
-    --bg: #000000;
-    --bg-elevated: #111111;
-    --bg-elevated-soft: #1f1f1f;
-    --text: #e0e0e0;
-    --text-soft: #888888;
-    --border: #333333;
-    --accent: #7c4dff;
-    --accent-soft: rgba(124, 77, 255, 0.2);
+	--bg: #000000;
+	--bg-elevated: #111111;
+	--bg-elevated-soft: #1f1f1f;
+	--text: #e0e0e0;
+	--text-soft: #888888;
+	--border: #333333;
+	--accent: #7c4dff;
+	--accent-soft: rgba(124, 77, 255, 0.2);
 }
 
 body {
 	background-color: var(--bg);
 	color: var(--text);
-	font-family: var(--font-main);
+	font-family: 'ubuntu', sans-serif; 
 	height: 100vh;
 	display: flex;
 	flex-direction: column;
@@ -35,53 +35,65 @@ body {
    GHOST DRAGGING (МОБИЛЬНОЕ ПЕРЕТАСКИВАНИЕ)
    ========================================= */
 .dragging-ghost {
-    background: var(--bg-elevated) !important;
-    border: 2px solid var(--accent) !important;
-    color: var(--text) !important;
-    box-shadow: 0 15px 30px rgba(0,0,0,0.5) !important;
-    padding: 10px 16px !important;
-    border-radius: 12px !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    opacity: 0.9 !important;
-    pointer-events: none !important;
-    z-index: 99999 !important;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    /* Анимация появления */
-    animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+	background: var(--bg-elevated) !important;
+	border: 2px solid var(--accent) !important;
+	color: var(--text) !important;
+	box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5) !important;
+	padding: 10px 16px !important;
+	border-radius: 12px !important;
+	font-size: 14px !important;
+	font-weight: 600 !important;
+	opacity: 0.9 !important;
+	pointer-events: none !important;
+	z-index: 99999 !important;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	/* Анимация появления */
+	animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .dragging-ghost i {
-    font-size: 20px;
+	font-size: 20px;
 }
 
 @keyframes popIn {
-    from { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
-    to { transform: translate(-50%, -50%) scale(1.1); opacity: 0.9; }
+	from {
+		transform: translate(-50%, -50%) scale(0.5);
+		opacity: 0;
+	}
+	to {
+		transform: translate(-50%, -50%) scale(1.1);
+		opacity: 0.9;
+	}
 }
 
 /* =========================================
    GLOBAL FORM STYLES
    ========================================= */
-input, select, textarea, .modal-input, .ui-input {
-    background-color: var(--bg-elevated);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 6px 10px;
-    outline: none;
-    font-family: var(--font-main);
+input,
+select,
+textarea,
+.modal-input,
+.ui-input {
+	background-color: var(--bg-elevated);
+	color: var(--text);
+	border: 1px solid var(--border);
+	border-radius: 6px;
+	padding: 6px 10px;
+	outline: none;
+	font-family: var(--font-main);
 }
 
-input:focus, select:focus, textarea:focus {
-    border-color: var(--accent);
+input:focus,
+select:focus,
+textarea:focus {
+	border-color: var(--accent);
 }
 
 /* Цвет иконки календаря/стрелок в select для Webkit */
 ::-webkit-calendar-picker-indicator {
-    filter: invert(0.5); /* Делает иконки видимыми и на темном, и на светлом */
+	filter: invert(0.5); /* Делает иконки видимыми и на темном, и на светлом */
 }
 
 /* =========================================
@@ -126,7 +138,9 @@ header {
 .icon-btn {
 	background: transparent;
 	border: 1px solid transparent;
-	color: var(--text-soft); /* Если пропадают иконки - проверить эту переменную */
+	color: var(
+		--text-soft
+	); /* Если пропадают иконки - проверить эту переменную */
 	width: 38px;
 	height: 38px;
 	border-radius: 10px;
@@ -220,7 +234,9 @@ header {
 	position: absolute;
 	top: calc(100% + 8px);
 	left: 0;
-	background: var(--bg-elevated); /* Исправлено: жесткая привязка к переменной */
+	background: var(
+		--bg-elevated
+	); /* Исправлено: жесткая привязка к переменной */
 	backdrop-filter: blur(10px);
 	border: 1px solid var(--border);
 	border-radius: 12px;
@@ -354,7 +370,7 @@ header {
 }
 .lib-cat-item:hover {
 	background: var(--bg-elevated-soft);
-    color: var(--text);
+	color: var(--text);
 }
 .lib-cat-item.active {
 	background: var(--bg-elevated-soft);
@@ -426,12 +442,12 @@ header {
 	margin-left: auto;
 	transition: 0.2s;
 	opacity: 0.6;
-    color: var(--text-soft);
+	color: var(--text-soft);
 }
 .toggle-btn:hover {
 	background: var(--bg-elevated-soft);
 	opacity: 1;
-    color: var(--text);
+	color: var(--text);
 }
 
 /* Состояние: СВЕРНУТ (Collapsed) */
@@ -618,7 +634,7 @@ header {
 
 .folder-content {
 	display: none;
-	background: var(--bg); 
+	background: var(--bg);
 	box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.05);
 }
 
@@ -633,19 +649,19 @@ header {
 
 /* Список элементов (проектов, объектов) */
 .list-item {
-    color: var(--text);
-    padding: 8px 10px;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
+	color: var(--text);
+	padding: 8px 10px;
+	display: flex;
+	align-items: center;
+	cursor: pointer;
 }
 .list-item:hover {
-    background-color: var(--bg-elevated-soft);
+	background-color: var(--bg-elevated-soft);
 }
 
 .list-item i {
-    color: var(--text-soft);
-    margin-right: 8px;
+	color: var(--text-soft);
+	margin-right: 8px;
 }
 
 .list-container.drag-over {
@@ -662,79 +678,107 @@ header {
 
 /* --- СТИЛИ ДЛЯ ВЫБОРА ТЕМЫ В ШАПКЕ И ПРОЧИЕ SELECT --- */
 .header-theme-select {
-    background: var(--bg-elevated-soft);
-    color: var(--text);
-    border: 1px solid var(--border);
-    padding: 6px 10px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    outline: none;
-    margin-right: 8px;
-    transition: 0.2s;
-    appearance: none; 
-    -webkit-appearance: none;
-    text-align: center;
+	background: var(--bg-elevated-soft);
+	color: var(--text);
+	border: 1px solid var(--border);
+	padding: 6px 10px;
+	border-radius: 8px;
+	font-size: 12px;
+	font-weight: 600;
+	cursor: pointer;
+	outline: none;
+	margin-right: 8px;
+	transition: 0.2s;
+	appearance: none;
+	-webkit-appearance: none;
+	text-align: center;
 }
 
 .header-theme-select:hover {
-    border-color: var(--accent);
-    background: var(--bg);
+	border-color: var(--accent);
+	background: var(--bg);
 }
 
 .header-theme-select option {
-    background: var(--bg-elevated);
-    color: var(--text);
+	background: var(--bg-elevated);
+	color: var(--text);
 }
 
 /* Шаблоны (кнопки внизу сайдбара) */
 .template-controls {
-    padding: 10px;
+	padding: 10px;
 }
 
 .template-controls p {
-    color: var(--text);
-    font-size: 12px;
-    font-weight: 600;
-    margin-bottom: 8px;
-    opacity: 0.8;
+	color: var(--text);
+	font-size: 12px;
+	font-weight: 600;
+	margin-bottom: 8px;
+	opacity: 0.8;
 }
 
 .template-controls button {
-    background: var(--bg-elevated-soft);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 12px;
-    cursor: pointer;
-    margin-bottom: 6px;
-    width: 100%;
-    text-align: left;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.2s;
+	background: var(--bg-elevated-soft);
+	color: var(--text);
+	border: 1px solid var(--border);
+	border-radius: 6px;
+	padding: 6px 12px;
+	font-size: 12px;
+	cursor: pointer;
+	margin-bottom: 6px;
+	width: 100%;
+	text-align: left;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	transition: all 0.2s;
 }
 
 .template-controls button:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--bg-elevated);
+	border-color: var(--accent);
+	color: var(--accent);
+	background: var(--bg-elevated);
 }
 
 /* Исправление для модальных окон при темных темах */
 .modal-window {
-    background: var(--bg-elevated);
-    color: var(--text);
-    border: 1px solid var(--border);
+	background: var(--bg-elevated);
+	color: var(--text);
+	border: 1px solid var(--border);
 }
 
 .modal-title {
-    color: var(--text);
+	color: var(--text);
 }
 
 .modal-message {
-    color: var(--text-soft);
+	color: var(--text-soft);
+}
+
+/* =========================================
+   УНИВЕРСАЛЬНЫЙ СКРОЛЛБАР (ДЛЯ ВСЕХ ТЕМ)
+   ========================================= */
+
+/* Настраиваем ширину и фон дорожки */
+::-webkit-scrollbar {
+    width: 6px;               /* Тонкий скролл */
+    height: 6px;              /* Для горизонтального скролла */
+    background: transparent;  /* Фон прозрачный, чтобы не конфликтовал с темой */
+}
+
+/* Сам ползунок (Thumb) */
+::-webkit-scrollbar-thumb {
+    background-color: var(--border); /* Цвет берется из текущей темы! */
+    border-radius: 3px;
+    opacity: 0.5;
+}
+
+/* Ползунок при наведении */
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--text-soft); /* Становится ярче при наведении */
+}
+
+/* Уголок (где сходятся вертикальный и горизонтальный скролл) */
+::-webkit-scrollbar-corner {
+    background: transparent;
 }

@@ -1063,13 +1063,18 @@ const BLOCK_DEFINITIONS = [
 		inputs: [
 			{ label: 'Объект', default: 'box1' },
 			{
-				label: 'Тип (box/circle)',
+				label: 'Форма',
 				default: 'box',
 				type: 'select',
 				options: ['box', 'circle'],
 			},
-			{ label: 'Статичный? (1/0)', default: '0' },
-			{ label: 'Прыгучесть (0-1)', default: '0.5' },
+			{
+				label: 'Режим',
+				default: 'Dynamic',
+				type: 'select',
+				options: ['Dynamic', 'Static'], // Теперь тут нельзя ввести 0.5
+			},
+			{ label: 'Прыгучесть (0-1)', default: '0.2' }, // Дефолт 0.2, чтобы не прыгало как мяч
 		],
 	},
 	{

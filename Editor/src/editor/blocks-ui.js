@@ -23,7 +23,14 @@ function createBlock(typeId, clientX, clientY, restoreData = null) {
 	let inputsHTML = ''
 	if (def.inputs) {
 		def.inputs.forEach((inp, idx) => {
-			const val = restoreData ? restoreData.values[idx] : inp.default
+			let val = inp.default
+			if (
+				restoreData &&
+				restoreData.values &&
+				restoreData.values[idx] !== undefined
+			) {
+				val = restoreData.values[idx]
+			}
 
 			// ОПРЕДЕЛЯЕМ, ЦВЕТ ЛИ ЭТО
 			const isColor =
@@ -176,7 +183,7 @@ function createBlock(typeId, clientX, clientY, restoreData = null) {
 		})
 	}
 
-	// === МОБИЛЬНОЕ ПЕРЕТАСКИВАНИЕ (Обновленная логика) ===
+	// === МОБИЛЬНОЕ ПЕРЕТАСКИВАНИЕ (ИСПРАВЛЕННАЯ ЛОГИКА) ===
 	const header = el.querySelector('.node-header')
 	header.addEventListener(
 		'touchstart',
@@ -184,7 +191,6 @@ function createBlock(typeId, clientX, clientY, restoreData = null) {
 			if (e.target.classList.contains('action-close')) return
 			if (e.target.closest('.toggle-btn')) return
 
-			// Блокируем зум и скролл
 			e.preventDefault()
 			e.stopPropagation()
 
@@ -192,34 +198,49 @@ function createBlock(typeId, clientX, clientY, restoreData = null) {
 			el.classList.add('dragging')
 
 			const t = e.touches[0]
-			const r = el.getBoundingClientRect()
 
-			// Вычисляем смещение пальца относительно угла блока с учетом зума
+			// --- ИСПРАВЛЕНИЕ: Используем canvas (вьюпорт), а не container ---
+			const canvasRect = canvas.getBoundingClientRect() // Статичная рамка
+
+			// Текущие координаты пальца в мире (с учетом зума и пана)
+			// Формула: (ЭкранныеКоординаты - СдвигПана) / Зум
+			const worldFingerX = (t.clientX - canvasRect.left - panX) / zoomLevel
+			const worldFingerY = (t.clientY - canvasRect.top - panY) / zoomLevel
+
+			// Текущие координаты блока (они уже в мире, так как это style.left/top)
+			// Но style.left это строка "100px", парсим её:
+			const blockX = parseFloat(el.style.left) || 0
+			const blockY = parseFloat(el.style.top) || 0
+
+			// Смещение хвата (разница между пальцем и углом блока)
 			dragOffset = {
-				x: (t.clientX - r.left) / zoomLevel,
-				y: (t.clientY - r.top) / zoomLevel,
+				x: worldFingerX - blockX,
+				y: worldFingerY - blockY,
 			}
 
-			// Локальный обработчик движения для конкретного блока
 			const touchMoveBlock = tm => {
 				if (!draggedBlock) return
-
-				// ЖЕСТКАЯ БЛОКИРОВКА СКРОЛЛА
 				tm.preventDefault()
 				tm.stopPropagation()
 
 				const t = tm.touches[0]
+				const canvasRect = canvas.getBoundingClientRect() // Пересчитываем, вдруг ресайз окна
 
-				const containerRect = container.getBoundingClientRect()
-
-				// Добавляем проверку на NaN, чтобы блок не исчезал при ошибках зума
 				let zoom = window.zoomLevel || 1
 				if (zoom < 0.1) zoom = 0.1
 
-				const newX =
-					(t.clientX - containerRect.left - panX) / zoom - dragOffset.x
-				const newY =
-					(t.clientY - containerRect.top - panY) / zoom - dragOffset.y
+				// --- ИСПРАВЛЕНИЕ: Правильная математика координат ---
+				// 1. Получаем X пальца относительно левого края вьюпорта
+				const rawX = t.clientX - canvasRect.left
+				const rawY = t.clientY - canvasRect.top
+
+				// 2. Переводим в мировые координаты (обратная матрица трансформации)
+				const worldX = (rawX - panX) / zoom
+				const worldY = (rawY - panY) / zoom
+
+				// 3. Применяем смещение хвата
+				const newX = worldX - dragOffset.x
+				const newY = worldY - dragOffset.y
 
 				draggedBlock.style.left = newX + 'px'
 				draggedBlock.style.top = newY + 'px'
@@ -233,7 +254,6 @@ function createBlock(typeId, clientX, clientY, restoreData = null) {
 
 				if (draggedBlock) {
 					draggedBlock.classList.remove('dragging')
-					// Магнитная привязка
 					if (typeof checkMagnet === 'function') checkMagnet(draggedBlock)
 					if (typeof saveCurrentWorkspace === 'function') saveCurrentWorkspace()
 					draggedBlock = null

@@ -10,6 +10,7 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="../src/styles/themes.css">
+    <link rel="stylesheet" href="../src/styles/fonts.css">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="styles/export.css">
     <link rel="stylesheet" href="styles/mobile.css">
@@ -103,7 +104,7 @@
                     </div>
                 </div>
             
-                <div class="menu-item" id="menuAssets">
+                <!-- <div class="menu-item" id="menuAssets">
                     Ассеты <i class="ri-arrow-down-s-line"></i>
                     <div class="menu-dropdown">
                         <div class="menu-entry" id="btnAssetImport"><i class="ri-upload-2-line"></i> Импорт...</div>
@@ -113,7 +114,7 @@
                         <div class="menu-entry" id="btnAssetClean"><i class="ri-delete-bin-2-line"></i> Очистить неиспользуемые
                         </div>
                     </div>
-                </div>
+                </div> -->
             
                 <div class="menu-item" id="menuRun">
                     Запуск <i class="ri-arrow-down-s-line"></i>
@@ -127,7 +128,7 @@
                     </div>
                 </div>
             
-                <div class="menu-item" id="menuTools">
+                <!-- <div class="menu-item" id="menuTools">
                     Инструменты <i class="ri-arrow-down-s-line"></i>
                     <div class="menu-dropdown">
                         <div class="menu-entry" id="btnToolConsole"><i class="ri-terminal-box-line"></i> Консоль</div>
@@ -137,7 +138,7 @@
                         <div class="menu-entry" id="btnToolAI"><i class="ri-brain-line"></i> AI / Скрипты</div>
                         <div class="menu-entry" id="btnToolExt"><i class="ri-puzzle-line"></i> Расширения</div>
                     </div>
-                </div>
+                </div> -->
             
                 <div class="menu-item" id="menuWindow">
                     Окна <i class="ri-arrow-down-s-line"></i>
@@ -157,18 +158,18 @@
                         <div class="menu-entry" id="hlpDocs"><i class="ri-book-open-line"></i> Документация</div>
                         <div class="menu-entry" id="hlpShortcuts"><i class="ri-keyboard-box-line"></i> Горячие клавиши</div>
                         <div class="menu-separator"></div>
-                        <div class="menu-entry" id="hlpCommunity"><i class="ri-discord-line"></i> Сообщество / Discord</div>
+                        <div class="menu-entry" id="hlpCommunity"><i class="ri-telegram-line"></i> Сообщество / Telegram</div>
                         <div class="menu-entry" id="hlpAbout"><i class="ri-information-line"></i> О движке</div>
-                        <div class="menu-entry" style="font-size: 10px; opacity: 0.5;">Версия: ECX 2025.31.12</div>
+                        <div class="menu-entry" style="font-size: 10px; opacity: 0.5;">Версия: ECX 2025.05.01-bf3</div>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="header-controls">
-            <button class="icon-btn" onclick="openScreenshotModal()" title="Сделать красивый скриншот">
+            <!-- <button class="icon-btn" onclick="openScreenshotModal()" title="Сделать красивый скриншот">
                 <i class="ri-camera-3-line"></i> Beta
-            </button>
+            </button> -->
             <button id="btnToggleToolbox" class="icon-btn" title="Скрыть/Показать инструменты" style="margin-right: 10px;">
                 <i class="ri-layout-right-line"></i>
             </button>
@@ -257,6 +258,10 @@
         
             <div class="panel-header">
                 <i class="ri-tools-line"></i><i class="ri-tool-line"></i> Инструменты
+            </div>
+
+            <div class="toolbox-search">
+                <input type="text" id="blockSearchInput" placeholder="Поиск блоков..." autocomplete="off">
             </div>
             <div id="toolboxContent"></div>
         </div>

@@ -1,5 +1,5 @@
 // ==========================================
-// EXPORT LOGIC (Ecrous Engine) - FIX
+// EXPORT LOGIC (Ecrous Engine) - FIXED & ROBUST
 // ==========================================
 
 function openExportModal() {
@@ -149,8 +149,7 @@ async function generateGameHTML() {
 		exportedAt: new Date().toISOString(),
 	}
 
-    // Мы берем логику из main.js, но т.к. мы в браузере, нам нужно внедрить её как строку.
-    // ВНИМАНИЕ: Здесь вставлен обновленный код из вашего main.js
+	// Внедряем JS код движка
 	const runtimeScript = `
         const PROJECT = ${JSON.stringify(buildData.project)};
         const START_SCENE_ID = "${buildData.startSceneId}";
@@ -354,9 +353,6 @@ async function generateGameHTML() {
                 });
             }
             
-            // --- 1.1 ФИЗИКА (Simple 2D Update Loop) ---
-            // Здесь можно добавить простую физику, если она используется
-
             // --- 2. КАМЕРА (2D Follow & Shake) ---
             const world = document.getElementById('game-world');
             const is3D = world && world.style.transformStyle === 'preserve-3d';
@@ -446,9 +442,6 @@ async function generateGameHTML() {
             activeTimers = [];
             
             const allScripts = scene.objects.flatMap(o => o.scripts || []);
-
-            // Загрузка звуков заранее (если нужно)
-            // ...
 
             // Start
             allScripts.filter(b => b.type === 'evt_start').forEach(block => {
@@ -763,6 +756,66 @@ async function generateGameHTML() {
                             break;
                         }
 
+                        case 'obj_create_sprite': {
+                            const id = resolveValue(v[0]);
+                            if (document.getElementById(id)) break;
+
+                            const url = getAssetUrl(resolveValue(v[1]));
+                            const x = parseFloat(resolveValue(v[2]));
+                            const y = parseFloat(resolveValue(v[3]));
+                            const w = parseFloat(resolveValue(v[4]));
+                            const h = parseFloat(resolveValue(v[5]));
+                            const physType = resolveValue(v[6]); 
+                            const zIdx = parseInt(resolveValue(v[7])) || 1;
+
+                            // 1. Создаем DIV
+                            const el = document.createElement('div');
+                            el.id = id;
+                            el.style.position = 'absolute';
+                            el.style.left = x + 'px';
+                            el.style.top = y + 'px';
+                            el.style.width = w + 'px';
+                            el.style.height = h + 'px';
+                            el.style.backgroundImage = "url('" + url + "')";
+                            el.style.backgroundSize = 'contain';
+                            el.style.backgroundRepeat = 'no-repeat';
+                            el.style.backgroundPosition = 'center';
+                            el.style.zIndex = zIdx;
+                            
+                            (document.getElementById('game-stage') || document.body).appendChild(el);
+
+                            // 2. ФИЗИКА (FIX: Use matterEngine instead of window.engine)
+                            if (physType !== 'None' && typeof Matter !== 'undefined' && matterEngine) {
+                                const isStatic = (physType === 'Static' || physType === 'static');
+                                const centerX = x + w / 2;
+                                const centerY = y + h / 2;
+
+                                const body = Matter.Bodies.rectangle(centerX, centerY, w, h, {
+                                    isStatic: isStatic,
+                                    label: id,
+                                    friction: 0.5,
+                                    restitution: 0.2,
+                                    angle: 0
+                                });
+
+                                Matter.World.add(matterEngine.world, body);
+                                
+                                // Привязка спрайта
+                                bodyMap.set(id, body);
+                            }
+                            break;
+                        }
+
+                        case 'obj_set_sprite_frame': {
+                            const id = resolveValue(v[0]);
+                            const el = document.getElementById(id);
+                            if (el) {
+                                const url = getAssetUrl(resolveValue(v[1]));
+                                el.style.backgroundImage = "url('" + url + "')";
+                            }
+                            break;
+                        }
+
                         // 6. ТЕКСТ
                         case 'txt_create': { if(document.getElementById(v[0])) break; const d=document.createElement('div'); d.id=v[0]; d.style.position='absolute'; d.style.left=v[1]+'px'; d.style.top=v[2]+'px'; d.dataset.template=v[3]; d.innerText=resolveText(v[3]); d.style.fontSize=v[4]+'px'; d.style.color=v[5]; w.appendChild(d); break; }
                         case 'txt_modify': { 
@@ -864,7 +917,8 @@ async function generateGameHTML() {
                         case 'phys_enable': { 
                              const el=document.getElementById(v[0]); 
                              if(el && matterEngine) {
-                                const isStatic=v[2]==='1'||v[2]==='true';
+                                const valStatic = resolveValue(v[2]);
+                                const isStatic = (valStatic === '1' || valStatic === 'true' || valStatic === 'Static' || valStatic === true);
                                 const w=el.offsetWidth; const h=el.offsetHeight;
                                 const x=parseFloat(el.style.left)||0; const y=parseFloat(el.style.top)||0;
                                 const body = Matter.Bodies.rectangle(x+w/2, y+h/2, w, h, { isStatic: isStatic, restitution: parseFloat(v[3])||0, label:v[0] });
@@ -1044,15 +1098,15 @@ async function exportMobileBundle(platform) {
 	const orient = projectData.settings?.orientation || 'landscape'
 	const pkgId = projectData.settings?.packageId || 'com.ecrous.game'
 	const appName = projectData.settings?.name || 'Game'
-    
-    // 1. Основной файл
+
+	// 1. Основной файл
 	zip.file('index.html', html)
 
-    // 2. Иконка
+	// 2. Иконка
 	const [, iconData] = iconBase64.split('base64,')
 	zip.file('icon.png', iconData, { base64: true })
 
-    // 3. Манифест (PWA / Android TWA)
+	// 3. Манифест (PWA / Android TWA)
 	const manifest = {
 		name: appName,
 		short_name: appName,
@@ -1065,8 +1119,8 @@ async function exportMobileBundle(platform) {
 	}
 	zip.file('manifest.json', JSON.stringify(manifest, null, 2))
 
-    // 4. Инструкция для пользователя (так как браузер не делает .apk)
-    const readme = `
+	// 4. Инструкция для пользователя (так как браузер не делает .apk)
+	const readme = `
 ECROUS ENGINE - MOBILE EXPORT (${platform})
 ===========================================
 
@@ -1082,8 +1136,8 @@ ECROUS ENGINE - MOBILE EXPORT (${platform})
 - index.html (Сама игра)
 - icon.png (Иконка)
 - manifest.json (Настройки)
-    `;
-    zip.file('README.txt', readme);
+    `
+	zip.file('README.txt', readme)
 
 	zip.generateAsync({ type: 'blob' }).then(content => {
 		downloadFile(`${appName}_${platform}.zip`, content, 'application/zip')
@@ -1099,7 +1153,9 @@ function exportProjectAsEcr() {
 }
 
 function exportProjectAsExe() {
-	alert('Экспорт в EXE требует внешнего упаковщика (например, Electron). Скачан HTML.')
+	alert(
+		'Экспорт в EXE требует внешнего упаковщика (например, Electron). Скачан HTML.'
+	)
 	document.getElementById('exportWindows').click()
 }
 

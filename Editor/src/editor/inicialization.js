@@ -292,60 +292,69 @@ function getActiveObject() {
 
 // 1. Функция создания папки
 async function addFolder(type) {
-    const name = await showCustomPrompt('Новая папка', 'Введите название папки:', 'New Folder');
-    if (!name) return;
+	const name = await showCustomPrompt(
+		'Новая папка',
+		'Введите название папки:',
+		'New Folder'
+	)
+	if (!name) return
 
-    if (type === 'scene') {
-        // Инициализируем массив папок проекта, если нет
-        if (!projectData.sceneFolders) projectData.sceneFolders = [];
-        
-        if (!projectData.sceneFolders.includes(name)) {
-            projectData.sceneFolders.push(name);
-        } else {
-            alert('Папка с таким именем уже есть!');
-        }
-    } else if (type === 'object') {
-        const currentScene = getActiveScene();
-        if (!currentScene) return;
+	if (type === 'scene') {
+		// Инициализируем массив папок проекта, если нет
+		if (!projectData.sceneFolders) projectData.sceneFolders = []
 
-        // Инициализируем массив папок сцены
-        if (!currentScene.objectFolders) currentScene.objectFolders = [];
+		if (!projectData.sceneFolders.includes(name)) {
+			projectData.sceneFolders.push(name)
+		} else {
+			alert('Папка с таким именем уже есть!')
+		}
+	} else if (type === 'object') {
+		const currentScene = getActiveScene()
+		if (!currentScene) return
 
-        if (!currentScene.objectFolders.includes(name)) {
-            currentScene.objectFolders.push(name);
-        } else {
-            alert('Папка с таким именем уже есть!');
-        }
-    }
-    
-    saveProjectToLocal();
-    renderSidebar();
+		// Инициализируем массив папок сцены
+		if (!currentScene.objectFolders) currentScene.objectFolders = []
+
+		if (!currentScene.objectFolders.includes(name)) {
+			currentScene.objectFolders.push(name)
+		} else {
+			alert('Папка с таким именем уже есть!')
+		}
+	}
+
+	saveProjectToLocal()
+	renderSidebar()
 }
 
 // 2. Функция удаления папки (Только если пустая или с подтверждением)
 async function deleteFolder(type, folderName) {
-    const confirmed = await showConfirmDialog('Удаление папки', `Удалить папку "${folderName}"? Объекты внутри станут "без папки".`);
-    if (!confirmed) return;
+	const confirmed = await showConfirmDialog(
+		'Удаление папки',
+		`Удалить папку "${folderName}"? Объекты внутри станут "без папки".`
+	)
+	if (!confirmed) return
 
-    if (type === 'scene') {
-        // Убираем папку из списка
-        projectData.sceneFolders = projectData.sceneFolders.filter(f => f !== folderName);
-        // Сбрасываем привязку у сцен внутри этой папки
-        projectData.scenes.forEach(s => {
-            if (s.folder === folderName) delete s.folder;
-        });
-    } else {
-        const scene = getActiveScene();
-        if (scene) {
-            scene.objectFolders = scene.objectFolders.filter(f => f !== folderName);
-            // Сбрасываем привязку у объектов
-            scene.objects.forEach(o => {
-                if (o.folder === folderName) delete o.folder;
-            });
-        }
-    }
-    saveProjectToLocal();
-    renderSidebar();
+	if (type === 'scene') {
+		// Убираем папку из списка
+		projectData.sceneFolders = projectData.sceneFolders.filter(
+			f => f !== folderName
+		)
+		// Сбрасываем привязку у сцен внутри этой папки
+		projectData.scenes.forEach(s => {
+			if (s.folder === folderName) delete s.folder
+		})
+	} else {
+		const scene = getActiveScene()
+		if (scene) {
+			scene.objectFolders = scene.objectFolders.filter(f => f !== folderName)
+			// Сбрасываем привязку у объектов
+			scene.objects.forEach(o => {
+				if (o.folder === folderName) delete o.folder
+			})
+		}
+	}
+	saveProjectToLocal()
+	renderSidebar()
 }
 
 // 3. Контекстное меню для элементов (Добавляем "Переместить в папку")
@@ -482,99 +491,109 @@ function showFolderSelectModal(title, folders, currentFolder, onSelect) {
 
 // Функция хелпер для назначения событий на контейнер списка
 function attachDropToContainer(container, targetType) {
-    container.ondragover = (e) => {
-        e.preventDefault();
-        // Подсвечиваем только если тащим над самим контейнером, а не над папкой внутри
-        if (e.target === container) {
-            container.classList.add('drag-over');
-        }
-    };
-    container.ondragleave = () => container.classList.remove('drag-over');
-    
-    container.ondrop = (e) => {
-        e.preventDefault();
-        container.classList.remove('drag-over');
-        
-        // Если бросили прямо в контейнер (а не в папку) -> Перемещаем в КОРЕНЬ
-        if (e.target === container || e.target.classList.contains('list-item')) {
-            const draggedId = e.dataTransfer.getData('id');
-            const draggedType = e.dataTransfer.getData('type');
+	container.ondragover = e => {
+		e.preventDefault()
+		// Подсвечиваем только если тащим над самим контейнером, а не над папкой внутри
+		if (e.target === container) {
+			container.classList.add('drag-over')
+		}
+	}
+	container.ondragleave = () => container.classList.remove('drag-over')
 
-            if (draggedType !== targetType) return;
+	container.ondrop = e => {
+		e.preventDefault()
+		container.classList.remove('drag-over')
 
-            if (targetType === 'scene') {
-                const scene = projectData.scenes.find(s => s.id === draggedId);
-                if (scene) delete scene.folder; // Удаляем папку
-            } else {
-                const obj = getActiveScene().objects.find(o => o.id === draggedId);
-                if (obj) delete obj.folder; // Удаляем папку
-            }
+		// Если бросили прямо в контейнер (а не в папку) -> Перемещаем в КОРЕНЬ
+		if (e.target === container || e.target.classList.contains('list-item')) {
+			const draggedId = e.dataTransfer.getData('id')
+			const draggedType = e.dataTransfer.getData('type')
 
-            saveProjectToLocal();
-            renderSidebar();
-        }
-    };
+			if (draggedType !== targetType) return
+
+			if (targetType === 'scene') {
+				const scene = projectData.scenes.find(s => s.id === draggedId)
+				if (scene) delete scene.folder // Удаляем папку
+			} else {
+				const obj = getActiveScene().objects.find(o => o.id === draggedId)
+				if (obj) delete obj.folder // Удаляем папку
+			}
+
+			saveProjectToLocal()
+			renderSidebar()
+		}
+	}
 }
 
 function renderSidebar() {
-    sceneListEl.innerHTML = '';
-    objectListEl.innerHTML = '';
+	sceneListEl.innerHTML = ''
+	objectListEl.innerHTML = ''
 
-    // --- ПОДКЛЮЧАЕМ DROP В КОРЕНЬ ---
-    attachDropToContainer(sceneListEl, 'scene');
-    attachDropToContainer(objectListEl, 'object');
-    // --------------------------------
+	// --- ПОДКЛЮЧАЕМ DROP В КОРЕНЬ ---
+	attachDropToContainer(sceneListEl, 'scene')
+	attachDropToContainer(objectListEl, 'object')
+	// --------------------------------
 
-    // ... (Дальше стандартный код рендера, как был раньше) ...
-    
-    // 1. РЕНДЕР СЦЕН
-    const sceneFolders = projectData.sceneFolders || [];
-    const scenesWithoutFolder = [];
-    const scenesByFolder = {};
+	// ... (Дальше стандартный код рендера, как был раньше) ...
 
-    projectData.scenes.forEach(scene => {
-        if (scene.folder && sceneFolders.includes(scene.folder)) {
-            if (!scenesByFolder[scene.folder]) scenesByFolder[scene.folder] = [];
-            scenesByFolder[scene.folder].push(scene);
-        } else {
-            scenesWithoutFolder.push(scene);
-        }
-    });
+	// 1. РЕНДЕР СЦЕН
+	const sceneFolders = projectData.sceneFolders || []
+	const scenesWithoutFolder = []
+	const scenesByFolder = {}
 
-    sceneFolders.forEach(folderName => {
-        renderFolderGroup(sceneListEl, folderName, scenesByFolder[folderName] || [], 'scene');
-    });
+	projectData.scenes.forEach(scene => {
+		if (scene.folder && sceneFolders.includes(scene.folder)) {
+			if (!scenesByFolder[scene.folder]) scenesByFolder[scene.folder] = []
+			scenesByFolder[scene.folder].push(scene)
+		} else {
+			scenesWithoutFolder.push(scene)
+		}
+	})
 
-    scenesWithoutFolder.forEach(scene => {
-        sceneListEl.appendChild(createSceneElement(scene));
-    });
+	sceneFolders.forEach(folderName => {
+		renderFolderGroup(
+			sceneListEl,
+			folderName,
+			scenesByFolder[folderName] || [],
+			'scene'
+		)
+	})
 
-    // 2. РЕНДЕР ОБЪЕКТОВ
-    const currentScene = getActiveScene();
-    if (currentScene) {
-        const objectFolders = currentScene.objectFolders || [];
-        const objectsWithoutFolder = [];
-        const objectsByFolder = {};
+	scenesWithoutFolder.forEach(scene => {
+		sceneListEl.appendChild(createSceneElement(scene))
+	})
 
-        currentScene.objects.forEach(obj => {
-            if (obj.folder && objectFolders.includes(obj.folder)) {
-                if (!objectsByFolder[obj.folder]) objectsByFolder[obj.folder] = [];
-                objectsByFolder[obj.folder].push(obj);
-            } else {
-                objectsWithoutFolder.push(obj);
-            }
-        });
+	// 2. РЕНДЕР ОБЪЕКТОВ
+	const currentScene = getActiveScene()
+	if (currentScene) {
+		const objectFolders = currentScene.objectFolders || []
+		const objectsWithoutFolder = []
+		const objectsByFolder = {}
 
-        objectFolders.forEach(folderName => {
-            renderFolderGroup(objectListEl, folderName, objectsByFolder[folderName] || [], 'object');
-        });
+		currentScene.objects.forEach(obj => {
+			if (obj.folder && objectFolders.includes(obj.folder)) {
+				if (!objectsByFolder[obj.folder]) objectsByFolder[obj.folder] = []
+				objectsByFolder[obj.folder].push(obj)
+			} else {
+				objectsWithoutFolder.push(obj)
+			}
+		})
 
-        objectsWithoutFolder.forEach(obj => {
-            objectListEl.appendChild(createObjectElement(obj));
-        });
-    }
+		objectFolders.forEach(folderName => {
+			renderFolderGroup(
+				objectListEl,
+				folderName,
+				objectsByFolder[folderName] || [],
+				'object'
+			)
+		})
 
-    updateBreadcrumbs();
+		objectsWithoutFolder.forEach(obj => {
+			objectListEl.appendChild(createObjectElement(obj))
+		})
+	}
+
+	updateBreadcrumbs()
 }
 
 // --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ РЕНДЕРА ---
@@ -750,12 +769,12 @@ function createObjectElement(obj) {
 }
 
 function updateBreadcrumbs() {
-    const objName = getActiveObject() ? getActiveObject().name : '---';
-    const ctx = document.getElementById('current-context');
-    const currentScene = getActiveScene();
-    if (ctx) {
-        ctx.innerText = `${currentScene ? currentScene.name : ''} > ${objName}`;
-    }
+	const objName = getActiveObject() ? getActiveObject().name : '---'
+	const ctx = document.getElementById('current-context')
+	const currentScene = getActiveScene()
+	if (ctx) {
+		ctx.innerText = `${currentScene ? currentScene.name : ''} > ${objName}`
+	}
 }
 
 // ==========================================
@@ -1190,4 +1209,74 @@ function createVariablePill(name) {
 	}
 
 	return el
+}
+
+// ==========================================
+// --- ПОИСК ПО БЛОКАМ (FIX) ---
+// ==========================================
+
+// Навешиваем событие на инпут поиска
+const searchInput = document.getElementById('blockSearchInput')
+if (searchInput) {
+	searchInput.addEventListener('input', e => {
+		filterToolbox(e.target.value)
+	})
+}
+
+function filterToolbox(text) {
+	const query = text.toLowerCase().trim()
+	const container = document.getElementById('toolboxContent')
+	if (!container) return
+
+	// Получаем все элементы (заголовки, подзаголовки, инструменты)
+	const items = Array.from(container.children)
+
+	// Сбрасываем видимость если поиск пустой
+	if (!query) {
+		items.forEach(el => (el.style.display = ''))
+		return
+	}
+
+	// 1. Сначала скрываем всё
+	items.forEach(el => (el.style.display = 'none'))
+
+	// 2. Проходимся и ищем совпадения в блоках
+	for (let i = 0; i < items.length; i++) {
+		const el = items[i]
+
+		// Нас интересуют только сами блоки (tool-item)
+		if (el.classList.contains('tool-item')) {
+			const label = el.innerText.toLowerCase()
+
+			// Если нашли совпадение
+			if (label.includes(query)) {
+				// Показываем сам блок
+				el.style.display = 'flex' // или 'block', в зависимости от CSS. Flex для .tool-item
+
+				// 3. (Опционально) Показываем заголовок категории над этим блоком
+				// Идем вверх от текущего элемента и ищем ближайший заголовок
+				for (let j = i - 1; j >= 0; j--) {
+					const prev = items[j]
+					// Если наткнулись на заголовок категории или подкатегории
+					if (
+						prev.classList.contains('category-title') ||
+						prev.classList.contains('toolbox-subheader')
+					) {
+						prev.style.display = 'block'
+						// Если это подкатегория, ищем еще выше Главную категорию
+						if (prev.classList.contains('toolbox-subheader')) {
+							// Продолжаем цикл j вниз, пока не найдем category-title
+							// (Для простоты в этой версии можно показывать просто ближайший заголовок)
+						} else {
+							// Если это главный заголовок - останавливаемся, мы его нашли
+							break
+						}
+					}
+					// Если наткнулись на другой блок - значит заголовки кончились (или мы внутри группы),
+					// просто продолжаем искать вверх, пока не упремся в заголовок.
+					if (prev.classList.contains('tool-item')) continue
+				}
+			}
+		}
+	}
 }

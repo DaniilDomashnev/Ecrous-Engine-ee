@@ -34,7 +34,7 @@ let editorMode = 'stack'
 let connections = []
 window.currentSessionId = 0 // Глобальный счетчик сессий
 window.loadedSounds = {} // Глобальное хранилище звуков
-let currentAssetFolderId = null; // null = корневая папка
+let currentAssetFolderId = null // null = корневая папка
 let isWiring = false
 let wireStartBlock = null
 let tempWireNode = null
@@ -1267,39 +1267,74 @@ function executeBlockLogic(block) {
 
 				// --- ФИЗИКА ---
 				case 'phys_enable': {
-					const id = v[0]
-					const shape = v[1] // box или circle
-					const isStatic = v[2] === '1' || v[2] === 'true'
-					const restitution = parseFloat(v[3]) || 0
+					const id = resolveValue(v[0])
+					const shape = v[1]
+
+					// Логика определения статичности (поддержка старых и новых блоков)
+					const valInput = resolveValue(v[2])
+					let isStatic = false
+
+					// Если выбрали "Static" в меню ИЛИ если пришло "1"/"true" из старого сохранения
+					if (
+						valInput === 'Static' ||
+						String(valInput) === '1' ||
+						String(valInput) === 'true'
+					) {
+						isStatic = true
+					}
+
+					let restitution = parseFloat(resolveValue(v[3]))
+					if (isNaN(restitution)) restitution = 0
 
 					const el = document.getElementById(id)
-					if (el && matterEngine) {
+
+					// ПРОВЕРКА: Ищем глобальный движок
+					if (el && window.matterEngine && window.matterEngine.world) {
+						if (bodyMap.has(id)) {
+							const oldBody = bodyMap.get(id)
+							Matter.World.remove(window.matterEngine.world, oldBody)
+							bodyMap.delete(id)
+						}
+
 						const x = parseFloat(el.style.left) || 0
 						const y = parseFloat(el.style.top) || 0
 						const w = el.offsetWidth
 						const h = el.offsetHeight
 
-						// Смещаем координаты к центру для Matter.js
 						const centerX = x + w / 2
 						const centerY = y + h / 2
 
-						let body
-						if (shape === 'circle') {
-							body = Matter.Bodies.circle(centerX, centerY, w / 2, {
-								isStatic: isStatic,
-								restitution: restitution,
-								label: id, // Важно для коллизий
-							})
-						} else {
-							body = Matter.Bodies.rectangle(centerX, centerY, w, h, {
-								isStatic: isStatic,
-								restitution: restitution,
-								label: id,
-							})
+						const commonOptions = {
+							isStatic: isStatic,
+							restitution: restitution,
+							friction: 0.5,
+							label: id,
+							angle: 0,
 						}
 
-						Matter.World.add(matterEngine.world, body)
-						bodyMap.set(id, body) // Сохраняем в map
+						let body
+						if (shape === 'circle') {
+							body = Matter.Bodies.circle(
+								centerX,
+								centerY,
+								w / 2,
+								commonOptions
+							)
+						} else {
+							body = Matter.Bodies.rectangle(
+								centerX,
+								centerY,
+								w,
+								h,
+								commonOptions
+							)
+						}
+
+						// Принудительно задаем статичность
+						Matter.Body.setStatic(body, isStatic)
+
+						Matter.World.add(window.matterEngine.world, body)
+						bodyMap.set(id, body)
 					}
 					break
 				}
@@ -2966,70 +3001,68 @@ function executeBlockLogic(block) {
 					break
 				}
 				case 'obj_create_sprite': {
-					const id = v[0]
-					// Если объект уже есть, не создаем дубликат
+					const id = resolveValue(v[0])
+
+					// Защита: если объект с таким ID уже есть, не создаем дубль
 					if (document.getElementById(id)) break
 
+					// Получаем параметры
 					const url = getAssetUrl(resolveValue(v[1]))
 					const x = parseFloat(resolveValue(v[2]))
 					const y = parseFloat(resolveValue(v[3]))
 					const wVal = parseFloat(resolveValue(v[4]))
 					const hVal = parseFloat(resolveValue(v[5]))
-					const physType = v[6] // 'Static', 'Dynamic', 'None'
-					const layer = parseInt(resolveValue(v[7])) || 1
+					const physType = v[6] // Значения: 'Static', 'Dynamic', 'None'
+					const zIdx = parseInt(resolveValue(v[7])) || 1
 
 					// 1. Создаем визуальный элемент (DOM)
 					const el = document.createElement('div')
 					el.id = id
+					el.className = 'game-object' // Полезно для общих стилей
 					el.style.position = 'absolute'
 					el.style.left = x + 'px'
 					el.style.top = y + 'px'
 					el.style.width = wVal + 'px'
 					el.style.height = hVal + 'px'
+
+					// Настройка картинки
 					el.style.backgroundImage = `url('${url}')`
-					el.style.backgroundSize = 'contain'
+					el.style.backgroundSize = 'contain' // Вписать картинку целиком
 					el.style.backgroundRepeat = 'no-repeat'
 					el.style.backgroundPosition = 'center'
-					el.style.zIndex = layer
+					el.style.zIndex = zIdx
 
-					document.getElementById('game-world').appendChild(el)
+					// Добавляем на сцену
+					document.getElementById('game-stage').appendChild(el)
 
-					// 2. Добавляем физику (если выбрана)
-					if (
-						physType !== 'None' &&
-						typeof Matter !== 'undefined' &&
-						matterEngine
-					) {
+					// 2. ФИЗИКА
+					// Проверяем window.matterEngine
+					if (physType !== 'None' && window.Matter && window.matterEngine) {
 						const isStatic = physType === 'Static'
-						// Matter.js использует координаты центра, а DOM — левый верхний угол
+
 						const centerX = x + wVal / 2
 						const centerY = y + hVal / 2
 
 						const body = Matter.Bodies.rectangle(centerX, centerY, wVal, hVal, {
 							isStatic: isStatic,
-							label: id, // Важно для событий столкновения
+							label: id,
 							friction: 0.5,
-							restitution: 0.0, // Упругость
+							restitution: 0.2,
+							angle: 0,
 						})
 
-						Matter.World.add(matterEngine.world, body)
-						bodyMap.set(id, body)
+						// Принудительно фиксируем, если статичный
+						if (isStatic) Matter.Body.setStatic(body, true)
 
-						// Регистрируем в системе физики движка (для updatePhysics)
-						physicsObjects[id] = {
-							vx: 0,
-							vy: 0,
-							mass: isStatic ? 0 : 1,
-							width: wVal,
-							height: hVal,
-							collideWorld: false,
-						}
+						Matter.World.add(window.matterEngine.world, body)
+						bodyMap.set(id, body) // Сохраняем ссылку
 					}
 					break
 				}
 
 				case 'obj_set_sprite_frame': {
-					const el = document.getElementById(v[0])
+					const id = resolveValue(v[0])
+					const el = document.getElementById(id)
 					if (el) {
 						const url = getAssetUrl(resolveValue(v[1]))
 						el.style.backgroundImage = `url('${url}')`
@@ -3103,4 +3136,3 @@ function getAssetUrl(input) {
 	// 3. Иначе считаем, что это прямая ссылка (https://...)
 	return input
 }
-

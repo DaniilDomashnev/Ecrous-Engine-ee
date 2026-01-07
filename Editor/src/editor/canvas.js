@@ -263,4 +263,92 @@ function updateTransform() {
 	canvas.style.backgroundSize = `${gridSize}px ${gridSize}px`
 }
 
+/* =========================================
+   МОБИЛЬНОЕ УПРАВЛЕНИЕ КАНВАСОМ (TOUCH FIX)
+   ========================================= */
 
+// Оборачиваем в ожидание загрузки страницы
+document.addEventListener('DOMContentLoaded', () => {
+    
+    // 1. Явно ищем контейнер, чтобы точно его найти
+    const mobileContainer = document.getElementById('canvas-container');
+
+    // Если контейнера нет (например, другая страница), выходим, чтобы не было ошибок
+    if (!mobileContainer) return;
+
+    let lastTouchX = 0;
+    let lastTouchY = 0;
+    let initialPinchDistance = null;
+    let initialZoom = 1;
+
+    // 2. Начало касания
+    mobileContainer.addEventListener('touchstart', (e) => {
+        // Если касаемся одним пальцем - это перемещение (Pan)
+        if (e.touches.length === 1) {
+            // Проверяем, что не касаемся блока
+            if (e.target.closest('.node-block') || e.target.closest('.socket')) return;
+            
+            lastTouchX = e.touches[0].clientX;
+            lastTouchY = e.touches[0].clientY;
+        }
+        // Если касаемся двумя пальцами - это Зум (Pinch)
+        else if (e.touches.length === 2) {
+            e.preventDefault(); 
+            const dx = e.touches[0].clientX - e.touches[1].clientX;
+            const dy = e.touches[0].clientY - e.touches[1].clientY;
+            initialPinchDistance = Math.sqrt(dx * dx + dy * dy);
+            
+            // Берем глобальную переменную zoomLevel из canvas.js
+            // Если она не определена, берем 1
+            initialZoom = (typeof zoomLevel !== 'undefined') ? zoomLevel : 1;
+        }
+    }, { passive: false });
+
+    // 3. Движение пальцем
+    mobileContainer.addEventListener('touchmove', (e) => {
+        // Перемещение (1 палец)
+        if (e.touches.length === 1) {
+            if (e.target.closest('.node-block') || e.target.closest('.socket')) return;
+
+            const x = e.touches[0].clientX;
+            const y = e.touches[0].clientY;
+
+            const dx = x - lastTouchX;
+            const dy = y - lastTouchY;
+
+            // Изменяем глобальные переменные panX/panY
+            if (typeof panX !== 'undefined') {
+                panX += dx;
+                panY += dy;
+                updateGrid(); // Обновляем сетку
+            }
+
+            lastTouchX = x;
+            lastTouchY = y;
+        }
+        // Зум (2 пальца)
+        else if (e.touches.length === 2 && initialPinchDistance) {
+            e.preventDefault();
+
+            const dx = e.touches[0].clientX - e.touches[1].clientX;
+            const dy = e.touches[0].clientY - e.touches[1].clientY;
+            const currentDistance = Math.sqrt(dx * dx + dy * dy);
+
+            const scale = currentDistance / initialPinchDistance;
+            
+            let newZoom = initialZoom * scale;
+            newZoom = Math.max(0.2, Math.min(newZoom, 3));
+
+            // Обновляем глобальный зум
+            if (typeof zoomLevel !== 'undefined') {
+                zoomLevel = newZoom;
+                updateGrid();
+            }
+        }
+    }, { passive: false });
+
+    // 4. Конец касания
+    mobileContainer.addEventListener('touchend', () => {
+        initialPinchDistance = null;
+    });
+});

@@ -140,11 +140,12 @@ function runProject() {
 		World = Matter.World,
 		Runner = Matter.Runner
 
-	matterEngine = Engine.create()
-	matterEngine.world.gravity.y = 1
+	// ВАЖНО: Делаем движок глобальным через window
+	window.matterEngine = Engine.create()
+	window.matterEngine.world.gravity.y = 1
 
 	// Обработка коллизий
-	Matter.Events.on(matterEngine, 'collisionStart', event => {
+	Matter.Events.on(window.matterEngine, 'collisionStart', event => {
 		event.pairs.forEach(pair => {
 			const idA = pair.bodyA.label
 			const idB = pair.bodyB.label
@@ -657,11 +658,11 @@ function stopGame() {
 	loadedSounds = {}
 	if (currentKeyDownHandler)
 		window.removeEventListener('keydown', currentKeyDownHandler)
-	// Очистка Matter.js
-	if (matterEngine) {
-		Matter.World.clear(matterEngine.world)
-		Matter.Engine.clear(matterEngine)
-		matterEngine = null
+	// Очистка Matter.js (ИСПОЛЬЗУЕМ window.matterEngine)
+	if (window.matterEngine) {
+		Matter.World.clear(window.matterEngine.world)
+		Matter.Engine.clear(window.matterEngine)
+		window.matterEngine = null
 	}
 	bodyMap.clear()
 	if (currentClickHandler)

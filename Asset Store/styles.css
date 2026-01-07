@@ -1,11 +1,7 @@
 :root {
-	/* Дополнительные константы для UI, которые не зависят от темы */
 	--radius: 16px;
 	--radius-sm: 10px;
 	--transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-	/* Тени можно тоже привязать к теме, если они определены там, 
-       или оставить общие */
 	--shadow-card: 0 4px 20px rgba(0, 0, 0, 0.2);
 	--shadow-hover: 0 10px 30px var(--accent-soft);
 }
@@ -14,25 +10,19 @@
 	margin: 0;
 	padding: 0;
 	box-sizing: border-box;
-	font-family: 'Inter', sans-serif;
+	font-family: 'ubuntu', sans-serif; 
 	-webkit-font-smoothing: antialiased;
 }
 
 body {
 	background-color: var(--bg);
-	/* Градиент теперь использует цвет акцента из темы */
-	background-image: radial-gradient(
-			circle at 15% 50%,
-			var(--accent-soft),
-			transparent 25%
-		),
+	background-image: radial-gradient(circle at 15% 50%, var(--accent-soft), transparent 25%),
 		radial-gradient(circle at 85% 30%, var(--accent-soft), transparent 25%);
 	color: var(--text);
 	overflow-x: hidden;
 	transition: background-color 0.3s, color 0.3s;
 }
 
-/* === Utility Classes === */
 .hidden {
 	display: none !important;
 }
@@ -212,7 +202,6 @@ body {
 }
 
 .hero-banner {
-	/* Можно оставить изображение, но подложку сделать зависимой от темы */
 	background: linear-gradient(90deg, var(--bg) 0%, rgba(0, 0, 0, 0.3) 100%),
 		url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1600&auto=format&fit=crop');
 	background-size: cover;
@@ -376,12 +365,7 @@ body {
 	font-size: 0.85rem;
 	font-weight: 700;
 	color: var(--success);
-	background: rgba(
-		16,
-		185,
-		129,
-		0.1
-	); /* Можно оставить, или сделать прозрачнее */
+	background: rgba(16, 185, 129, 0.1);
 	padding: 4px 10px;
 	border-radius: 8px;
 }
@@ -401,12 +385,18 @@ body {
 	gap: 8px;
 }
 
+.btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    filter: grayscale(0.5);
+}
+
 .btn-primary {
 	background: var(--accent);
-	color: white; /* Для контраста на цветных кнопках часто лучше белый */
+	color: white;
 	box-shadow: 0 4px 15px var(--accent-soft);
 }
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
 	transform: translateY(-2px);
 	box-shadow: 0 8px 25px var(--accent-soft);
 	filter: brightness(1.1);
@@ -417,7 +407,7 @@ body {
 	color: white;
 	box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
-.btn-accent:hover {
+.btn-accent:hover:not(:disabled) {
 	filter: brightness(1.1);
 	transform: translateY(-2px);
 }
@@ -426,7 +416,7 @@ body {
 	background: transparent;
 	color: var(--text-soft);
 }
-.btn-text:hover {
+.btn-text:hover:not(:disabled) {
 	color: var(--text);
 	background: var(--bg-elevated-soft);
 }
@@ -439,7 +429,7 @@ body {
 	font-size: 0.85rem;
 	border-radius: 8px;
 }
-.btn-outline-sm:hover {
+.btn-outline-sm:hover:not(:disabled) {
 	background: var(--text);
 	color: var(--bg);
 	border-color: var(--text);
@@ -451,7 +441,7 @@ body {
 	padding: 8px;
 	border-radius: 50%;
 }
-.btn-icon:hover {
+.btn-icon:hover:not(:disabled) {
 	color: var(--danger);
 	background: rgba(239, 68, 68, 0.1);
 }
@@ -685,11 +675,11 @@ body {
 	color: var(--text);
 }
 
-.edit-btn:hover {
+.edit-btn:hover:not(:disabled) {
 	color: var(--warning) !important;
 	background: rgba(251, 191, 36, 0.1);
 }
-.delete-btn:hover {
+.delete-btn:hover:not(:disabled) {
 	color: var(--danger) !important;
 	background: rgba(239, 68, 68, 0.1);
 }
@@ -825,14 +815,14 @@ body {
 .comment-btn.edit {
 	color: var(--warning);
 }
-.comment-btn.edit:hover {
+.comment-btn.edit:hover:not(:disabled) {
 	color: #f59e0b;
 }
 
 .comment-btn.delete {
 	color: var(--danger);
 }
-.comment-btn.delete:hover {
+.comment-btn.delete:hover:not(:disabled) {
 	color: #dc2626;
 }
 
@@ -859,7 +849,7 @@ body {
 	justify-content: center;
 	gap: 10px;
 }
-.btn-tg:hover {
+.btn-tg:hover:not(:disabled) {
 	background: #1b8ac0;
 	box-shadow: 0 0 15px rgba(34, 158, 217, 0.4);
 }
