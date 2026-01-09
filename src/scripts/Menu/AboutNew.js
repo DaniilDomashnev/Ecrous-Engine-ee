@@ -3,7 +3,7 @@
 ========================================== */
 
 const UPDATE_CONFIG = {
-	version: 'ECX 2025.05.01-bf3',
+	version: 'ECX 2026.09.01',
 	changes: [
 		{
 			type: 'new',
