@@ -1,39 +1,26 @@
 /* ==========================================
-   AboutNew.js - Исправленная версия
+   AboutNew.js
 ========================================== */
 
 const UPDATE_CONFIG = {
-	version: 'ECX 2026.09.01',
+	version: 'ECX 2026.15.01',
 	changes: [
 		{
 			type: 'new',
 			text: {
 				ru: 'Добавлены новые блоки "создать спрайт" и "сменить кадр/картинку"',
-				// en: 'Blocks work correctly on mobile',
-				// uk: 'Блоки на телефоні працюють нормально',
-				// kz: 'Телефонда блоктар дұрыс жұмыс істейді',
 			},
 		},
 		{
 			type: 'fix',
-			text: {
-				ru: 'Блоки на телефоне работают нормально, при отдалении тоже',
-				// en: 'Blocks work correctly on mobile',
-				// uk: 'Блоки на телефоні працюють нормально',
-				// kz: 'Телефонда блоктар дұрыс жұмыс істейді',
-			},
+			text: { ru: 'Блоки на телефоне работают нормально, при отдалении тоже' },
 		},
 	],
 }
 
 const STORAGE_KEY_VERSION = 'EcrousEngine_LastViewedVersion'
 
-// Словари для бейджей
-const BADGE_KEYS = {
-	new: 'badgeNew',
-	fix: 'badgeFix',
-	update: 'badgeUpdate',
-}
+const BADGE_KEYS = { new: 'badgeNew', fix: 'badgeFix', update: 'badgeUpdate' }
 const BADGE_FALLBACKS = {
 	ru: { new: 'Новое', fix: 'Исправлено', update: 'Улучшено' },
 	en: { new: 'New', fix: 'Fixed', update: 'Improved' },
@@ -41,42 +28,38 @@ const BADGE_FALLBACKS = {
 	kz: { new: 'Жаңа', fix: 'Түзетілді', update: 'Жақсартылды' },
 }
 
+// Инициализация
 document.addEventListener('DOMContentLoaded', () => {
 	initChangelog()
 	checkAndShowUpdate()
 })
 
-// === ВАЖНО: Делаем функцию глобальной, чтобы Language.js мог её вызвать ===
 window.initChangelog = initChangelog
 
 function getCurrentLanguage() {
-	let lang = localStorage.getItem('language')
-	if (!lang) lang = 'ru' // Язык по умолчанию
-	return lang
+	return localStorage.getItem('language') || 'ru'
 }
 
 function initChangelog() {
 	const container = document.getElementById('changelogContainer')
 	const versionSpan = document.getElementById('newVersionNumber')
-	const currentLang = getCurrentLanguage()
 
 	if (versionSpan) versionSpan.innerText = UPDATE_CONFIG.version
 	if (!container) return
 
 	container.innerHTML = ''
+	const currentLang = getCurrentLanguage()
+	const fragment = document.createDocumentFragment() // Оптимизация рендеринга
 
 	UPDATE_CONFIG.changes.forEach(item => {
 		const row = document.createElement('div')
 		row.className = 'changelog-item'
 
-		const badgeClass = `badge ${item.type}`
-
-		// 1. Текст бейджа
+		// Текст бейджа
 		const dict = BADGE_FALLBACKS[currentLang] || BADGE_FALLBACKS['ru']
 		const badgeText = dict[item.type] || item.type
 
-		// 2. Текст обновления
-		// Ищем перевод, если нет - берем русский, если нет - берем первый доступный или пустую строку
+		// Текст обновления
 		const updateText =
 			item.text[currentLang] ||
 			item.text['ru'] ||
@@ -84,30 +67,33 @@ function initChangelog() {
 			''
 
 		row.innerHTML = `
-            <div class="${badgeClass}" data-translate="${
+            <div class="badge ${item.type}" data-translate="${
 			BADGE_KEYS[item.type]
 		}">${badgeText}</div>
             <div class="change-text">${updateText}</div>
         `
-		container.appendChild(row)
+		fragment.appendChild(row)
 	})
+
+	container.appendChild(fragment)
 }
 
-function openAboutNew() {
+window.openAboutNew = function () {
 	const panel = document.getElementById('aboutNewPanel')
 	if (!panel) return
-	initChangelog() // Обновляем перед открытием
-	try {
-		document.documentElement.style.overflow = 'hidden'
-	} catch (e) {}
+
+	initChangelog()
+	document.documentElement.style.overflow = 'hidden'
+
 	panel.style.display = 'flex'
 	panel.style.animation =
 		'popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards'
 }
 
-function closeAboutNew() {
+window.closeAboutNew = function () {
 	const panel = document.getElementById('aboutNewPanel')
 	if (!panel) return
+
 	panel.style.animation = 'fadeOut 0.3s forwards'
 	setTimeout(() => {
 		panel.style.display = 'none'
@@ -120,9 +106,7 @@ function closeAboutNew() {
 function checkAndShowUpdate() {
 	const lastViewed = localStorage.getItem(STORAGE_KEY_VERSION)
 	if (lastViewed !== UPDATE_CONFIG.version) {
-		setTimeout(() => {
-			openAboutNew()
-		}, 1000)
+		setTimeout(window.openAboutNew, 1000)
 	}
 }
 

@@ -1,31 +1,38 @@
-function openThanks() {
+/* ===============================
+   thanks.js
+================================= */
+
+window.openThanks = function () {
 	const panel = document.getElementById('thanksPanel')
 	if (!panel) return
 
-	try {
-		const overlay = ensureModalOverlay()
-		overlay.style.display = 'block'
-		setTimeout(() => overlay.classList.add('visible'), 10)
-		document.documentElement.style.overflow = 'hidden'
-	} catch (e) {}
-
+	const ov = document.getElementById('modalOverlay') || createOverlay() // Assuming createOverlay or manual check
+	if (ov) {
+		ov.style.display = 'block'
+		setTimeout(() => ov.classList.add('visible'), 10)
+	}
+	document.documentElement.style.overflow = 'hidden'
 	panel.style.display = 'block'
 }
 
-function closeThanks() {
+window.closeThanks = function () {
 	const panel = document.getElementById('thanksPanel')
 	if (!panel) return
 	panel.style.display = 'none'
 
-	try {
-		const overlay = document.getElementById('modalOverlay')
-		if (overlay) {
-			overlay.classList.remove('visible')
-			setTimeout(() => {
-				overlay.style.display = 'none'
-			}, 220)
-		}
-	} catch (e) {}
-
+	const ov = document.getElementById('modalOverlay')
+	if (ov) {
+		ov.classList.remove('visible')
+		setTimeout(() => (ov.style.display = 'none'), 220)
+	}
 	document.documentElement.style.overflow = ''
+}
+
+// Хелпер, если его нет в других файлах (безопасно дублировать такую мелочь)
+function createOverlay() {
+	const ov = document.createElement('div')
+	ov.id = 'modalOverlay'
+	ov.className = 'modal-overlay'
+	document.body.appendChild(ov)
+	return ov
 }

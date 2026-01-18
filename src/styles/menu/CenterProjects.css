@@ -1,160 +1,143 @@
 /* ======================================
-   ЦЕНТРАЛЬНЫЕ КАРТОЧКИ ПРОЕКТОВ (REMASTERED)
+   CENTER PROJECTS 
 ====================================== */
 
 .center-container {
-    position: absolute; /* Changed from fixed to match main layout flow better */
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    
-    z-index: 5;
-    /* Важно: сам контейнер пропускает клики, но дети (список) будут их ловить */
-    pointer-events: none; 
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	z-index: 5;
+	pointer-events: none;
 }
 
-/* Сетка проектов */
 .center-projects-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Чуть шире */
-    gap: 24px;
-    
-    width: 100%;
-    max-width: 900px;
-    padding: 40px;
-    
-    /* 🔥 КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: Включаем клики для списка */
-    pointer-events: auto; 
-    
-    animation: fadeInUpList 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 24px;
+	width: 100%;
+	max-width: 900px;
+	padding: 40px;
+	pointer-events: auto;
+	animation: fadeInUpList 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
 }
 
 @keyframes fadeInUpList {
-    from { opacity: 0; transform: translateY(40px) scale(0.95); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
+	from {
+		opacity: 0;
+		transform: translateY(40px) scale(0.95);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
 }
 
-/* Карточка проекта */
 .center-project-card {
-    position: relative;
-    background: var(--bg-elevated);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-xl);
-    padding: 24px;
-    
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    height: 180px; /* Фиксированная высота для аккуратности */
-    
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    
-    /* Glassmorphism effect */
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
+	position: relative;
+	background: var(--bg-elevated);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-xl);
+	padding: 24px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 16px;
+	height: 180px;
+	cursor: pointer;
+	transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+	backdrop-filter: blur(10px);
+	box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+	overflow: hidden;
 }
 
-/* Эффект при наведении */
 .center-project-card:hover {
-    transform: translateY(-8px);
-    border-color: var(--accent);
-    box-shadow: 0 15px 35px var(--accent-soft);
-    background: var(--bg-elevated-soft);
+	transform: translateY(-8px);
+	border-color: var(--accent);
+	box-shadow: 0 15px 35px var(--accent-soft);
+	background: var(--bg-elevated-soft);
 }
 
-/* Иконка папки */
 .project-card-icon {
-    font-size: 48px;
-    color: var(--text-soft);
-    transition: transform 0.4s ease, color 0.3s ease;
-    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+	font-size: 48px;
+	color: var(--text-soft);
+	transition: transform 0.4s ease, color 0.3s ease;
+	filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
 }
 
 .center-project-card:hover .project-card-icon {
-    transform: scale(1.2) rotate(-5deg); /* Живая анимация */
-    color: var(--accent);
+	transform: scale(1.2) rotate(-5deg);
+	color: var(--accent);
 }
 
-/* Название проекта */
 .project-card-name {
-    color: var(--text);
-    font-size: 18px;
-    font-weight: 600;
-    text-align: center;
-    
-    width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis; /* Троеточие, если имя длинное */
-    
-    font-family: 'Khand', sans-serif; /* Используем твой шрифт */
-    letter-spacing: 0.5px;
-    transition: color 0.2s ease;
+	color: var(--text);
+	font-size: 18px;
+	font-weight: 600;
+	text-align: center;
+	width: 100%;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font-family: 'Khand', sans-serif;
+	letter-spacing: 0.5px;
+	transition: color 0.2s ease;
 }
 
 .center-project-card:hover .project-card-name {
-    color: var(--accent-strong);
+	color: var(--accent-strong);
 }
 
-/* Декоративный элемент (блик) */
 .center-project-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    opacity: 0.5;
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 1px;
+	background: linear-gradient(
+		90deg,
+		transparent,
+		rgba(255, 255, 255, 0.2),
+		transparent
+	);
+	opacity: 0.5;
 }
-
-/* ======================================
-   АДАПТИВНОСТЬ
-====================================== */
 
 @media (max-width: 768px) {
-    .center-container {
-        justify-content: flex-start;
-        padding-top: 140px;
-        overflow-y: auto;
-        pointer-events: auto; /* На мобилках разрешаем скролл контейнера */
-    }
-
-    .center-projects-list {
-        grid-template-columns: 1fr; /* Список в колонку */
-        padding: 0 20px 100px 20px; /* Отступ снизу для меню */
-        gap: 12px;
-    }
-
-    .center-project-card {
-        flex-direction: row; /* Иконка слева, текст справа */
-        height: 70px;
-        padding: 0 20px;
-        justify-content: flex-start;
-        border-radius: var(--radius-lg);
-    }
-
-    .project-card-icon {
-        font-size: 28px;
-        margin-right: 16px;
-    }
-    
-    .center-project-card:hover .project-card-icon {
-        transform: scale(1.1); /* Меньше анимации на тач-экранах */
-    }
-
-    .project-card-name {
-        text-align: left;
-        font-size: 16px;
-    }
+	.center-container {
+		justify-content: flex-start;
+		padding-top: 140px;
+		overflow-y: auto;
+		pointer-events: auto;
+	}
+	.center-projects-list {
+		grid-template-columns: 1fr;
+		padding: 0 20px 100px 20px;
+		gap: 12px;
+	}
+	.center-project-card {
+		flex-direction: row;
+		height: 70px;
+		padding: 0 20px;
+		justify-content: flex-start;
+		border-radius: var(--radius-lg);
+	}
+	.project-card-icon {
+		font-size: 28px;
+		margin-right: 16px;
+	}
+	.center-project-card:hover .project-card-icon {
+		transform: scale(1.1);
+	}
+	.project-card-name {
+		text-align: left;
+		font-size: 16px;
+	}
 }

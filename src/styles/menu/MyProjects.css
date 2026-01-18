@@ -1,5 +1,5 @@
 /* ======================================
-   ПАНЕЛЬ "МОИ ПРОЕКТЫ" (BIG SIZE)
+   MY PROJECTS PANEL
 ====================================== */
 
 .MyProjects-panel {
@@ -7,32 +7,22 @@
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%) scale(0.95);
-
-	/* 🔥 СДЕЛАЛ ПОШИРЕ */
 	width: 85%;
-	max-width: 1000px; /* Было 700px, теперь просторно */
-
-	/* Высота всё так же авто, но может занимать почти весь экран */
+	max-width: 1000px;
 	height: auto;
 	max-height: 90vh;
-
-	padding: 32px; /* Чуть больше отступов внутри */
-
+	padding: 32px;
 	background: var(--bg-elevated);
 	border-radius: var(--radius-xl);
 	box-shadow: var(--shadow-soft);
-
 	color: var(--text);
 	opacity: 0;
 	z-index: 1250;
-
 	display: flex;
 	flex-direction: column;
-
 	animation: fadeInPanel 0.4s ease forwards;
 }
 
-/* Анимация появления панели */
 @keyframes fadeInPanel {
 	from {
 		opacity: 0;
@@ -44,31 +34,27 @@
 	}
 }
 
-/* Заголовок */
 .titleMyProjects {
 	text-align: center;
 	margin-bottom: 24px;
-	font-size: 36px; /* Чуть крупнее шрифт */
+	font-size: 36px;
 	font-weight: 700;
 	color: var(--text);
 	flex-shrink: 0;
 }
 
-/* Кнопка закрытия */
 .close-MyProjects {
 	position: absolute;
 	top: 20px;
 	right: 20px;
-
 	background: transparent;
 	border: none;
 	cursor: pointer;
-
 	transition: transform 0.25s ease, filter 0.25s ease;
 }
 
 .close-MyProjects img {
-	width: 36px; /* Чуть крупнее крестик */
+	width: 36px;
 	height: 36px;
 	filter: brightness(0) invert(1);
 	opacity: 0.85;
@@ -77,31 +63,25 @@
 body.theme-light .close-MyProjects img {
 	filter: none;
 }
-
 .close-MyProjects:hover img {
 	transform: scale(1.12);
 	opacity: 1;
 }
 
-/* Контент панели */
 .MyProjects-content {
 	display: flex;
 	flex-direction: column;
 	position: relative;
 }
 
-/* Кнопка добавления проекта / импорт */
 .plus-button,
 .import-button {
-	width: 48px; /* Кнопки чуть крупнее */
+	width: 48px;
 	height: 48px;
-
 	margin-right: 12px;
 	cursor: pointer;
-
 	border-radius: 14px;
-	transition: transform 0.25s ease, filter 0.25s ease, box-shadow 0.25s ease;
-
+	transition: all 0.25s ease;
 	filter: drop-shadow(0 3px 8px var(--accent-soft));
 }
 
@@ -111,61 +91,46 @@ body.theme-light .close-MyProjects img {
 	filter: drop-shadow(0 0 12px var(--accent));
 }
 
-/* Список проектов */
 .project-list {
 	margin-top: 25px;
-
-	/* 🔥 СПИСОК ТЕПЕРЬ ВЫШЕ */
-	max-height: 50vh; /* Занимает до 50% высоты экрана (примерно 6-8 проектов) */
+	max-height: 50vh;
 	min-height: 150px;
-
 	overflow-y: auto;
 	border-radius: var(--radius-lg);
-
 	background: var(--bg-elevated-soft);
 	padding: 20px;
-
 	box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.25);
-
 	color: var(--text-soft);
 }
 
-/* Стилизация скролла */
 .project-list::-webkit-scrollbar {
-	width: 10px; /* Скролл чуть шире для удобства */
+	width: 10px;
 }
-
 .project-list::-webkit-scrollbar-track {
 	background: var(--border);
 	margin: 4px 0;
 	border-radius: 10px;
 }
-
 .project-list::-webkit-scrollbar-thumb {
 	background: #555;
 	border-radius: 10px;
 	border: 3px solid var(--bg-elevated-soft);
 }
-
 .project-list::-webkit-scrollbar-thumb:hover {
 	background: var(--accent);
 }
 
-/* Элемент списка проекта */
 .project-item {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-
 	background: var(--bg-elevated);
-	padding: 16px 20px; /* Больше воздуха внутри элемента */
+	padding: 16px 20px;
 	border-radius: var(--radius-lg);
 	margin-bottom: 14px;
 	color: var(--text);
-
 	border: 1px solid var(--border);
 	position: relative;
-
 	flex-shrink: 0;
 }
 
@@ -173,19 +138,15 @@ body.theme-light .close-MyProjects img {
 	margin-bottom: 0;
 }
 
-/* Контейнер кнопки трёх точек */
 .project-menu {
 	position: relative;
 }
-
-/* Кнопка "три точки" */
 .menu-dots {
 	background: none;
 	border: none;
 	cursor: pointer;
 	padding: 4px;
 }
-
 .menu-dots img {
 	width: 28px;
 	height: 28px;
@@ -197,73 +158,56 @@ body.theme-light .close-MyProjects img {
 body.theme-light .menu-dots img {
 	filter: none;
 }
-
 .menu-dots:hover img {
 	transform: scale(1.12);
 	opacity: 1;
 }
 
-/* ВЫПАДАЮЩЕЕ МЕНЮ */
 .menu-dropdown {
 	position: absolute;
 	right: 0;
 	top: 40px;
-
-	width: 180px; /* Меню тоже чуть шире */
-
+	width: 180px;
 	background: var(--bg-elevated-soft);
 	border-radius: var(--radius-lg);
-
 	display: none;
 	flex-direction: column;
-
 	box-shadow: var(--shadow-soft);
 	padding: 8px 0;
-
 	z-index: 2000;
 }
 
 .menu-dropdown.active {
 	display: flex;
 }
-
-/* Пункты меню */
 .menu-dropdown div {
 	padding: 12px 18px;
 	color: var(--text);
 	cursor: pointer;
 	font-size: 16px;
-
 	transition: 0.2s ease;
 }
-
 .menu-dropdown div:hover {
 	background: var(--accent-soft);
 	color: var(--accent-strong);
 }
-
-/* Пункт "Удалить" */
 .menu-dropdown .danger:hover {
 	background: rgba(255, 80, 112, 0.2);
 	color: var(--danger);
 }
 
-/* Модалка */
+/* Modals */
 .modals {
 	display: none;
 	position: fixed;
-
 	top: 0;
 	left: 0;
 	width: 100%;
 	height: 100%;
-
 	background: rgba(0, 0, 0, 0.55);
 	backdrop-filter: blur(6px);
-
 	justify-content: center;
 	align-items: center;
-
 	animation: fadeModal 0.3s ease;
 }
 
@@ -276,15 +220,12 @@ body.theme-light .menu-dots img {
 	}
 }
 
-/* Контент модалки */
 .modals-content {
 	background: var(--bg-elevated);
 	padding: 32px;
 	border-radius: var(--radius-lg);
-
 	width: 400px;
 	text-align: center;
-
 	box-shadow: var(--shadow-soft);
 }
 
@@ -293,17 +234,13 @@ body.theme-light .menu-dots img {
 	color: var(--text);
 	font-size: 24px;
 }
-
 .modals-content input {
 	width: 100%;
 	padding: 14px;
-
 	border-radius: var(--radius-lg);
 	border: 1px solid var(--border);
-
 	background: var(--bg-elevated-soft);
 	color: var(--text);
-
 	margin-bottom: 20px;
 	font-size: 16px;
 }
@@ -311,18 +248,14 @@ body.theme-light .menu-dots img {
 .modals-content button {
 	width: 100%;
 	padding: 14px 0;
-
 	border: none;
 	border-radius: var(--radius-lg);
-
 	background: var(--accent);
 	color: var(--text);
-
 	font-size: 16px;
 	font-weight: 600;
-
 	cursor: pointer;
-	transition: background 0.25s ease, transform 0.25s ease;
+	transition: 0.25s ease;
 }
 
 .modals-content button:hover {
@@ -330,14 +263,12 @@ body.theme-light .menu-dots img {
 	transform: scale(1.03);
 }
 
-/* Контейнер для кнопок справа (Play + Меню) */
 .project-controls-right {
 	display: flex;
 	align-items: center;
 	gap: 12px;
 }
 
-/* Кнопка быстрого запуска */
 .quick-run-btn {
 	background: transparent;
 	border: none;
@@ -361,12 +292,10 @@ body.theme-light .menu-dots img {
 body.theme-light .quick-run-btn img {
 	filter: none;
 }
-
 .quick-run-btn:hover {
 	background: rgba(255, 255, 255, 0.1);
 	transform: scale(1.1);
 }
-
 .quick-run-btn:hover img {
 	opacity: 1;
 }
@@ -377,11 +306,10 @@ body.theme-light .quick-run-btn img {
 	text-overflow: ellipsis;
 	margin-right: 20px;
 	max-width: 60%;
-	font-size: 16px; /* Шрифт названия чуть крупнее */
+	font-size: 16px;
 }
 
-/* === СТИЛИ ДЛЯ ОКНА УДАЛЕНИЯ === */
-
+/* Delete Modal & Alerts */
 .confirm-modal-size {
 	width: 450px;
 	padding: 36px 28px;
@@ -389,7 +317,6 @@ body.theme-light .quick-run-btn img {
 	flex-direction: column;
 	align-items: center;
 }
-
 .confirm-icon img {
 	width: 72px;
 	height: 72px;
@@ -397,14 +324,12 @@ body.theme-light .quick-run-btn img {
 	opacity: 0.9;
 	filter: drop-shadow(0 0 15px rgba(255, 80, 112, 0.4));
 }
-
 .confirm-text {
 	color: var(--text-soft, #aaaaaa);
 	font-size: 16px;
 	line-height: 1.5;
 	margin-bottom: 28px;
 }
-
 .confirm-buttons {
 	display: flex;
 	gap: 16px;
@@ -425,42 +350,32 @@ body.theme-light .quick-run-btn img {
 	border: 1px solid var(--border, #444) !important;
 	color: var(--text, #fff) !important;
 }
-
 .btn-secondary:hover {
 	background: rgba(255, 255, 255, 0.05) !important;
 }
-
 .btn-danger {
 	background: #ff4757 !important;
 	color: white !important;
 	border: none !important;
 	box-shadow: 0 4px 12px rgba(255, 71, 87, 0.3);
 }
-
 .btn-danger:hover {
 	background: #ff6b81 !important;
 	transform: translateY(-2px);
 	box-shadow: 0 6px 15px rgba(255, 71, 87, 0.4);
 }
 
-/* === ДОПОЛНИТЕЛЬНЫЕ СТИЛИ ДЛЯ ОКНА УДАЛЕНИЯ === */
-
 #deleteConfirmModal {
 	z-index: 9999 !important;
 	background-color: rgba(0, 0, 0, 0.7) !important;
 	backdrop-filter: blur(10px);
 	-webkit-backdrop-filter: blur(10px);
-	align-items: center;
-	justify-content: center;
 	padding-top: 0 !important;
 }
-
 #deleteConfirmModal .modals-content {
 	margin: auto !important;
 	transform: translateY(-10%);
 }
-
-/* === СТИЛИ ДЛЯ НОВЫХ МОДАЛОК (Alert/Prompt) === */
 
 .styled-input {
 	width: 100%;
@@ -474,7 +389,6 @@ body.theme-light .quick-run-btn img {
 	outline: none;
 	transition: border-color 0.2s;
 }
-
 .styled-input:focus {
 	border-color: var(--accent, #4cd137);
 	background: rgba(0, 0, 0, 0.3);
@@ -492,7 +406,6 @@ body.theme-light .quick-run-btn img {
 	font-weight: 600;
 	transition: transform 0.2s, box-shadow 0.2s;
 }
-
 .btn-primary-action:hover {
 	transform: translateY(-2px);
 	box-shadow: 0 4px 15px rgba(58, 134, 255, 0.4);

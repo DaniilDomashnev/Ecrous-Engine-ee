@@ -1,17 +1,15 @@
 /* ==========================================
-   Settings.js - Исправленная версия с рабочими темами
+   Settings.js
 ========================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
 	loadCustomTheme()
 	loadSavedTheme()
 
-	// Если тема все еще не применилась (например, из-за CSS), пробуем принудительно
+	// Принудительное обновление, если CSS не подхватился
 	const saved = localStorage.getItem('theme') || 'Dark'
-	forceThemeApply(saved)
+	document.body.classList.add(getThemeClass(saved))
 
-	restoreAnimations()
-	restoreHints()
 	initSettingsListeners()
 })
 
@@ -20,62 +18,79 @@ function initSettingsListeners() {
 	const fileInput = document.getElementById('themeFileInput')
 	const themeSelect = document.getElementById('ThemeSelect')
 
-	if (themeSelect) {
-		themeSelect.addEventListener('change', changeTheme)
-	}
+	if (themeSelect) themeSelect.addEventListener('change', changeTheme)
 
 	if (uploadBtn && fileInput) {
 		uploadBtn.addEventListener('click', () => fileInput.click())
-
-		fileInput.addEventListener('change', async event => {
-			const file = event.target.files[0]
+		fileInput.addEventListener('change', async e => {
+			const file = e.target.files[0]
 			if (!file) return
-
 			try {
 				const text = await file.text()
-				// Простая генерация имени, если в файле нет
-				let themeName = 'theme-custom-' + Date.now()
+				let name = 'theme-custom-' + Date.now()
 				const match = text.match(/\.theme-[a-zA-Z0-9_-]+/)
-				if (match) themeName = match[0].replace('.', '')
+				if (match) name = match[0].replace('.', '')
 
 				localStorage.setItem('customThemeCSS', text)
-				localStorage.setItem('customThemeName', themeName)
+				localStorage.setItem('customThemeName', name)
 
-				addCustomThemeToDOM(themeName, text)
-				addCustomThemeToSelect(themeName)
-				applyTheme(themeName)
-
-				if (themeSelect) themeSelect.value = themeName
-				alert('Тема успешно загружена!')
-			} catch (e) {
-				console.error(e)
-				alert('Ошибка чтения файла')
+				addCustomThemeToDOM(name, text)
+				addCustomThemeToSelect(name)
+				applyTheme(name)
+				if (themeSelect) themeSelect.value = name
+				alert('Тема загружена!')
+			} catch (err) {
+				alert('Ошибка файла')
 			}
 		})
 	}
 }
 
-/* ==========================================
-   ЗАГРУЗКА И ПРИМЕНЕНИЕ ТЕМ
-========================================== */
+// === THEME LOGIC ===
+
+const THEME_MAP = {
+	Dark: 'theme-dark',
+	Light: 'theme-light',
+	Night: 'theme-night',
+	Ruby: 'theme-ruby',
+	RubyLight: 'theme-ruby-light',
+	RubyNeon: 'theme-ruby-neon',
+	Emerald: 'theme-emerald',
+	Gold: 'theme-gold',
+	Diamond: 'theme-diamond',
+	Sapphire: 'theme-sapphire',
+	Gray: 'theme-gray',
+	Mint: 'theme-mint',
+	Sakura: 'theme-sakura',
+	Sunset: 'theme-sunset',
+	Frost: 'theme-frost',
+}
+
+function getThemeClass(name) {
+	return THEME_MAP[name] || (name.startsWith('theme-') ? name : 'theme-dark')
+}
+
+function applyThemeClasses(themeName) {
+	// Эффективная очистка классов тем
+	document.body.className = document.body.className
+		.split(' ')
+		.filter(c => !c.startsWith('theme-'))
+		.join(' ')
+
+	document.body.classList.add(getThemeClass(themeName))
+}
 
 function loadSavedTheme() {
 	const saved = localStorage.getItem('theme') || 'Dark'
 	applyThemeClasses(saved)
-
 	const select = document.getElementById('ThemeSelect')
-	if (select) {
-		select.value = saved
-		if (!select.value) select.value = 'Dark' // Фолбэк
-	}
+	if (select) select.value = saved
 }
 
-function changeTheme() {
+window.changeTheme = function () {
 	const select = document.getElementById('ThemeSelect')
 	if (!select) return
-	const theme = select.value
-	applyThemeClasses(theme)
-	localStorage.setItem('theme', theme)
+	applyTheme(select.value)
 }
 
 function applyTheme(name) {
@@ -83,139 +98,65 @@ function applyTheme(name) {
 	localStorage.setItem('theme', name)
 }
 
-function applyThemeClasses(themeName) {
-	// Сначала убираем ВСЕ классы тем
-	const classes = document.body.classList
-	const toRemove = []
-	classes.forEach(c => {
-		if (c.startsWith('theme-')) toRemove.push(c)
-	})
-	toRemove.forEach(c => classes.remove(c))
-
-	// Маппинг имен из Select -> CSS классы
-	const map = {
-		Dark: 'theme-dark',
-		Light: 'theme-light',
-		Night: 'theme-night',
-		Ruby: 'theme-ruby',
-		RubyLight: 'theme-ruby-light',
-		RubyNeon: 'theme-ruby-neon',
-		Emerald: 'theme-emerald',
-		Gold: 'theme-gold',
-		Diamond: 'theme-diamond',
-		Sapphire: 'theme-sapphire',
-		Gray: 'theme-gray',
-		Mint: 'theme-mint',
-		Sakura: 'theme-sakura',
-		Sunset: 'theme-sunset',
-		Frost: 'theme-frost',
-	}
-
-	// Если это стандартная тема
-	if (map[themeName]) {
-		document.body.classList.add(map[themeName])
-	}
-	// Если это кастомная тема (начинается с theme-)
-	else if (themeName.startsWith('theme-')) {
-		document.body.classList.add(themeName)
-	}
-	// Иначе дефолт
-	else {
-		document.body.classList.add('theme-dark')
-	}
-}
-
-function forceThemeApply(themeName) {
-	// Если CSS файл не подгрузился, переменные не сработают.
-	// Но классы мы всё равно вешаем.
-	applyThemeClasses(themeName)
-}
-
-/* ==========================================
-   CUSTOM THEMES
-========================================== */
+// === CUSTOM THEMES ===
 function loadCustomTheme() {
 	const css = localStorage.getItem('customThemeCSS')
 	const name = localStorage.getItem('customThemeName')
-	if (!css || !name) return
-
-	addCustomThemeToDOM(name, css)
-	addCustomThemeToSelect(name)
+	if (css && name) {
+		addCustomThemeToDOM(name, css)
+		addCustomThemeToSelect(name)
+	}
 }
 
 function addCustomThemeToDOM(name, css) {
-	const old = document.getElementById('custom-theme-style')
-	if (old) old.remove()
-	const style = document.createElement('style')
-	style.id = 'custom-theme-style'
+	let style = document.getElementById('custom-theme-style')
+	if (!style) {
+		style = document.createElement('style')
+		style.id = 'custom-theme-style'
+		document.head.appendChild(style)
+	}
 	style.textContent = css
-	document.head.appendChild(style)
 }
 
 function addCustomThemeToSelect(name) {
 	const select = document.getElementById('ThemeSelect')
-	if (!select) return
-	if ([...select.options].some(o => o.value === name)) return
-
+	if (!select || [...select.options].some(o => o.value === name)) return
 	const option = document.createElement('option')
 	option.value = name
 	option.textContent = 'Custom: ' + name.replace('theme-', '')
 	select.appendChild(option)
 }
 
-/* ==========================================
-   ОСТАЛЬНЫЕ НАСТРОЙКИ
-========================================== */
-function restoreAnimations() {
-	// Пример
-}
-function restoreHints() {
-	// Пример
-}
-
-/* ==========================================
-   MODAL LOGIC
-========================================== */
-function openSettings() {
+// === MODALS ===
+window.openSettings = function () {
 	const panel = document.getElementById('settingsPanel')
 	if (panel) {
-		const overlay = ensureModalOverlay()
-		overlay.style.display = 'block'
-		setTimeout(() => overlay.classList.add('visible'), 10)
+		// Пробуем найти оверлей из других скриптов или создаем свой
+		let ov = document.getElementById('modalOverlay')
+		if (!ov) {
+			ov = document.createElement('div')
+			ov.id = 'modalOverlay'
+			ov.className = 'modal-overlay'
+			document.body.appendChild(ov)
+			ov.onclick = window.closeSettings
+		}
+		ov.style.display = 'block'
+		setTimeout(() => ov.classList.add('visible'), 10)
+
 		panel.style.display = 'flex'
-		setTimeout(() => panel.classList.remove('hidden'), 10)
+		panel.classList.remove('hidden')
 	}
 }
 
-function closeSettings() {
+window.closeSettings = function () {
 	const panel = document.getElementById('settingsPanel')
 	if (panel) {
 		panel.classList.add('hidden')
-		const overlay = document.getElementById('modalOverlay')
-		if (overlay) {
-			overlay.classList.remove('visible')
-			setTimeout(() => {
-				overlay.style.display = 'none'
-			}, 220)
+		const ov = document.getElementById('modalOverlay')
+		if (ov) {
+			ov.classList.remove('visible')
+			setTimeout(() => (ov.style.display = 'none'), 220)
 		}
-		setTimeout(() => {
-			panel.style.display = 'none'
-		}, 200)
+		setTimeout(() => (panel.style.display = 'none'), 200)
 	}
-}
-
-function ensureModalOverlay() {
-	let overlay = document.getElementById('modalOverlay')
-	if (overlay) return overlay
-	overlay = document.createElement('div')
-	overlay.id = 'modalOverlay'
-	overlay.classList.add('modal-overlay')
-	overlay.style.display = 'none'
-	overlay.addEventListener('click', () => {
-		try {
-			closeSettings()
-		} catch (e) {}
-	})
-	document.body.appendChild(overlay)
-	return overlay
 }
