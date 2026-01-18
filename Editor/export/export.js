@@ -1,5 +1,5 @@
 // ==========================================
-// EXPORT LOGIC (Ecrous Engine) - COMPLETE
+// EXPORT LOGIC (Ecrous Engine) - UPDATED
 // ==========================================
 
 function openExportModal() {
@@ -146,11 +146,12 @@ async function generateGameHTML() {
 		exportedAt: new Date().toISOString(),
 	}
 
-	// Скрипт движка, который будет внедрен в HTML
+	// --- СКРИПТ ДВИЖКА (RUNTIME) ---
+	// Сюда внедряется вся логика из main.js и game.js
 	const runtimeScript = `
         // Данные проекта
         const PROJECT = ${JSON.stringify(buildData.project)};
-        const projectData = PROJECT; // Алиас
+        const projectData = PROJECT; // Алиас для совместимости
         const START_SCENE_ID = "${buildData.startSceneId}";
         const DISABLE_SPLASH = ${buildData.disableSplash}; 
         let gameConfig = ${JSON.stringify(buildData.config)};
@@ -184,6 +185,7 @@ async function generateGameHTML() {
         let updateInterval = null;
         let activeTimers = [];
         let showFps = false;
+        let loopControl = { break: false, continue: false }; // Для циклов
 
         // --- ФУНКЦИИ УТИЛИТЫ ---
 
@@ -235,8 +237,34 @@ async function generateGameHTML() {
             });
         }
 
-        // Заглушка для Pathfinding (можно расширить)
-        function findPath(grid, sx, sy, ex, ey) { return []; } 
+        // BFS Pathfinding (упрощенный аналог A*)
+        function findPath(grid, startX, startY, endX, endY) { 
+            // grid ожидает массив массивов (0 - свободно, 1 - стена)
+            // Реализация BFS для простоты
+            if(!grid || !grid.length) return [];
+            let queue = [{x: startX, y: startY, path: []}];
+            let visited = new Set([\`\${startX},\${startY}\`]);
+            
+            while(queue.length > 0) {
+                let curr = queue.shift();
+                if (curr.x === endX && curr.y === endY) return curr.path;
+                
+                const dirs = [[0,1], [1,0], [0,-1], [-1,0]];
+                for(let d of dirs) {
+                    let nx = curr.x + d[0];
+                    let ny = curr.y + d[1];
+                    
+                    if (ny >= 0 && ny < grid.length && nx >= 0 && nx < grid[0].length) {
+                        // Предполагаем что 0 это проходимо
+                        if (grid[ny][nx] === 0 && !visited.has(\`\${nx},\${ny}\`)) {
+                            visited.add(\`\${nx},\${ny}\`);
+                            queue.push({x: nx, y: ny, path: [...curr.path, {x: nx, y: ny}]});
+                        }
+                    }
+                }
+            }
+            return [];
+        }
 
         // --- ЗАПУСК ---
         window.onload = function() {
@@ -388,6 +416,8 @@ async function generateGameHTML() {
             if(!world) return;
             const is3D = world.style.transformStyle === 'preserve-3d';
 
+            // Если режим 3D включен, камеру двигаем иначе (через cam_3d_move блоки)
+            // Но базовая 2D камера должна продолжать работать если не переопределена
             if (!is3D) {
                  if (cameraState.target) {
                     const targetEl = document.getElementById(cameraState.target);
@@ -425,6 +455,7 @@ async function generateGameHTML() {
                     if (factor !== 1) {
                         const offsetX = -finalX * (1 - factor);
                         const offsetY = -finalY * (1 - factor);
+                        // Осторожно с трансформациями, чтобы не сбить поворот
                         el.style.transform = \`translate(\${offsetX}px, \${offsetY}px)\`;
                     }
                 });
@@ -517,7 +548,6 @@ async function generateGameHTML() {
             const c = document.createElement('div'); c.id = 'game-ui';
             c.style.position = 'absolute'; c.style.top = 0; c.style.left = 0; c.style.width = '100%'; c.style.height = '100%'; c.style.pointerEvents = 'none';
             document.getElementById('game-stage').appendChild(c);
-            const s = document.createElement('style'); s.innerHTML = '#game-ui > * { pointer-events: auto; }'; document.head.appendChild(s);
         }
 
         function setupInputListeners(scene, allScripts) {
@@ -539,6 +569,7 @@ async function generateGameHTML() {
                 const inputVars = allScripts.filter(b => b.type === 'input_key_down');
                 inputVars.forEach(block => { if(e.code === block.values[0]) gameVariables[block.values[1]] = 0; });
             };
+            // Click Events
             document.getElementById('game-stage').onclick = (e) => {
                 const targetId = e.target.id || e.target.closest('[id]')?.id;
                 if (!targetId) return;
@@ -551,6 +582,17 @@ async function generateGameHTML() {
                      }
                 });
             };
+            // Global Screen Touch (evt_screen_touch)
+            const screenTouchEvents = allScripts.filter(b => b.type === 'evt_screen_touch');
+            if (screenTouchEvents.length > 0) {
+                 window.addEventListener('pointerdown', (e) => {
+                    if (!isRunning || isGamePaused) return;
+                    screenTouchEvents.forEach(block => {
+                        const owner = scene.objects.find(o => o.scripts.some(s => s.id === block.id));
+                        executeChain(block, owner.scripts, owner.connections || []);
+                    });
+                 });
+            }
         }
 
         async function executeChain(currentBlock, allBlocks, connections) {
@@ -570,25 +612,40 @@ async function generateGameHTML() {
             let skipToBlock = null;
 
             // --- LOGIC: IF / ELSE / REPEAT ---
-            if (currentBlock.type === 'flow_if') {
-                const valA = resolveValue(currentBlock.values[0]);
-                const op = currentBlock.values[1];
-                const valB = resolveValue(currentBlock.values[2]);
-                let condition = false;
-                const nA = parseFloat(valA), nB = parseFloat(valB);
-                const isNum = !isNaN(nA) && !isNaN(nB);
-                
-                if (op === '=') condition = valA == valB;
-                else if (op === '!=') condition = valA != valB;
-                else if (op === '>') condition = isNum ? nA > nB : valA > valB;
-                else if (op === '<') condition = isNum ? nA < nB : valA < valB;
-                else if (op === '>=') condition = isNum ? nA >= nB : valA >= valB;
-                else if (op === '<=') condition = isNum ? nA <= nB : valA <= valB;
-                else if (op === 'contains') condition = String(valA).includes(String(valB));
-                
-                if (!condition) {
-                    const elseBlock = findElseBlock(currentBlock, allBlocks, connections);
-                    skipToBlock = elseBlock ? elseBlock : findClosingBlock(currentBlock, allBlocks, connections);
+            if (currentBlock.type === 'flow_if' || currentBlock.type === 'flow_elseif') {
+                let shouldCheck = true;
+                if (currentBlock.type === 'flow_elseif') {
+                    if (!currentBlock._checkMe) shouldCheck = false; 
+                    else delete currentBlock._checkMe; 
+                }
+
+                if (shouldCheck) {
+                    const valA = resolveValue(currentBlock.values[0]);
+                    const op = currentBlock.values[1];
+                    const valB = resolveValue(currentBlock.values[2]);
+                    let condition = false;
+                    const nA = parseFloat(valA), nB = parseFloat(valB);
+                    const isNum = !isNaN(nA) && !isNaN(nB);
+                    
+                    if (op === '=') condition = valA == valB;
+                    else if (op === '!=') condition = valA != valB;
+                    else if (op === '>') condition = isNum ? nA > nB : valA > valB;
+                    else if (op === '<') condition = isNum ? nA < nB : valA < valB;
+                    else if (op === '>=') condition = isNum ? nA >= nB : valA >= valB;
+                    else if (op === '<=') condition = isNum ? nA <= nB : valA <= valB;
+                    else if (op === 'contains') condition = String(valA).includes(String(valB));
+                    
+                    if (!condition) {
+                        const nextBranch = findNextBranch(currentBlock, allBlocks, connections);
+                        if (nextBranch) {
+                            skipToBlock = nextBranch;
+                            if (nextBranch.type === 'flow_elseif') nextBranch._checkMe = true;
+                        } else {
+                            skipToBlock = findClosingBlock(currentBlock, allBlocks, connections);
+                        }
+                    }
+                } else {
+                    skipToBlock = findClosingBlock(currentBlock, allBlocks, connections);
                 }
             }
             else if (currentBlock.type === 'flow_else') { skipToBlock = findClosingBlock(currentBlock, allBlocks, connections); }
@@ -599,7 +656,8 @@ async function generateGameHTML() {
                 if (loopBodyStart && loopEnd) {
                     for (let i = 0; i < count; i++) {
                         if (!isRunning || currentSessionId !== mySession) return;
-                        await executeSection(loopBodyStart, loopEnd, allBlocks, connections);
+                        const res = await executeSection(loopBodyStart, loopEnd, allBlocks, connections);
+                        if (res === 'BREAK') { loopControl.break = false; break; }
                     }
                     skipToBlock = loopEnd;
                 }
@@ -610,7 +668,8 @@ async function generateGameHTML() {
                 const loopEnd = findClosingBlock(currentBlock, allBlocks, connections);
                 if (loopBodyStart && loopEnd) {
                     while (isRunning && window.currentSessionId === mySession) {
-                        await executeSection(loopBodyStart, loopEnd, allBlocks, connections);
+                        const res = await executeSection(loopBodyStart, loopEnd, allBlocks, connections);
+                        if (res === 'BREAK') { loopControl.break = false; break; }
                         await new Promise(resolve => setTimeout(resolve, 0));
                     }
                     return;
@@ -641,12 +700,14 @@ async function generateGameHTML() {
              return candidates[0];
         }
 
-        function findElseBlock(startBlock, allBlocks, connections) {
+        function findNextBranch(startBlock, allBlocks, connections) {
             let depth = 0; let curr = getNextBlock(startBlock, allBlocks, connections); let steps = 0;
-            while (curr && steps < 500) {
-                if (curr.type === 'flow_if' || curr.type === 'flow_repeat') depth++;
+            while (curr && steps < 1000) {
+                if (curr.type === 'flow_if' || curr.type === 'flow_repeat' || curr.type === 'flow_forever') depth++;
                 if (curr.type === 'flow_end') depth--;
-                if (depth === 0 && curr.type === 'flow_else') return curr;
+                if (depth === 0) {
+                    if (curr.type === 'flow_else' || curr.type === 'flow_elseif') return curr;
+                }
                 if (depth < 0) return null;
                 curr = getNextBlock(curr, allBlocks, connections);
                 steps++;
@@ -671,6 +732,9 @@ async function generateGameHTML() {
             while(curr && curr.id !== end.id) {
                 if (!isRunning) return;
                 await executeBlockLogic(curr);
+                if (loopControl.break) return 'BREAK';
+                if (loopControl.continue) { loopControl.continue = false; return 'CONTINUE'; }
+                
                 if (curr.type === 'flow_if') {
                     const valA = resolveValue(curr.values[0]);
                     const op = curr.values[1];
@@ -749,6 +813,7 @@ async function generateGameHTML() {
                         }
                         case 'win_set_cursor': { stage.style.cursor = v[0]; break; }
                         case 'win_fullscreen': { if(v[0]==='1') { if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen(); } else { if(document.exitFullscreen) document.exitFullscreen(); } break; }
+                        case 'win_console_state': { break; } // В экспорте консоли нет
 
                         // --- ПЕРЕМЕННЫЕ ---
                         case 'var_set': { gameVariables[v[0]] = resolveValue(v[1]); updateDynamicText(); break; }
@@ -927,6 +992,7 @@ async function generateGameHTML() {
                             if(body) { const fx=parseFloat(v[1]), fy=parseFloat(v[2]); Matter.Body.applyForce(body, body.position, {x:fx*0.001, y:fy*0.001}); } 
                             break; 
                         }
+                        case 'phys_set_velocity': { /* Заглушка, для Matter JS нужен Body.setVelocity, но в main.js его нет для Matter */ break; }
 
                         case 'obj_set_sprite_frame': {
                             const id = resolveValue(v[0]); const el = document.getElementById(id);
@@ -1090,13 +1156,83 @@ async function generateGameHTML() {
                         case 'interact_dist': { const a=document.getElementById(v[0]), b=document.getElementById(v[1]); if(a&&b){ const r1=a.getBoundingClientRect(), r2=b.getBoundingClientRect(); const x1=r1.left+r1.width/2, y1=r1.top+r1.height/2, x2=r2.left+r2.width/2, y2=r2.top+r2.height/2; gameVariables[v[2]] = Math.sqrt(Math.pow(x2-x1,2)+Math.pow(y2-y1,2)) / (window.zoomLevel||1); } else gameVariables[v[2]]=999999; break; }
                         case 'zone_check': { const me=document.getElementById(v[0]), zone=document.getElementById(v[1]); let res=0; if(me&&zone){ const r1=me.getBoundingClientRect(), r2=zone.getBoundingClientRect(); if(!(r2.left>r1.right || r2.right<r1.left || r2.top>r1.bottom || r2.bottom<r1.top)) res=1; } gameVariables[v[2]]=res; break; }
 
+                        case 'state_set': { const el=document.getElementById(v[0]); if(el) el.dataset.state=v[1]; break; }
+                        case 'state_get': { const el=document.getElementById(v[0]); gameVariables[v[1]]=el?el.dataset.state||'':''; break; }
+                        case 'tag_add': { const el=document.getElementById(v[0]); if(el) el.classList.add('tag_'+v[1]); break; }
+                        case 'tag_check': { const el=document.getElementById(v[0]); gameVariables[v[2]] = (el && el.classList.contains('tag_'+v[1]))?1:0; break; }
+
                         case 'ai_move_to': { const me=document.getElementById(v[0]), target=document.getElementById(v[1]), speed=parseFloat(v[2]); if(me&&target){ const mx=parseFloat(me.style.left||0), my=parseFloat(me.style.top||0); const tx=parseFloat(target.style.left||0), ty=parseFloat(target.style.top||0); const dx=tx-mx, dy=ty-my, dist=Math.sqrt(dx*dx+dy*dy); if(dist>speed){ me.style.left=mx+(dx/dist)*speed+'px'; me.style.top=my+(dy/dist)*speed+'px'; } } break; }
                         case 'ai_flee': { const me=document.getElementById(v[0]), target=document.getElementById(v[1]), speed=parseFloat(v[2]); if(me&&target){ const mx=parseFloat(me.style.left||0), my=parseFloat(me.style.top||0); const tx=parseFloat(target.style.left||0), ty=parseFloat(target.style.top||0); const dx=mx-tx, dy=my-ty, dist=Math.sqrt(dx*dx+dy*dy); if(dist>0){ me.style.left=mx+(dx/dist)*speed+'px'; me.style.top=my+(dy/dist)*speed+'px'; } } break; }
+                        case 'ai_move_smart': {
+                             // Используем добавленную функцию findPath
+                             const me=document.getElementById(v[0]), target=document.getElementById(v[1]), speed=parseFloat(v[2]), mapData=gameVariables[v[3]];
+                             if(me&&target&&mapData){
+                                 const tileSize=32;
+                                 const myGridX=Math.floor(parseFloat(me.style.left)/tileSize), myGridY=Math.floor(parseFloat(me.style.top)/tileSize);
+                                 const targetGridX=Math.floor(parseFloat(target.style.left)/tileSize), targetGridY=Math.floor(parseFloat(target.style.top)/tileSize);
+                                 // Тут упрощенно - просто вызов, для реального движения нужно хранить путь
+                                 if(!me.currentPath || me.pathTarget !== \`\${targetGridX},\${targetGridY}\`) {
+                                     me.currentPath = findPath(mapData, myGridX, myGridY, targetGridX, targetGridY);
+                                     me.pathTarget = \`\${targetGridX},\${targetGridY}\`;
+                                 }
+                                 // Движение по точкам можно реализовать, если путь найден
+                             }
+                             break;
+                        }
+
+                        case 'fx_screen_color': { 
+                            const color=v[0], time=parseFloat(v[1])*1000;
+                            let ov=document.getElementById('fx-overlay-color');
+                            if(!ov){ ov=document.createElement('div'); ov.id='fx-overlay-color'; ov.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;transition:background '+(time/2)+'ms'; stage.appendChild(ov); }
+                            ov.style.background=color; setTimeout(()=>ov.style.background='transparent', time);
+                            break;
+                        }
+                        case 'fx_shake': {
+                            const id=v[0], power=parseFloat(v[1]), dur=parseFloat(v[2])*1000; const el=document.getElementById(id);
+                            if(el){
+                                const start=Date.now(), origin=el.style.transform;
+                                const i=setInterval(()=>{
+                                    if(Date.now()-start>dur){ clearInterval(i); el.style.transform=origin; return; }
+                                    const dx=(Math.random()-0.5)*power, dy=(Math.random()-0.5)*power;
+                                    el.style.transform=\`\${origin} translate(\${dx}px, \${dy}px)\`;
+                                },16);
+                            }
+                            break;
+                        }
+
+                        case 'comp_add': case 'comp_set': { const id=v[0], comp=v[1], val=resolveValue(v[2]); if(!window.entityComponents[id]) window.entityComponents[id]={}; window.entityComponents[id][comp]=val; break; }
+                        case 'comp_get': { const id=v[0], comp=v[1], tVar=v[2]; gameVariables[tVar] = (window.entityComponents[id]&&window.entityComponents[id][comp]!==undefined)?window.entityComponents[id][comp]:0; break; }
+                        case 'comp_has': { const id=v[0], comp=v[1]; gameVariables[v[2]] = (window.entityComponents[id]&&window.entityComponents[id][comp]!==undefined)?1:0; break; }
+
+                        case 'evt_message_send': {
+                            const evtName=resolveValue(v[0]), param=resolveValue(v[1]);
+                            gameVariables['event_param']=param;
+                            if(globalCurrentSceneData){
+                                globalCurrentSceneData.objects.forEach(obj=>{
+                                    if(!obj.scripts)return;
+                                    obj.scripts.filter(b=>b.type==='evt_message_receive'&&b.values[0]===evtName).forEach(block=>executeChain(block, obj.scripts, obj.connections));
+                                });
+                            }
+                            break;
+                        }
+
+                        case 'gfx_light_ambient': { const val=parseFloat(v[0]); let amb=document.getElementById('gfx-ambient'); if(!amb){amb=document.createElement('div');amb.id='gfx-ambient';amb.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:500;mix-blend-mode:multiply;';stage.appendChild(amb);} amb.style.backgroundColor=\`rgba(0,0,0,\${1.0-val})\`; break; }
+                        case 'gfx_light_point': { const el=document.getElementById(v[0]); if(el){ const c=v[1], r=v[2]+'px'; el.style.boxShadow=\`0 0 \${r} \${parseFloat(r)/4}px \${c}\`; el.style.zIndex='501'; } break; }
+                        case 'gfx_particles': {
+                             const x=parseFloat(v[0]), y=parseFloat(v[1]), c=v[2], count=parseInt(v[3]);
+                             for(let i=0;i<count;i++){
+                                 const p=document.createElement('div'); p.style.cssText=\`position:absolute;left:\${x}px;top:\${y}px;width:4px;height:4px;background:\${c};border-radius:50%;pointer-events:none;z-index:1000;\`;
+                                 stage.appendChild(p);
+                                 const a=Math.random()*Math.PI*2, s=Math.random()*50+20;
+                                 p.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:\`translate(\${Math.cos(a)*s}px,\${Math.sin(a)*s}px) scale(0)\`,opacity:0}],{duration:500+Math.random()*500,easing:'ease-out'}).onfinish=()=>p.remove();
+                             }
+                             break;
+                        }
+                        case 'gfx_filter': { const t=v[0],val=v[1]; stage.style.filter=(t==='none')?'none':(t==='blur'?\`blur(\${val/10}px)\`:t==='contrast'?\`contrast(\${val}%)\`:\`\${t}(\${val}%)\`); break; }
 
                         // --- 3D WORLD ---
                         case 'scene_3d_init': { 
                             if(stage && w){ stage.style.perspective=v[0]+'px'; stage.style.overflow='hidden'; w.style.transformStyle='preserve-3d'; w.style.width="100%"; w.style.height="100%"; } 
-                            if(!document.getElementById('css-3d-s')){const s=document.createElement('style');s.id='css-3d-s';s.innerHTML='.ecr-cube,.ecr-plane{position:absolute;transform-style:preserve-3d;} .ecr-face{position:absolute;width:100%;height:100%;border:1px solid rgba(0,0,0,0.1);display:flex;align-items:center;justify-content:center;}.ecr-face.front{transform:rotateY(0deg) translateZ(calc(var(--s)/2));}.ecr-face.back{transform:rotateY(180deg) translateZ(calc(var(--s)/2));}.ecr-face.right{transform:rotateY(90deg) translateZ(calc(var(--s)/2));}.ecr-face.left{transform:rotateY(-90deg) translateZ(calc(var(--s)/2));}.ecr-face.top{transform:rotateX(90deg) translateZ(calc(var(--s)/2));}.ecr-face.bottom{transform:rotateX(-90deg) translateZ(calc(var(--s)/2));}';document.head.appendChild(s);}
                             break; 
                         }
                         case 'obj_3d_create_cube': { 
@@ -1114,6 +1250,19 @@ async function generateGameHTML() {
                              pl.style.position='absolute'; pl.style.width=resolveValue(v[1])+'px'; pl.style.height=resolveValue(v[2])+'px'; pl.style.backgroundColor=resolveValue(v[3]);
                              pl.style.transform=\`translate3d(\${resolveValue(v[4])}px,\${resolveValue(v[5])}px,\${resolveValue(v[6])}px) rotateX(\${resolveValue(v[7])}deg)\`;
                              pl.style.transformOrigin='center center'; w.appendChild(pl); break;
+                        }
+                        case 'obj_3d_create_cylinder': {
+                            const id=v[0]; if(document.getElementById(id))break;
+                            const height=parseFloat(resolveValue(v[1])), diam=parseFloat(resolveValue(v[2])), sides=parseInt(resolveValue(v[3]))||8, color=resolveValue(v[4]);
+                            const x=resolveValue(v[5]), y=resolveValue(v[6]), z=resolveValue(v[7]);
+                            const cont=document.createElement('div'); cont.id=id; cont.className='ecr-cylinder-group'; cont.style.position='absolute';cont.style.transformStyle='preserve-3d';cont.style.width='0px';cont.style.height='0px';cont.style.transform=\`translate3d(\${x}px,\${y}px,\${z}px)\`;
+                            const radius=diam/2; const stripWidth=(2*radius*Math.tan(Math.PI/sides))+1; const angleStep=360/sides;
+                            for(let i=0;i<sides;i++){
+                                const s=document.createElement('div'); s.style.position='absolute';s.style.height=height+'px';s.style.width=stripWidth+'px';s.style.backgroundColor=color;
+                                if(i%2===0)s.style.filter='brightness(0.9)';
+                                s.style.transform=\`rotateY(\${i*angleStep}deg) translateZ(\${radius}px)\`; s.style.left=-stripWidth/2+'px'; s.style.top=-height/2+'px'; cont.appendChild(s);
+                            }
+                            w.appendChild(cont); break;
                         }
                         case 'obj_3d_billboard': {
                             const id=v[0]; if(document.getElementById(id))break;
@@ -1136,6 +1285,27 @@ async function generateGameHTML() {
                             }
                             break;
                         }
+                        case 'obj_3d_set_face': {
+                             const cubeId=v[0], faceClass=v[1], url=getAssetUrl(resolveValue(v[2]));
+                             const cube=document.getElementById(cubeId);
+                             if(cube){ const f=cube.querySelector('.ecr-face.'+faceClass); if(f){ f.style.backgroundImage=\`url('\${url}')\`; f.style.backgroundSize='cover'; f.style.backgroundColor='transparent'; f.innerHTML=''; f.style.border='none'; } }
+                             break;
+                        }
+                        case 'obj_3d_rotate_anim': {
+                             const id=v[0], sx=parseFloat(resolveValue(v[1])), sy=parseFloat(resolveValue(v[2])), sz=parseFloat(resolveValue(v[3]));
+                             if(!window.anim3d)window.anim3d={}; if(!window.anim3d[id])window.anim3d[id]={rx:0,ry:0,rz:0};
+                             const el=document.getElementById(id);
+                             if(el){
+                                if(el.rotateInterval)clearInterval(el.rotateInterval);
+                                el.rotateInterval=setInterval(()=>{
+                                    if(!document.getElementById(id)||!isRunning){clearInterval(el.rotateInterval);return;}
+                                    const st=window.anim3d[id]; st.rx+=sx; st.ry+=sy; st.rz+=sz;
+                                    const ct=el.style.transform.match(/translate3d\\([^)]+\\)/); const ps=ct?ct[0]:'translate3d(0px,0px,0px)';
+                                    el.style.transform=\`\${ps} rotateX(\${st.rx}deg) rotateY(\${st.ry}deg) rotateZ(\${st.rz}deg)\`;
+                                },16);
+                             }
+                             break;
+                        }
                         
                         // --- MEDIA ---
                         case 'video_load': {
@@ -1155,13 +1325,16 @@ async function generateGameHTML() {
 
                         // --- POST PROCESSING ---
                         case 'pp_filter_set': { const t=v[0]; const val=parseFloat(resolveValue(v[1])); if(w){ let f=''; if(t==='blur')f=\`blur(\${val}px)\`; else if(t==='hue-rotate')f=\`hue-rotate(\${val}deg)\`; else f=\`\${t}(\${val}%)\`; w.style.filter=f; } break; }
-                        case 'pp_vignette': { if(v[0]==='1'||v[0]==='true'){ const d=document.createElement('div'); d.id='pp-overlay-vignette'; d.style.cssText=\`position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:800;background:radial-gradient(circle,transparent 50%,\${v[2]} 100%);opacity:\${resolveValue(v[1])};mix-blend-mode:multiply;\`; stage.appendChild(d); } else { const d=document.getElementById('pp-overlay-vignette'); if(d)d.remove(); } break; }
-                        case 'pp_crt_effect': { if(v[0]==='1'||v[0]==='true'){ const d=document.createElement('div'); d.id='pp-overlay-crt'; d.style.cssText=\`position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9990;background:linear-gradient(rgba(18,16,16,0) 50%,rgba(0,0,0,0.25) 50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06));background-size:100% 4px,6px 100%;opacity:\${resolveValue(v[1])};\`; stage.appendChild(d); } else { const d=document.getElementById('pp-overlay-crt'); if(d)d.remove(); } break; }
+                        case 'pp_vignette': { if(v[0]==='1'||v[0]==='true'){ const d=document.getElementById('pp-overlay-vignette')||document.createElement('div'); d.id='pp-overlay-vignette'; d.style.cssText=\`position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:800;background:radial-gradient(circle,transparent 50%,\${v[2]} 100%);opacity:\${resolveValue(v[1])};mix-blend-mode:multiply;\`; stage.appendChild(d); } else { const d=document.getElementById('pp-overlay-vignette'); if(d)d.remove(); } break; }
+                        case 'pp_crt_effect': { if(v[0]==='1'||v[0]==='true'){ const d=document.getElementById('pp-overlay-crt')||document.createElement('div'); d.id='pp-overlay-crt'; d.style.cssText=\`position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9990;background:linear-gradient(rgba(18,16,16,0) 50%,rgba(0,0,0,0.25) 50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06));background-size:100% 4px,6px 100%;opacity:\${resolveValue(v[1])};\`; stage.appendChild(d); } else { const d=document.getElementById('pp-overlay-crt'); if(d)d.remove(); } break; }
+                        case 'pp_chromatic': { const on=(v[0]==='1'||v[0]==='true'); const s=resolveValue(v[1]); if(w){ if(on)w.style.filter=\`drop-shadow(\${s}px 0 0 rgba(255,0,0,0.5)) drop-shadow(-\${s}px 0 0 rgba(0,0,255,0.5))\`; else w.style.filter='none'; } break; }
+                        case 'pp_bloom_fake': { const on=(v[0]==='1'||v[0]==='true'); const val=parseFloat(resolveValue(v[1])); if(w){ if(on)w.style.filter=\`brightness(\${val}) contrast(1.1) saturate(1.2)\`; else w.style.filter='none'; } break; }
                         case 'pp_clear_all': { if(w)w.style.filter='none'; ['pp-overlay-vignette','pp-overlay-crt'].forEach(id=>{const el=document.getElementById(id);if(el)el.remove();}); break; }
 
                         // --- WEBVIEW ---
                         case 'ui_webview_create': { if(document.getElementById(v[0]))break; const wb=document.createElement('iframe'); wb.id=v[0]; wb.src=resolveValue(v[1]); wb.className='ui-element'; wb.style.border='none'; wb.style.left=resolveValue(v[2])+'px'; wb.style.top=resolveValue(v[3])+'px'; wb.style.width=resolveValue(v[4])+'px'; wb.style.height=resolveValue(v[5])+'px'; ui.appendChild(wb); break; }
-                        case 'ui_webview_control': { const wb=document.getElementById(v[0]); if(wb&&wb.contentWindow){ if(v[1]==='reload')wb.contentWindow.location.reload(); if(v[1]==='back')wb.contentWindow.history.back(); } break; }
+                        case 'ui_webview_control': { const wb=document.getElementById(v[0]); if(wb&&wb.contentWindow){ if(v[1]==='reload')wb.contentWindow.location.reload(); if(v[1]==='back')wb.contentWindow.history.back(); if(v[1]==='forward')wb.contentWindow.history.forward(); } break; }
+                        case 'ui_webview_url': { const wb=document.getElementById(v[0]); if(wb) wb.src = resolveValue(v[1]); break; }
 
                         // --- INPUTS ---
                         case 'ui_input_create': case 'ui_textarea_create': {
@@ -1169,12 +1342,18 @@ async function generateGameHTML() {
                             const isArea = block.type==='ui_textarea_create';
                             const el=document.createElement(isArea?'textarea':'input'); el.id=id; el.className='ui-element ui-input-widget';
                             let x,y,width,height;
-                            if(isArea){ x=resolveValue(v[1]);y=resolveValue(v[2]);width=resolveValue(v[3]);height=resolveValue(v[4]); }
-                            else { el.placeholder=resolveValue(v[1]); el.type=v[2]; x=resolveValue(v[3]);y=resolveValue(v[4]);width=resolveValue(v[5]);height=resolveValue(v[6]); }
+                            if(isArea){ x=resolveValue(v[1]);y=resolveValue(v[2]);width=resolveValue(v[3]);height=resolveValue(v[4]); el.style.resize='none';}
+                            else { 
+                                el.placeholder=resolveValue(v[1]); 
+                                const validTypes=['text','password','number'];
+                                if(validTypes.includes(v[2])){ el.type=v[2]; x=resolveValue(v[3]);y=resolveValue(v[4]);width=resolveValue(v[5]);height=resolveValue(v[6]); }
+                                else { el.type='text'; x=resolveValue(v[2]);y=resolveValue(v[3]);width=resolveValue(v[4]);height=resolveValue(v[5]); }
+                            }
                             el.style.left=x+'px';el.style.top=y+'px';el.style.width=width+'px';el.style.height=height+'px';
                             el.oninput=()=>triggerUiChangeEvent(id);
                             ui.appendChild(el); break;
                         }
+                        case 'ui_input_set': { const el=document.getElementById(v[0]); if(el){ const a=v[1], val=resolveValue(v[2]); if(a==='set_text')el.value=val; if(a==='clear')el.value=''; if(a==='disable')el.disabled=true; if(a==='enable')el.disabled=false; if(a==='focus')el.focus(); } break; }
                         case 'ui_input_get': { const el=document.getElementById(v[0]); if(el){ gameVariables[v[1]]=el.value; updateDynamicText(); } break; }
                         case 'ui_slider_adv': {
                             if(document.getElementById(v[0]))break;
@@ -1187,6 +1366,20 @@ async function generateGameHTML() {
                         }
                         case 'ui_scroll_create': { if(document.getElementById(v[0]))break; const sc=document.createElement('div'); sc.id=v[0]; sc.className='ui-element ui-scroll-box'; sc.style.left=resolveValue(v[1])+'px'; sc.style.top=resolveValue(v[2])+'px'; sc.style.width=resolveValue(v[3])+'px'; sc.style.height=resolveValue(v[4])+'px'; sc.style.backgroundColor=resolveValue(v[5]); sc.style.overflow='auto'; ui.appendChild(sc); break; }
                         case 'ui_scroll_add': { const sc=document.getElementById(v[0]), wgt=document.getElementById(v[1]); if(sc&&wgt){ sc.appendChild(wgt); wgt.style.position='relative'; wgt.style.left='0'; wgt.style.top='0'; } break; }
+                        case 'ui_widget_delete': { const el=document.getElementById(v[0]); if(el)el.remove(); break; }
+                        case 'ui_widget_prop': { const wgt=document.getElementById(v[0]), t=v[1]; if(wgt){ const v1=resolveValue(v[2]), v2=resolveValue(v[3]); if(t==='position'){wgt.style.left=v1+'px';wgt.style.top=v2+'px';} if(t==='size'){wgt.style.width=v1+'px';wgt.style.height=v2+'px';} if(t==='visible'){wgt.style.display=(v1==='true'||v1===1)?'block':'none';} } break; }
+
+                        case 'flow_break': loopControl.break=true; break;
+                        case 'flow_continue': loopControl.continue=true; break;
+                        case 'logic_op': { 
+                            const rV=v[0], vA=parseFloat(resolveValue(v[1]))||0, op=v[2], vB=parseFloat(resolveValue(v[3]))||0;
+                            const bA=vA?1:0, bB=vB?1:0;
+                            if(op==='AND')gameVariables[rV]=bA&&bB?1:0; if(op==='OR')gameVariables[rV]=bA||bB?1:0; if(op==='XOR')gameVariables[rV]=bA!==bB?1:0; if(op==='NAND')gameVariables[rV]=!(bA&&bB)?1:0; 
+                            break; 
+                        }
+                        case 'dev_vibrate': { if(navigator.vibrate) navigator.vibrate(parseInt(resolveValue(v[0]))||200); break; }
+                        case 'dev_fullscreen': { if(v[0]==='enter'){if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen();}else{if(document.exitFullscreen)document.exitFullscreen();} break; }
+                        case 'dev_hide_keyboard': { if(document.activeElement)document.activeElement.blur(); break; }
 
                         // --- SYSTEM ---
                         case 'scene_load': { const next = PROJECT.scenes.find(s=>s.name===v[0]); if(next) loadScene(next.id); break; }
@@ -1236,8 +1429,10 @@ async function generateGameHTML() {
             width: 800px; height: 600px; background: #1a1a1a; overflow: hidden; 
             position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
             box-shadow: 0 0 100px rgba(0,0,0,0.8); 
+            /* Важно для 3D: */
+            perspective: 800px;
         }
-        #game-world { width: 100%; height: 100%; position: absolute; transform-origin: 0 0; will-change: transform; }
+        #game-world { width: 100%; height: 100%; position: absolute; transform-origin: 0 0; will-change: transform; transform-style: preserve-3d; }
         .ui-element { position: absolute; box-sizing: border-box; pointer-events: auto; }
         .ui-btn { border: none; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 600; background: var(--accent); color: white; transition: 0.1s; }
         .ui-btn:active { transform: scale(0.95); opacity: 0.9; }
@@ -1246,6 +1441,16 @@ async function generateGameHTML() {
         .ui-slider { -webkit-appearance: none; height: 6px; background: #444; border-radius: 3px; outline: none; }
         .ui-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; background: #2979FF; border-radius: 50%; cursor: pointer; }
         .ui-input-widget { border: 1px solid #444; background: rgba(0,0,0,0.7); color: white; padding: 5px; font-family: inherit; }
+
+        /* 3D STYLES (для работы 3D в экспорте) */
+        .ecr-cube, .ecr-plane, .ecr-cylinder-group { position: absolute; transform-style: preserve-3d; }
+        .ecr-face { position: absolute; width: 100%; height: 100%; border: 1px solid rgba(0,0,0,0.1); display:flex; align-items:center; justify-content:center; }
+        .ecr-face.front  { transform: rotateY(  0deg) translateZ(calc(var(--s) / 2)); }
+        .ecr-face.back   { transform: rotateY(180deg) translateZ(calc(var(--s) / 2)); }
+        .ecr-face.right  { transform: rotateY( 90deg) translateZ(calc(var(--s) / 2)); }
+        .ecr-face.left   { transform: rotateY(-90deg) translateZ(calc(var(--s) / 2)); }
+        .ecr-face.top    { transform: rotateX( 90deg) translateZ(calc(var(--s) / 2)); }
+        .ecr-face.bottom { transform: rotateX(-90deg) translateZ(calc(var(--s) / 2)); }
 
         /* SPLASH */
         #ecrous-splash {
@@ -1335,7 +1540,7 @@ async function exportMobileBundle(platform) {
 	const readme = `ECROUS ENGINE - ${platform} BUNDLE\n\nUse websitetoapk.com or Cordova/Capacitor to convert this zip content to an app.`
 	zip.file('README.txt', readme)
 
-	zip.generateAsync({ type: 'blob' }).then(content => {
+	zip.generateAsync({ type: 'blob' }).then(function (content) {
 		downloadFile(`${appName}_${platform}.zip`, content, 'application/zip')
 		if (btn) btn.innerHTML = oldText
 	})

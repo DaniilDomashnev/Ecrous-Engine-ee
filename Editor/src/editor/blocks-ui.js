@@ -67,7 +67,9 @@ function createBlock(typeId, clientX, clientY, restoreData = null) {
                               style="width:100%; min-width:180px; font-family:'Courier New', monospace; font-size:11px; background:rgba(0,0,0,0.3); border:1px solid var(--border); color:#a5d6a7; resize:vertical; border-radius:4px; padding:5px;"
                               oninput="this.innerHTML = this.value">${val}</textarea>
                 </div>`
-			} else if (inp.type === 'select') {
+			}
+			// --- ВАРИАНТ С SELECT (ИСПРАВЛЕНА СТРЕЛОЧКА) ---
+			else if (inp.type === 'select') {
 				let optionsHtml = ''
 				if (inp.options) {
 					inp.options.forEach(opt => {
@@ -82,29 +84,33 @@ function createBlock(typeId, clientX, clientY, restoreData = null) {
                         <select class="node-input" onchange="this.setAttribute('value', this.value)">
                             ${optionsHtml}
                         </select>
-                        <i class="ri-arrow-down-s-line"></i>
                     </div>
                 </div>`
-			}
-			else {
-				// ВАРИАНТ 2: ОБЫЧНЫЙ ТЕКСТОВЫЙ ВВОД + РЕДАКТОР ФОРМУЛ
+			} else {
+				// ВАРИАНТ 2: ОБЫЧНЫЙ ТЕКСТ (ТЕПЕРЬ MULTI-LINE + FX СПРАВА)
 
 				// Генерируем уникальный ID
 				const inputId = `inp_${el.id}_${idx}`
 
+				// Используем Flexbox: Textarea слева (растягивается), кнопка FX справа (фиксирована)
+				// Textarea заменяет input type="text"
 				inputsHTML += `
 				<div class="input-row">
 						<span>${inp.label || inp.name}</span>
-						<div style="position:relative; flex:1;">
-								<input type="text" class="node-input" value="${val}" id="${inputId}">
-								<div class="formula-trigger" 
-										onclick="window.FormulaEditor.open(document.getElementById('${inputId}'))">
+						<div style="display:flex; align-items:center; gap:5px; flex:1; min-width: 120px;">
+                                <textarea class="node-input" id="${inputId}" rows="1"
+                                    style="flex:1; resize:vertical; min-height:24px; overflow:hidden; white-space:pre-wrap; field-sizing: content;"
+                                    oninput="this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'">${val}</textarea>
+								
+                                <div class="formula-trigger" 
+                                     style="position:static; transform:none; margin:0; height:24px; display:flex; align-items:center;"
+                                     onclick="window.FormulaEditor.open(document.getElementById('${inputId}'))">
 										fx
 								</div>
 						</div>
 				</div>`
 			}
-    })
+		})
 	}
 
 	el.innerHTML = `<div class="node-header" style="border-left: 4px solid ${def.color}"><div style="display:flex; align-items:center; gap:8px;"><i class="${def.icon}"></i> <span>${def.label}</span></div><i class="ri-close-line action-close"></i></div><div class="node-content">${inputsHTML}</div><div class="node-port port-in" title="Вход"></div><div class="node-port port-out" title="Выход"></div>`

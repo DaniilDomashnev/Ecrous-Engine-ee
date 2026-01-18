@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="../src/styles/themes.css">
     <link rel="stylesheet" href="../src/styles/fonts.css">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles/ide.css">
     <link rel="stylesheet" href="styles/export.css">
     <link rel="stylesheet" href="styles/mobile.css">
 
@@ -222,7 +223,7 @@
                         <div class="menu-entry" id="btnResetSettings" onclick="resetEditorSettings()">
                             <i class="ri-refresh-line"></i> Сбросить настройки
                         </div>
-                        
+
                         <input type="file" id="settingsFileInput" accept=".json" style="display: none;"
                             onchange="handleSettingsFileSelect(this)">
                     </div>
@@ -276,14 +277,13 @@
             <div class="section-title">
                 <span><i class="ri-folder-image-line"></i> АССЕТЫ</span>
                 <div style="display:flex; gap:10px;">
-                    <i class="ri-brush-line action-icon" onclick="openPaintModal()"
-                        title="Нарисовать спрайт (Ecrous Paint)"></i> <i class="ri-folder-add-line action-icon"
-                        onclick="createAssetFolder()" title="Создать папку"></i>
+                    <i class="ri-file-code-line action-icon" onclick="createScriptAsset()" title="Создать скрипт"></i>
+                    <i class="ri-brush-line action-icon" onclick="openPaintModal()" title="Нарисовать спрайт"></i>
+                    <i class="ri-folder-add-line action-icon" onclick="createAssetFolder()" title="Создать папку"></i>
                     <i class="ri-upload-2-line action-icon" onclick="document.getElementById('assetFileInput').click()"
                         title="Загрузить файл"></i>
                 </div>
-                <input type="file" id="assetFileInput" style="display: none;" multiple
-                    accept="image/*,audio/*,.ttf,.otf,.woff">
+                <input type="file" id="assetFileInput" style="display: none;" multiple accept="image/*,audio/*,.ttf,.otf,.woff">
             </div>
             <div class="list-container" id="assetList">
                 <div style="padding:10px; color:#666; font-size:11px; text-align:center;">Нет файлов</div>
@@ -314,6 +314,8 @@
                             class="ri-list-check-2"></i></button>
                     <button id="btnModeNodes" class="mode-btn" title="Режим узлов (Nodes)"><i
                             class="ri-node-tree"></i></button>
+                    <button id="btnModeCode" class="mode-btn" title="NexLang Code"><i
+                            class="ri-code-s-slash-line"></i></button>
                 </div>
 
                 <div class="hint-text"><i class="ri-mouse-line"></i> ПКМ: Меню | Колесо: Двигать</div>
@@ -321,9 +323,36 @@
             </div>
         </div>
 
+        <div id="code-editor-container" class="hidden">
+            <div class="ide-sidebar">
+                <div class="ide-sidebar-header">
+                    <span>SCRIPTS</span>
+                    <button id="btnCreateScript" title="Создать скрипт"><i class="ri-add-line"></i></button>
+                </div>
+                <div id="script-list" class="script-list">
+                </div>
+            </div>
+        
+            <div class="ide-main">
+                <div class="ide-toolbar">
+                    <span id="current-file-name">Select a script...</span>
+                    <div class="ide-controls">
+                        <button id="btnSaveScript" title="Сохранить"><i class="ri-save-3-line"></i></button>
+                        <button id="btnCloseEditor" title="Закрыть редактор"><i class="ri-close-large-line"></i></button>
+                    </div>
+                </div>
+        
+                <div class="editor-wrapper">
+                    <div class="code-line-numbers" id="codeLines">1</div>
+                    <textarea id="nexlangInput" spellcheck="false"
+                        placeholder="// Выберите или создайте скрипт слева..."></textarea>
+                </div>
+            </div>
+        </div>
+
         <div id="toolbox-layout" class="toolbox">
             <div id="toolboxResizer"></div>
-        
+
             <div class="toolbox-nav">
                 <div class="nav-item active">
                     <div class="nav-circle" style="background: #00C853;"></div>
@@ -334,18 +363,18 @@
                     <span class="nav-label">Движение</span>
                 </div>
             </div>
-        
+
             <div class="toolbox-wrapper">
                 <div class="toolbox-search">
-                    <input type="text" placeholder="Поиск...">
+                    <input type="text" id="blockSearchInput" placeholder="Поиск...">
                 </div>
-        
+
                 <div id="toolboxContent">
                     <div class="category-title">События</div>
                     <div class="tool-item">...</div>
                 </div>
             </div>
-        
+
         </div>
     </div>
 
@@ -1039,11 +1068,11 @@
     <div id="modal-editor-settings" class="modal-overlay hidden">
         <div class="modal-window" style="width: 450px;">
             <div class="modal-title">Внешний вид редактора</div>
-    
+
             <div style="background:var(--bg-elevated-soft); padding:10px; border-radius:8px; margin-bottom:15px;">
                 <div style="font-weight:bold; font-size:12px; margin-bottom:10px; opacity:0.7;">РАБОЧАЯ ОБЛАСТЬ (NODES)
                 </div>
-    
+
                 <div class="input-group">
                     <label style="display:block; margin-bottom:5px; font-size:12px; color:var(--text-soft);">Масштаб
                         блоков</label>
@@ -1054,7 +1083,7 @@
                         <option value="1.4">Огромный (140%)</option>
                     </select>
                 </div>
-    
+
                 <div class="input-group">
                     <label style="display:block; margin-bottom:5px; font-size:12px; color:var(--text-soft);">Шрифт
                         узлов</label>
@@ -1064,21 +1093,23 @@
                         <option value="'Arial', sans-serif">Arial</option>
                     </select>
                 </div>
-    
+
                 <div class="input-group">
-                    <label style="display:block; margin-bottom:5px; font-size:12px; color:var(--text-soft);">Размер текста
+                    <label style="display:block; margin-bottom:5px; font-size:12px; color:var(--text-soft);">Размер
+                        текста
                         узлов</label>
                     <div style="display:flex; align-items:center; gap:10px;">
-                        <input type="range" id="set-editor-font-size-range" min="10" max="20" value="13" style="flex:1;">
+                        <input type="range" id="set-editor-font-size-range" min="10" max="20" value="13"
+                            style="flex:1;">
                         <span id="set-editor-font-size-val" style="font-size:12px; width:30px;">13</span>
                     </div>
                 </div>
             </div>
-    
+
             <div style="background:var(--bg-elevated-soft); padding:10px; border-radius:8px; margin-bottom:15px;">
                 <div style="font-weight:bold; font-size:12px; margin-bottom:10px; opacity:0.7;">ПАНЕЛЬ ИНСТРУМЕНТОВ
                     (TOOLBOX)</div>
-    
+
                 <div class="input-group">
                     <label style="display:block; margin-bottom:5px; font-size:12px; color:var(--text-soft);">Высота
                         элементов</label>
@@ -1089,17 +1120,19 @@
                         <option value="1.4">Крупно (140%)</option>
                     </select>
                 </div>
-    
+
                 <div class="input-group">
-                    <label style="display:block; margin-bottom:5px; font-size:12px; color:var(--text-soft);">Размер текста
+                    <label style="display:block; margin-bottom:5px; font-size:12px; color:var(--text-soft);">Размер
+                        текста
                         меню</label>
                     <div style="display:flex; align-items:center; gap:10px;">
-                        <input type="range" id="set-toolbox-font-size-range" min="10" max="18" value="13" style="flex:1;">
+                        <input type="range" id="set-toolbox-font-size-range" min="10" max="18" value="13"
+                            style="flex:1;">
                         <span id="set-toolbox-font-size-val" style="font-size:12px; width:30px;">13</span>
                     </div>
                 </div>
             </div>
-    
+
             <div class="modal-buttons" style="justify-content: space-between;">
                 <button class="modal-btn danger" onclick="resetEditorUISettings()"
                     style="margin-right:auto;">Сбросить</button>
@@ -1116,15 +1149,16 @@
             <div class="modal-title">
                 <i class="ri-keyboard-line" style="color:var(--accent)"></i> Горячие клавиши
             </div>
-    
+
             <div class="modal-message" style="flex: 1; overflow-y: auto; padding-right: 5px;">
                 <p style="margin-bottom: 15px; font-size: 12px;">Нажмите на кнопку с сочетанием, чтобы изменить его.</p>
-    
+
                 <div id="hotkeys-list-container" style="display: flex; flex-direction: column; gap: 8px;">
                 </div>
             </div>
-    
-            <div class="modal-buttons" style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
+
+            <div class="modal-buttons"
+                style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 15px;">
                 <button class="modal-btn secondary" onclick="resetDefaultHotkeys()">Сбросить</button>
                 <div style="flex:1"></div>
                 <button class="modal-btn secondary" onclick="closeHotkeysModal()">Отмена</button>
@@ -1182,6 +1216,7 @@
     <!-- Editor Scripts -->
     <script src="src/editor/canvas.js"></script>
     <script src="src/editor/blocks-ui.js"></script>
+    <script src="src/editor/code-ui.js"></script>
     <script src="src/editor/ghost-block.js"></script>
     <script src="src/editor/connections.js"></script>
     <script src="src/editor/inicialization.js"></script>
@@ -1200,6 +1235,9 @@
 
     <!-- Bar -->
     <script src="src/bar/editor.js"></script>
+
+    <!-- Languages -->
+    <script src="src/languages/nexlang.js"></script>
 
     <!-- More -->
     <script src="export/export.js"></script>

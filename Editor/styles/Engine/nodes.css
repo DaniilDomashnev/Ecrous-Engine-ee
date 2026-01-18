@@ -137,3 +137,35 @@ input[type='color']::-webkit-color-swatch {
 	border: 2px solid var(--border);
 	border-radius: 50%;
 }
+
+/* =========================================
+   СПЕЦИФИЧНЫЕ ПРАВИЛА ДЛЯ БЛОКОВ
+   ========================================= */
+
+/* Скрываем ВХОДЯЩИЙ сокет потока (обычно первый flow-сокет) для блоков событий.
+   Используем селектор по атрибуту data-id или id, если они проставляются генератором */
+
+/* Вариант 1: Если у div блока есть id="evt_start" */
+#evt_start .socket.flow-in,
+#evt_update .socket.flow-in,
+#evt_timer .socket.flow-in,
+#evt_screen_touch .socket.flow-in {
+    display: none !important;
+}
+
+/* Вариант 2: (Более надежный) Если у вас нет классов flow-in, 
+   скрываем ПЕРВЫЙ сокет (который обычно является входом потока) */
+
+div[data-block-id="evt_start"] .socket:first-child,
+div[data-block-id="evt_update"] .socket:first-child,
+div[data-block-id="evt_timer"] .socket:first-child,
+div[data-block-id="evt_screen_touch"] .socket:first-child {
+   display: none !important; 
+   /* Если сокеты не внутри контейнера, возможно потребуется :nth-child(1) */
+}
+
+/* Вариант 3: Универсальный для категории (Если в генераторе блоков (blocks-ui.js) 
+   вы добавляете атрибут data-category контейнеру блока) */
+.node-block[data-category="События"] .flow-socket-input {
+    display: none;
+}

@@ -224,7 +224,7 @@ function createHeaderBtn(id, iconClass, title, marginLeftValue) {
 
 function runProject() {
 	stopGame()
-	saveCurrentWorkspace() // Убедитесь, что эта функция доступна глобально (из main.js или inicialization.js)
+	saveCurrentWorkspace()
 	initConsoleControls()
 
 	// UI
@@ -303,8 +303,6 @@ function runProject() {
 
 	activeCollisionsPair.clear()
 
-	// ... (остальной код runProject без изменений) ...
-
 	// --- ФИНАЛЬНЫЙ ЗАПУСК ---
 	isRunning = true
 	isGamePaused = false
@@ -330,6 +328,60 @@ function loadRuntimeScene(sceneData) {
 
 	// !!! ВАЖНО: Сохраняем ссылку на данные сцены для триггеров !!!
 	window.globalCurrentSceneData = sceneData
+
+	// === NEXLANG EXECUTION (ПРОВЕРЬ ЭТОТ БЛОК) ===
+	if (window.NexLang && projectData.assets) {
+		sceneData.objects.forEach(obj => {
+			// Проверяем, прикреплен ли скрипт
+			if (obj.attachedScript) {
+				// Ищем файл скрипта по ИМЕНИ
+				const scriptData = projectData.assets.find(
+					s => s.name === obj.attachedScript && s.type === 'script'
+				)
+
+				if (scriptData && scriptData.data) {
+					try {
+						// ХАК: Ищем DOM элемент (он должен быть уже создан executeChain выше,
+						// но если скрипт стартует первым, элемента может не быть.
+						// В идеале этот блок кода должен идти ПОСЛЕ цикла создания объектов)
+						let el = document.getElementById(obj.id)
+
+						// Создаем контекст (this)
+						const context = {
+							id: obj.id,
+							name: obj.name, // <--- ВОТ ОТСЮДА БЕРЕТСЯ this.name
+							el: el,
+
+							move: function (x, y) {
+								if (this.el) {
+									const curX = parseFloat(this.el.style.left) || 0
+									const curY = parseFloat(this.el.style.top) || 0
+									this.el.style.left = curX + x + 'px'
+									this.el.style.top = curY + y + 'px'
+								}
+							},
+							// Проброс глобальных переменных
+							getVar: name => gameVariables[name],
+							setVar: (name, val) => {
+								gameVariables[name] = val
+							},
+						}
+
+						// Запускаем
+						window.NexLang.run(scriptData.data, context)
+					} catch (e) {
+						console.error(`Ошибка в скрипте ${obj.attachedScript}:`, e)
+						if (typeof logToConsole === 'function') {
+							logToConsole(
+								`Error in ${obj.attachedScript}: ${e.message}`,
+								'error'
+							)
+						}
+					}
+				}
+			}
+		})
+	}
 
 	if (typeof loadedSounds !== 'undefined') {
 		Object.values(loadedSounds).forEach(snd => {
@@ -499,7 +551,9 @@ function gameLoop() {
 
 	if (!isGamePaused) {
 		// 1. Шаг физики Matter.js
-		Matter.Engine.update(matterEngine, dt)
+		if (physicsEngine) {
+			Matter.Engine.update(physicsEngine, 1000 / 60)
+		}
 
 		// 2. Синхронизация: Matter Body -> DOM Element
 		updateDOMFromPhysics()

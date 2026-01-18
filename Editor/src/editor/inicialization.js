@@ -167,26 +167,42 @@ window.addEventListener('DOMContentLoaded', () => {
 
 function setEditorMode(mode) {
 	editorMode = mode
-
-	// Сохраняем в память
 	localStorage.setItem('ecrous_editor_mode', mode)
 
-	// Переключаем класс на body для CSS (скрытие/показ портов)
+	// Управление классами кнопок
+	const btns = ['btnModeStack', 'btnModeNodes', 'btnModeCode']
+	btns.forEach(id => {
+		const btn = document.getElementById(id)
+		if (btn)
+			btn.classList.toggle(
+				'active',
+				id === `btnMode${mode.charAt(0).toUpperCase() + mode.slice(1)}`
+			)
+	})
+
+	// Управление видимостью контейнеров
+	const canvasContainer = document.getElementById('canvas-container')
+	const codeContainer = document.getElementById('code-editor-container')
+
 	document.body.classList.toggle('mode-nodes', mode === 'nodes')
 
-	// Обновляем активность кнопок
-	const btnStack = document.getElementById('btnModeStack')
-	const btnNodes = document.getElementById('btnModeNodes')
-	if (btnStack)
-		btnStack.className = mode === 'stack' ? 'mode-btn active' : 'mode-btn'
-	if (btnNodes)
-		btnNodes.className = mode === 'nodes' ? 'mode-btn active' : 'mode-btn'
+	if (mode === 'code') {
+		// Режим КОДА
+		canvasContainer.style.display = 'none'
+		if (codeContainer) codeContainer.classList.remove('hidden')
 
-	// Если включили ноды - нужно перерисовать линии
-	if (mode === 'nodes') {
-		setTimeout(() => {
-			if (typeof updateAllConnections === 'function') updateAllConnections()
-		}, 50)
+		// УДАЛИ ЭТУ СТРОКУ, ОНА БОЛЬШЕ НЕ НУЖНА:
+		// loadCodeToEditor();
+	} else {
+		// Режим БЛОКОВ
+		canvasContainer.style.display = 'block'
+		if (codeContainer) codeContainer.classList.add('hidden')
+
+		if (mode === 'nodes') {
+			setTimeout(() => {
+				if (typeof updateAllConnections === 'function') updateAllConnections()
+			}, 50)
+		}
 	}
 }
 
@@ -534,8 +550,6 @@ function renderSidebar() {
 	attachDropToContainer(objectListEl, 'object')
 	// --------------------------------
 
-	// ... (Дальше стандартный код рендера, как был раньше) ...
-
 	// 1. РЕНДЕР СЦЕН
 	const sceneFolders = projectData.sceneFolders || []
 	const scenesWithoutFolder = []
@@ -594,6 +608,69 @@ function renderSidebar() {
 	}
 
 	updateBreadcrumbs()
+
+	// --- ВЫБОР СКРИПТА ---
+	// !!! ИСПРАВЛЕНИЕ: Получаем текущий активный объект !!!
+	const activeObj = getActiveObject()
+
+	const scriptGroup = document.createElement('div')
+	scriptGroup.className = 'sidebar-group'
+	scriptGroup.innerHTML = `<label>NexLang Script</label>`
+
+	const scriptSelect = document.createElement('select')
+	scriptSelect.className = 'sidebar-input'
+	scriptSelect.style.width = '100%'
+
+	// Блокируем выбор, если объект не выбран
+	if (!activeObj) scriptSelect.disabled = true
+
+	// Опция "Нет скрипта"
+	const defaultOption = document.createElement('option')
+	defaultOption.value = ''
+	defaultOption.text = '-- Нет --'
+	scriptSelect.appendChild(defaultOption)
+
+	// Добавляем существующие скрипты в список (из старого массива scripts)
+	if (projectData.scripts) {
+		projectData.scripts.forEach(s => {
+			const opt = document.createElement('option')
+			opt.value = s.name
+			opt.text = s.name
+			// Если у объекта уже выбран этот скрипт
+			if (activeObj && activeObj.attachedScript === s.name) {
+				opt.selected = true
+			}
+			scriptSelect.appendChild(opt)
+		})
+	}
+
+	// Добавляем скрипты из assets
+	if (projectData.assets) {
+		const scripts = projectData.assets.filter(a => a.type === 'script')
+
+		scripts.forEach(s => {
+			const opt = document.createElement('option')
+			opt.value = s.name
+			opt.text = s.name
+			// Если у объекта уже выбран этот скрипт
+			if (activeObj && activeObj.attachedScript === s.name) {
+				opt.selected = true
+			}
+			scriptSelect.appendChild(opt)
+		})
+	}
+
+	// При изменении сохраняем имя скрипта в объект
+	scriptSelect.onchange = e => {
+		// !!! ИСПРАВЛЕНИЕ: Проверяем наличие объекта перед записью !!!
+		if (activeObj) {
+			activeObj.attachedScript = e.target.value
+			saveCurrentWorkspace()
+		}
+	}
+
+	scriptGroup.appendChild(scriptSelect)
+	container.appendChild(scriptGroup)
 }
 
 // --- ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ РЕНДЕРА ---
@@ -735,12 +812,46 @@ function createObjectElement(obj) {
 		e.dataTransfer.setData('type', 'object')
 		e.dataTransfer.effectAllowed = 'move'
 	}
+
+	// --- DROP ZONE (Для скриптов) ---
+	el.ondragover = e => {
+		e.preventDefault()
+		el.style.background = 'rgba(124, 77, 255, 0.2)' // Подсветка
+	}
+	el.ondragleave = e => {
+		el.style.background = '' // Убираем подсветку
+	}
+	el.ondrop = e => {
+		e.preventDefault()
+		el.style.background = ''
+
+		const type = e.dataTransfer.getData('type')
+		const id = e.dataTransfer.getData('id') // ID ассета
+
+		if (type === 'script_attach') {
+			// Прикрепляем скрипт к объекту
+			obj.attachedScript = id // Сохраняем ID, а не имя
+			if (typeof showNotification === 'function')
+				showNotification(`Скрипт прикреплен к ${obj.name}`)
+			saveCurrentWorkspace()
+			// Обновляем UI (если нужно, например хлебные крошки или инспектор)
+		}
+	}
 	// -----------------
 
 	el.innerHTML = `
         <div style="display:flex; align-items:center; gap:8px; flex:1; overflow:hidden; pointer-events:none;">
             <i class="ri-cube-line"></i> 
-            <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${obj.name}</span>
+            <div style="display:flex; flex-direction:column; overflow:hidden;">
+                <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${
+									obj.name
+								}</span>
+                ${
+									obj.attachedScript
+										? '<span style="font-size:9px; color:#FFD700; opacity:0.8;">JS Attached</span>'
+										: ''
+								}
+            </div>
         </div>
         <div class="item-actions" style="display:flex; gap:5px; padding-left:5px;">
             <i class="ri-folder-shared-line action-icon move-btn" title="В папку"></i>
@@ -766,7 +877,7 @@ function createObjectElement(obj) {
 	}
 
 	return el
-}
+}	
 
 function updateBreadcrumbs() {
 	const objName = getActiveObject() ? getActiveObject().name : '---'
@@ -979,6 +1090,7 @@ function switchObject(id) {
 	activeObjectId = id
 	renderSidebar()
 	loadWorkspace()
+	if (editorMode === 'code') loadCodeToEditor()
 }
 async function addScene() {
 	const defaultName = `Сцена ${projectData.scenes.length + 1}`
@@ -1109,7 +1221,7 @@ function initToolbox() {
 		'Анимация',
 		'Тайлмап',
 		'Графика',
-		'Звук',
+		'Медиа',
 		'Компоненты',
 		'Сцена',
 		'Система',

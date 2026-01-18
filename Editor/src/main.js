@@ -35,6 +35,7 @@ let connections = []
 window.currentSessionId = 0 // Глобальный счетчик сессий
 window.loadedSounds = {} // Глобальное хранилище звуков
 let currentAssetFolderId = null // null = корневая папка
+let loopControl = { break: false, continue: false }
 let isWiring = false
 let wireStartBlock = null
 let tempWireNode = null
@@ -103,41 +104,75 @@ async function executeChain(currentBlock, allBlocks, objConnections) {
 	let nextBlock = null
 	let skipToBlock = null
 
-	// --- 1. ЛОГИКА IF / ELSE (РАСШИРЕННАЯ) ---
-	if (currentBlock.type === 'flow_if') {
-		const valA = resolveValue(currentBlock.values[0])
-		const op = currentBlock.values[1]
-		const valB = resolveValue(currentBlock.values[2])
+	// --- 1. ЛОГИКА IF / ELSE / ELSEIF ---
+	if (currentBlock.type === 'flow_if' || currentBlock.type === 'flow_elseif') {
+		let shouldCheck = true
 
-		let condition = false
-		const nA = parseFloat(valA)
-		const nB = parseFloat(valB)
-		const isNum = !isNaN(nA) && !isNaN(nB)
-
-		// Стандартные
-		if (op === '=') condition = valA == valB
-		else if (op === '>') condition = isNum ? nA > nB : valA > valB
-		else if (op === '<') condition = isNum ? nA < nB : valA < valB
-		// НОВЫЕ ОПЕРАТОРЫ
-		else if (op === '!=') condition = valA != valB
-		else if (op === '>=') condition = isNum ? nA >= nB : valA >= valB
-		else if (op === '<=') condition = isNum ? nA <= nB : valA <= valB
-		else if (op === 'contains') condition = String(valA).includes(String(valB))
-
-		if (condition) {
-			// IF ИСТИНА: продолжаем выполнение
-		} else {
-			// IF ЛОЖЬ: Ищем ELSE или END
-			const elseBlock = findElseBlock(currentBlock, allBlocks, objConnections)
-			if (elseBlock) {
-				skipToBlock = elseBlock
+		// Если это ELSEIF, мы проверяем условие ТОЛЬКО если нам явно сказали (флаг _checkMe),
+		// то есть мы пришли сюда прыжком из предыдущего неудачного IF.
+		// Если мы пришли сюда "самотеком" (предыдущий IF выполнился), мы должны пропустить этот блок.
+		if (currentBlock.type === 'flow_elseif') {
+			if (!currentBlock._checkMe) {
+				shouldCheck = false // Пропускаем, так как предыдущая ветка сработала
 			} else {
-				skipToBlock = findClosingBlock(currentBlock, allBlocks, objConnections)
+				delete currentBlock._checkMe // Сбрасываем флаг и проверяем
 			}
 		}
+
+		if (shouldCheck) {
+			const valA = resolveValue(currentBlock.values[0])
+			const op = currentBlock.values[1]
+			const valB = resolveValue(currentBlock.values[2])
+
+			let condition = false
+			const nA = parseFloat(valA)
+			const nB = parseFloat(valB)
+			const isNum = !isNaN(nA) && !isNaN(nB)
+
+			if (op === '=') condition = valA == valB
+			else if (op === '>') condition = isNum ? nA > nB : valA > valB
+			else if (op === '<') condition = isNum ? nA < nB : valA < valB
+			else if (op === '!=') condition = valA != valB
+			else if (op === '>=') condition = isNum ? nA >= nB : valA >= valB
+			else if (op === '<=') condition = isNum ? nA <= nB : valA <= valB
+			else if (op === 'contains')
+				condition = String(valA).includes(String(valB))
+
+			if (condition) {
+				// ИСТИНА: Просто идем дальше (выполняем тело)
+			} else {
+				// ЛОЖЬ: Ищем Else или ElseIf
+				const nextBranch = findNextBranch(
+					currentBlock,
+					allBlocks,
+					objConnections
+				)
+
+				if (nextBranch) {
+					skipToBlock = nextBranch
+					// Если прыгаем на ElseIf, помечаем, что его НАДО проверить
+					if (nextBranch.type === 'flow_elseif') {
+						nextBranch._checkMe = true
+					}
+				} else {
+					// Веток нет, прыгаем в конец
+					skipToBlock = findClosingBlock(
+						currentBlock,
+						allBlocks,
+						objConnections
+					)
+				}
+			}
+		} else {
+			// Если мы попали на ElseIf случайно (после успешного IF), скипаем его и всё остальное до End
+			skipToBlock = findClosingBlock(currentBlock, allBlocks, objConnections)
+		}
 	}
-	// Если встретили ELSE, а мы здесь (значит пришли сверху от успешного IF), нужно его перепрыгнуть
+
+	// --- ОБРАБОТКА ELSE (без изменений, но для надежности) ---
 	else if (currentBlock.type === 'flow_else') {
+		// Если мы встретили ELSE, идя по коду, значит предыдущий IF выполнился.
+		// Нам нужно перепрыгнуть этот ELSE и идти к END.
 		skipToBlock = findClosingBlock(currentBlock, allBlocks, objConnections)
 	}
 
@@ -153,6 +188,20 @@ async function executeChain(currentBlock, allBlocks, objConnections) {
 				await executeSection(loopBodyStart, loopEnd, allBlocks, objConnections)
 			}
 			skipToBlock = loopEnd
+		}
+
+		// Внутри flow_repeat:
+		for (let i = 0; i < count; i++) {
+			const res = await executeSection(
+				loopBodyStart,
+				loopEnd,
+				allBlocks,
+				objConnections
+			)
+			if (res === 'BREAK') {
+				loopControl.break = false // Сброс флага
+				break // Выход из JS цикла
+			}
 		}
 	}
 
@@ -173,6 +222,20 @@ async function executeChain(currentBlock, allBlocks, objConnections) {
 			}
 			// Выхода из вечного цикла обычно нет, пока не остановят игру
 			return
+		}
+
+		// Внутри flow_forever:
+		for (let i = 0; i < count; i++) {
+			const res = await executeSection(
+				loopBodyStart,
+				loopEnd,
+				allBlocks,
+				objConnections
+			)
+			if (res === 'BREAK') {
+				loopControl.break = false // Сброс флага
+				break // Выход из JS цикла
+			}
 		}
 	}
 
@@ -206,6 +269,36 @@ function findElseBlock(startBlock, allBlocks, connections) {
 		if (depth === 0 && curr.type === 'flow_else') return curr
 
 		// Если вышли из блока (depth < 0) — значит ELSE нет
+		if (depth < 0) return null
+
+		curr = getNextBlock(curr, allBlocks, connections)
+		steps++
+	}
+	return null
+}
+
+function findNextBranch(startBlock, allBlocks, connections) {
+	let depth = 0
+	let curr = getNextBlock(startBlock, allBlocks, connections)
+	let steps = 0
+
+	while (curr && steps < 1000) {
+		// Учитываем вложенность
+		if (
+			curr.type === 'flow_if' ||
+			curr.type === 'flow_repeat' ||
+			curr.type === 'flow_forever'
+		)
+			depth++
+		if (curr.type === 'flow_end') depth--
+
+		// Если мы на текущем уровне (depth 0)
+		if (depth === 0) {
+			// Нашли следующую ветку (Else или ElseIf)
+			if (curr.type === 'flow_else' || curr.type === 'flow_elseif') return curr
+		}
+
+		// Если вышли из блока (depth < 0), значит веток больше нет (только End)
 		if (depth < 0) return null
 
 		curr = getNextBlock(curr, allBlocks, connections)
@@ -269,6 +362,22 @@ async function executeSection(start, end, allBlocks, conns) {
 		// Рекурсивно вызываем executeChain для одного шага? Нет, это вызовет ад.
 		// Просто выполняем логику
 		await executeBlockLogic(curr)
+
+		// Проверяем флаги циклов
+		if (loopControl.break) return 'BREAK' // Прерываем секцию
+		if (loopControl.continue) {
+			loopControl.continue = false
+			return 'CONTINUE' // Прерываем секцию, но цикл запустит её снова
+		}
+
+		await executeBlockLogic(curr) // Тут может сработать flow_break
+
+		// Проверка после выполнения блока (если блок был break)
+		if (loopControl.break) return 'BREAK'
+		if (loopControl.continue) {
+			loopControl.continue = false
+			return 'CONTINUE'
+		}
 
 		// Особая обработка вложенных IF внутри цикла (простая версия)
 		if (curr.type === 'flow_if') {
@@ -3466,6 +3575,33 @@ function executeBlockLogic(block) {
 							w.style.display = val1 === 'true' || val1 === 1 ? 'block' : 'none'
 						}
 					}
+					break
+				}
+
+				case 'flow_break':
+					loopControl.break = true
+					break
+
+				case 'flow_continue':
+					loopControl.continue = true
+					break
+
+				case 'logic_op': {
+					const resVar = v[0]
+					const valA = parseFloat(resolveValue(v[1])) || 0 // Приводим к 0/1 для надежности
+					const op = v[2]
+					const valB = parseFloat(resolveValue(v[3])) || 0
+					let res = 0
+
+					const boolA = valA ? 1 : 0
+					const boolB = valB ? 1 : 0
+
+					if (op === 'AND') res = boolA && boolB ? 1 : 0
+					if (op === 'OR') res = boolA || boolB ? 1 : 0
+					if (op === 'XOR') res = boolA !== boolB ? 1 : 0
+					if (op === 'NAND') res = !(boolA && boolB) ? 1 : 0
+
+					gameVariables[resVar] = res
 					break
 				}
 
